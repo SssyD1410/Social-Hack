@@ -4,6 +4,7 @@ from datetime import datetime
 
 import click
 from flask import current_app, g
+from flask.cli import with_appcontext
 
 
 def get_db():
@@ -61,6 +62,23 @@ def seed_command():
     click.echo("Seeded demo data. See README for demo logins.")
 
 
+@click.command("create-admin")
+@click.option("--email", prompt=True)
+@click.option("--name", prompt=True, default="EcoServing Admin")
+@click.option("--password", prompt=True, hide_input=True, confirmation_prompt=True)
+@with_appcontext
+def create_admin_command(email, name, password):
+    """Create an administrator account (admins verify distributors)."""
+    from werkzeug.security import generate_password_hash
+    if len(password) < 8:
+        raise click.BadParameter("use at least 8 characters", param_hint="password")
+    if query("SELECT 1 FROM users WHERE email = ?", (email,), one=True):
+        raise click.ClickException(f"An account for {email} already exists.")
+    execute("INSERT INTO users (email, password_hash, name, role) VALUES (?, ?, ?, 'admin')",
+            (email.strip(), generate_password_hash(password), name.strip()))
+    click.echo(f"Created admin {email}.")
+
+
 def migrate():
     """Add columns introduced after a database was created."""
     db = get_db()
@@ -76,6 +94,7 @@ def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
     app.cli.add_command(seed_command)
+    app.cli.add_command(create_admin_command)
     with app.app_context():
         if not os.path.exists(app.config["DATABASE"]):
             init_db()

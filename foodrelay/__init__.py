@@ -6,10 +6,20 @@ from flask import Flask, abort, request, session
 from . import db
 
 
+def _instance_secret(instance_path):
+    """A random secret key, made on first run and kept in instance/secret_key (never committed)."""
+    path = os.path.join(instance_path, "secret_key")
+    if not os.path.exists(path):
+        with open(path, "w") as f:
+            f.write(secrets.token_hex(32))
+    with open(path) as f:
+        return f.read().strip()
+
+
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
-        SECRET_KEY=os.environ.get("FOODRELAY_SECRET_KEY", "dev-change-me"),
+        SECRET_KEY=os.environ.get("FOODRELAY_SECRET_KEY"),
         DATABASE=os.path.join(app.instance_path, "foodrelay.sqlite"),
         UPLOAD_FOLDER=os.path.join(app.instance_path, "uploads"),
         MAX_CONTENT_LENGTH=8 * 1024 * 1024,
@@ -18,6 +28,8 @@ def create_app(test_config=None):
         app.config.update(test_config)
 
     os.makedirs(app.instance_path, exist_ok=True)
+    if not app.config["SECRET_KEY"]:
+        app.config["SECRET_KEY"] = _instance_secret(app.instance_path)
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
     db.init_app(app)

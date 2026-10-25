@@ -249,7 +249,7 @@ def _get_food_request(req_id):
 @role_required("supplier", "distributor", "volunteer", "admin")
 def food_requests():
     where, params = ["1=1"], []
-    mine = g.user["role"] == "distributor" and request.args.get("mine")
+    mine = g.user["role"] == "distributor"   # distributors only ever see their own requests
     if mine:
         where.append("r.distributor_id = ?")
         params.append(g.user["id"])
@@ -301,7 +301,10 @@ def new_food_request():
 @bp.route("/food-requests/<int:req_id>")
 @role_required("supplier", "distributor", "volunteer", "admin")
 def food_request(req_id):
-    return render_template("food_requests/detail.html", r=_get_food_request(req_id))
+    r = _get_food_request(req_id)
+    if g.user["role"] == "distributor" and r["distributor_id"] != g.user["id"]:
+        abort(404)
+    return render_template("food_requests/detail.html", r=r)
 
 
 @bp.route("/food-requests/<int:req_id>/<action>", methods=("POST",))

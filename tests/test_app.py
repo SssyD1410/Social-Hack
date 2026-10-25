@@ -323,6 +323,25 @@ class EcoServingTest(unittest.TestCase):
                   start_time=future(2), end_time=future(4), slots="1")
         self.assertIn('class="post-photo"', dist.get("/volunteer").get_data(as_text=True))
 
+    def test_distributors_only_see_their_own_requests(self):
+        d1 = self.client_for("distributor", "d1@example.test", org="Shelter One")
+        d2 = self.client_for("distributor", "d2@example.test", org="Shelter Two")
+        self.verify("d1@example.test"); self.verify("d2@example.test")
+        r = self.post(d1, "/food-requests/new", follow=False, title="Rice for One", description="x",
+                      quantity="5", location="1 Main St", needed_by=future(5))
+        rid1 = int(r.headers["Location"].rsplit("/", 1)[1])
+        self.post(d2, "/food-requests/new", title="Beans for Two", description="x",
+                  quantity="5", location="2 Main St", needed_by=future(5))
+        page = d1.get("/food-requests").get_data(as_text=True)
+        self.assertIn("Rice for One", page)
+        self.assertNotIn("Beans for Two", page)
+        self.assertEqual(d2.get(f"/food-requests/{rid1}").status_code, 404)
+        self.assertEqual(d1.get(f"/food-requests/{rid1}").status_code, 200)
+        supplier = self.client_for("supplier")      # suppliers still see every open request
+        page = supplier.get("/food-requests").get_data(as_text=True)
+        self.assertIn("Rice for One", page)
+        self.assertIn("Beans for Two", page)
+
     def test_homepage_photos_and_credits(self):
         anon = self.app.test_client()
         home = anon.get("/").get_data(as_text=True)
@@ -340,6 +359,21 @@ class EcoServingTest(unittest.TestCase):
                 for name in names:
                     self.assertIn(name, stock_credits())
                     self.assertTrue(os.path.exists(os.path.join(self.app.static_folder, "photos", "sm", name + ".jpg")))
+
+    def test_secret_key_and_create_admin(self):
+        key = self.app.config["SECRET_KEY"]
+        self.assertTrue(key and key != "dev-change-me" and len(key) >= 32)
+        self.assertTrue(os.path.exists(os.path.join(self.app.instance_path, "secret_key")))
+        runner = self.app.test_cli_runner()
+        r = runner.invoke(args=["create-admin", "--email", "boss@example.test", "--name", "Boss",
+                                "--password", "longpassword"])
+        self.assertIn("Created admin", r.output)
+        r = runner.invoke(args=["create-admin", "--email", "boss@example.test", "--name", "Boss",
+                                "--password", "longpassword"])
+        self.assertIn("already exists", r.output)
+        c = self.app.test_client()
+        page = self.post(c, "/login", email="boss@example.test", password="longpassword").get_data(as_text=True)
+        self.assertIn('href="/admin', page)
 
     def test_seed(self):
         with self.app.app_context():

@@ -89,8 +89,8 @@ All demo accounts use the password `ecoserving-demo`.
 python -m unittest discover tests
 ```
 
-### Production notes
+### Publishing
 
-Set `FOODRELAY_SECRET_KEY` to a long random value, run behind a real WSGI server (e.g. `waitress` or `gunicorn`),
-and serve over HTTPS. Create an admin by registering normally and running
-`UPDATE users SET role = 'admin' WHERE email = '...'` against the database.
+Step-by-step instructions for PythonAnywhere are in [DEPLOY.md](DEPLOY.md). Production entry point: `wsgi.py`
+(`application`). A random secret key is created in `instance/secret_key` on first run (or set `FOODRELAY_SECRET_KEY`),
+and `flask --app foodrelay create-admin` creates an administrator. Never run `seed` on a live site.
