@@ -1,37 +1,38 @@
-{% extends "learn/_layout.html" %}
-{% block headline %}Turn your leftovers into someone's next meal{% endblock %}
-{% block intro %}Suppliers are shops, bakeries, cafés, restaurants, caterers and grocers that regularly end the day with
-good food they can't sell. FoodRelay makes giving it away for free take about as long as throwing it out.{% endblock %}
+{# Learn-more content for the supplier tab; rendered by learn/_panel.html #}
+{% set panel_role = "supplier" %}
+{% set headline %}Turn your leftovers into someone's next meal{% endset %}
+{% set intro %}Suppliers are shops, bakeries, cafés, restaurants, caterers and grocers that regularly end the day with
+good food they can't sell. FoodRelay makes giving it away for free take about as long as throwing it out.{% endset %}
 
-{% block steps %}
+{% set steps %}
 <ol class="steps">
   <li><b>Create a supplier account</b> with your business name and usual pickup address.</li>
   <li><b>Post a food offer</b> when you have surplus: what it is, food type, quantity, dietary notes, where to collect it and the <b>pickup deadline</b>.</li>
-  <li><b>Choose who can see it.</b> Show it to verified distributors, individual volunteers and/or consumers. Small offers (a box of muffins, a few meals) can go straight to consumers; large ones are best for organizations.</li>
+  <li><b>Choose who can see it.</b> Show it to verified distributors and/or consumers. Small offers (a box of muffins, a few meals) can go straight to consumers; large ones are best for organizations.</li>
   <li><b>Someone claims it</b> and you'll see who on your dashboard. Use chat to confirm a pickup time.</li>
   <li><b>Mark it picked up</b> once it's collected. If plans change you can release a claim or cancel the offer.</li>
 </ol>
-{% endblock %}
+{% endset %}
 
-{% block features %}
+{% set features %}
 <ul class="check-list">
   <li><b>Food offers</b> with descriptions, types, size, dietary tags, location, pickup window and deadline.</li>
-  <li><b>Visibility controls</b> per offer: distributors, volunteers, consumers, or any mix.</li>
+  <li><b>Visibility controls</b> per offer: distributors, consumers, or both.</li>
   <li><b>Volunteer requests</b>: ask for help for a set time period, list the tasks (sorting, packing, driving) and any requirements, then accept or decline sign-ups.</li>
   <li><b>Distributor food requests</b>: see what local shelters and pantries need, and pledge to help.</li>
   <li><b>Direct chat</b> with anyone who claims your food or signs up to help.</li>
 </ul>
-{% endblock %}
+{% endset %}
 
-{% block faq %}
+{% set faq %}
 <details><summary>Does it cost anything?</summary><p>No. FoodRelay is free, and all food on it is given away for free.</p></details>
 <details><summary>Am I responsible for the food after it's collected?</summary><p>Only post food you'd be comfortable serving: within date, stored correctly and labeled with allergens where you can.
   Many regions also have Good Samaritan food-donation laws that protect donors acting in good faith; check what applies where you are.</p></details>
 <details><summary>What if nobody claims my offer?</summary><p>It expires automatically at the pickup deadline. Try widening its visibility, or check open food requests from distributors.</p></details>
-<details><summary>Can I limit offers to organizations only?</summary><p>Yes. Untick volunteers and consumers and only verified distributors will see it.</p></details>
-{% endblock %}
+<details><summary>Can I limit offers to organizations only?</summary><p>Yes. Untick consumers and only verified distributors will see it.</p></details>
+{% endset %}
 
-{% block aside %}
+{% set aside %}
 <ul class="check-list small">
   <li>Restaurants, cafés &amp; caterers</li>
   <li>Bakeries &amp; patisseries</li>
@@ -39,4 +40,5 @@ good food they can't sell. FoodRelay makes giving it away for free take about as
   <li>Event venues &amp; corporate kitchens</li>
 </ul>
 <p class="small muted">Tip: post as early as you can. A deadline a few hours out gets claimed far more often than one 30 minutes away.</p>
-{% endblock %}
+{% endset %}
+{% include "learn/_panel.html" %}

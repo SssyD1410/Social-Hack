@@ -19,7 +19,7 @@
   <button class="btn secondary" type="submit">Filter</button>
 </form>
 {% if requests %}
-  <div class="cards">{% for v in requests %}{{ volunteer_card(v) }}{% endfor %}</div>
+  <div class="cards">{% for v in requests %}{{ volunteer_card(v, v.poster_id == g.user.id) }}{% endfor %}</div>
 {% else %}
   <div class="empty">No volunteer requests found.</div>
 {% endif %}

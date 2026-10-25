@@ -1,11 +1,17 @@
 {% extends "base.html" %}
-{% from "macros.html" import csrf, status_tag %}
+{% from "macros.html" import csrf, status_tag, location_picker %}
 {% block title %}Your profile{% endblock %}
 {% block content %}
 {% set u = g.user %}
 <div class="page-head">
   <div><h1>Your profile</h1><p>{{ ROLES[u.role].icon if u.role in ROLES }} {{ ROLES[u.role].label if u.role in ROLES else 'Administrator' }} · {{ u.email }}</p></div>
-  {% if u.role != 'admin' %}<a class="btn secondary" href="{{ url_for('main.user_profile', user_id=u.id) }}">View public profile</a>{% endif %}
+  <div class="btn-row">
+    {% if u.role != 'admin' %}<a class="btn secondary" href="{{ url_for('main.user_profile', user_id=u.id) }}">View public profile</a>{% endif %}
+    <form method="post" action="{{ url_for('auth.logout') }}">
+      {{ csrf() }}
+      <button class="btn danger" type="submit">Log out</button>
+    </form>
+  </div>
 </div>
 
 <div class="two-col">
@@ -22,6 +28,7 @@
         <div><label for="city">City / area</label><input id="city" name="city" type="text" value="{{ u.city or '' }}"></div>
       </div>
       <div><label for="address">Address <span class="hint">(default pickup / meeting point)</span></label><input id="address" name="address" type="text" value="{{ u.address or '' }}"></div>
+      {{ location_picker(u.lat, u.lng, "Your location on map") }}
       <div><label for="bio">About {{ 'your organization' if u.org_name else 'you' }}</label><textarea id="bio" name="bio">{{ u.bio or '' }}</textarea></div>
       {% if u.role == 'distributor' %}
         <div><label for="registration_number">Organization registration number <span class="hint">(charity / non-profit number)</span></label>

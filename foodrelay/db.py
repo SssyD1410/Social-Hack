@@ -61,10 +61,23 @@ def seed_command():
     click.echo("Seeded demo data. See README for demo logins.")
 
 
+def migrate():
+    """Add columns introduced after a database was created."""
+    db = get_db()
+    for table in ("users", "food_offers", "food_requests", "volunteer_requests"):
+        cols = {r["name"] for r in db.execute(f"PRAGMA table_info({table})")}
+        for col in ("lat", "lng"):
+            if col not in cols:
+                db.execute(f"ALTER TABLE {table} ADD COLUMN {col} REAL")
+    db.commit()
+
+
 def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
     app.cli.add_command(seed_command)
-    if not os.path.exists(app.config["DATABASE"]):
-        with app.app_context():
+    with app.app_context():
+        if not os.path.exists(app.config["DATABASE"]):
             init_db()
+        else:
+            migrate()

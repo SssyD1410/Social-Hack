@@ -7,14 +7,16 @@
   <div class="btn-row"><a class="btn" href="{{ url_for('posts.offers') }}">Browse all offers</a></div>
 </div>
 
+{% include "dashboard/_map.html" %}
+
 {% if my_claims %}
-<section>
+<section class="section">
   <div class="section-head"><h2>Your reservations</h2></div>
   <div class="cards">{% for o in my_claims %}{{ offer_card(o, now) }}{% endfor %}</div>
 </section>
 {% endif %}
 
-<section class="{{ 'section' if my_claims }}">
+<section class="section">
   <div class="section-head"><h2>Available to pick up</h2></div>
   {% if available_offers %}
     <div class="cards">{% for o in available_offers %}{{ offer_card(o, now) }}{% endfor %}</div>

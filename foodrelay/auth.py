@@ -2,7 +2,7 @@ from flask import Blueprint, flash, g, redirect, render_template, request, sessi
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .db import execute, query
-from .helpers import ROLES
+from .helpers import ROLES, parse_latlng
 
 bp = Blueprint("auth", __name__)
 
@@ -41,13 +41,14 @@ def register():
             for e in errors:
                 flash(e, "error")
         else:
+            lat, lng = parse_latlng(f)
             uid = execute(
-                """INSERT INTO users (email, password_hash, name, role, org_name, phone, city, address,
+                """INSERT INTO users (email, password_hash, name, role, org_name, phone, city, address, lat, lng,
                                       verification_status)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (email, generate_password_hash(password), name, role,
                  f.get("org_name", "").strip() or None, f.get("phone", "").strip() or None,
-                 f.get("city", "").strip() or None, f.get("address", "").strip() or None,
+                 f.get("city", "").strip() or None, f.get("address", "").strip() or None, lat, lng,
                  "unverified" if role == "distributor" else "not_required"))
             session.clear()
             session["user_id"] = uid

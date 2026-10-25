@@ -56,16 +56,17 @@
         {% if v.status == 'closed' %}
           {{ post_button(url_for('posts.volunteer_request_action', req_id=v.id, action='reopen'), 'Reopen') }}
         {% else %}
-          {{ post_button(url_for('posts.volunteer_request_action', req_id=v.id, action='close'), 'Close request', 'btn danger', 'Stop accepting volunteers?') }}
+          {{ post_button(url_for('posts.volunteer_request_action', req_id=v.id, action='close'), 'Close request', 'btn danger', 'Click again to confirm') }}
         {% endif %}
       </div>
     {% elif g.user.role == 'volunteer' %}
       {% if my_signup and my_signup.status in ('pending', 'accepted') %}
         <h3>You're signed up</h3>
         <p>Status: {{ status_tag(my_signup.status) }}</p>
+        <p class="small muted">If you can't make it, let the organizer know: your spot is re-listed for other volunteers.</p>
         <div class="btn-row">
           {{ message_button(v.poster_id, 'volunteer_request:%d' % v.id, 'Message organizer') }}
-          {{ post_button(url_for('posts.withdraw_volunteer', req_id=v.id), 'Withdraw', 'btn danger', 'Withdraw from this request?') }}
+          {{ post_button(url_for('posts.withdraw_volunteer', req_id=v.id), "I can't make it", 'btn danger', 'Click again to confirm') }}
         </div>
       {% elif my_signup and my_signup.status == 'declined' %}
         <h3>Not this time</h3>

@@ -18,6 +18,19 @@
   <input type="text" name="city" placeholder="City" value="{{ request.args.city }}">
   <button class="btn secondary" type="submit">Filter</button>
 </form>
+{% set me = {'lat': g.user.lat, 'lng': g.user.lng, 'title': 'You', 'subtitle': g.user.address or g.user.city or ''} if g.user.lat is number else none %}
+{% set pts = [] %}
+{% for r in requests if r.lat is number %}{% set _ = pts.append({'lat': r.lat, 'lng': r.lng, 'title': r.title, 'subtitle': r.distributor_org or r.distributor_name, 'url': url_for('posts.food_request', req_id=r.id)}) %}{% endfor %}
+{% if pts %}
+  <div class="card map-card" style="margin-bottom:18px">
+    <div class="map map-list" id="requests-map"></div>
+    <p class="small muted" style="margin:8px 0 0">Numbers match the order of the list below.</p>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () =>
+      FRMap.points(document.getElementById('requests-map'), {me: {{ me|tojson }}, points: {{ pts|tojson }}}));
+  </script>
+{% endif %}
 {% if requests %}
   <div class="cards">{% for r in requests %}{{ food_request_card(r) }}{% endfor %}</div>
 {% else %}

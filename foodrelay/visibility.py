@@ -11,10 +11,11 @@ def offer_visibility_clause(user):
         return "1=1", ()
     if role == "supplier":
         return "o.supplier_id = ?", (user["id"],)
+    if role == "volunteer":
+        # Volunteers help with requests; they don't browse or claim food offers.
+        return "0", ()
     if role == "distributor":
         flag = "o.visible_distributors = 1"
-    elif role == "volunteer":
-        flag = "o.visible_volunteers = 1"
     else:  # consumer: only small offers suited to individual pickup
         flag = "o.visible_consumers = 1 AND o.size = 'small'"
     # Anyone who already claimed an offer keeps access to it.
@@ -27,8 +28,6 @@ def can_view_offer(user, offer):
     role = user["role"]
     if role == "distributor":
         return bool(offer["visible_distributors"])
-    if role == "volunteer":
-        return bool(offer["visible_volunteers"])
     if role == "consumer":
         return bool(offer["visible_consumers"]) and offer["size"] == "small"
     return False
@@ -40,7 +39,7 @@ def offer_is_expired(offer):
 
 def can_claim_offer(user, offer):
     from .helpers import is_verified
-    return (user["role"] in ("distributor", "volunteer", "consumer")
+    return (user["role"] in ("distributor", "consumer")
             and offer["supplier_id"] != user["id"]
             and offer["status"] == "available"
             and not offer_is_expired(offer)

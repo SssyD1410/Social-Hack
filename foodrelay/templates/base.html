@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>{% block title %}FoodRelay{% endblock %} · FoodRelay</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="{{ url_for('static', filename='map.js') }}"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥖</text></svg>">
 </head>
 <body>
@@ -16,7 +19,7 @@
       {% set ep = request.endpoint or '' %}
       {% if g.user %}
         <a href="{{ url_for('main.dashboard') }}" class="{{ 'active' if ep == 'main.dashboard' }}">Dashboard</a>
-        {% if g.user.role != 'admin' %}
+        {% if g.user.role not in ('admin', 'volunteer') %}
           <a href="{{ url_for('posts.offers') }}" class="{{ 'active' if ep.startswith('posts.') and 'offer' in ep }}">
             {{ 'My offers' if g.user.role == 'supplier' else 'Food offers' }}</a>
         {% endif %}
@@ -29,12 +32,7 @@
         <a href="{{ url_for('chat.inbox') }}" class="{{ 'active' if ep.startswith('chat.') }}">Messages{% if unread %}<span class="badge-count">{{ unread }}</span>{% endif %}</a>
         {% if g.user.role == 'admin' %}<a href="{{ url_for('admin.index') }}" class="{{ 'active' if ep.startswith('admin.') }}">Admin</a>{% endif %}
         <a href="{{ url_for('main.profile') }}" class="{{ 'active' if ep == 'main.profile' }}">Profile</a>
-        <form method="post" action="{{ url_for('auth.logout') }}">
-          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
-          <button class="linklike" type="submit">Log out</button>
-        </form>
       {% else %}
-        <a href="{{ url_for('main.index') }}#roles">How it works</a>
         <a href="{{ url_for('auth.login') }}">Log in</a>
         <a class="btn small" href="{{ url_for('auth.register') }}">Join FoodRelay</a>
       {% endif %}
@@ -62,6 +60,25 @@
     </span>
   </div>
 </footer>
+<script>
+  /* Two-step confirm for destructive buttons. (Native confirm() dialogs are blocked in some
+     embedded browsers, which silently cancelled these forms.) */
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-confirm]');
+    if (!btn) return;
+    if (btn.dataset.armed) return;          // second click: let the form submit
+    e.preventDefault();
+    btn.dataset.armed = '1';
+    btn.dataset.label = btn.textContent;
+    btn.textContent = btn.dataset.confirm;
+    btn.classList.add('armed');
+    setTimeout(() => {
+      delete btn.dataset.armed;
+      btn.textContent = btn.dataset.label;
+      btn.classList.remove('armed');
+    }, 4000);
+  });
+</script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

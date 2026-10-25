@@ -13,8 +13,9 @@
   {% endif %}
 </div>
 {% include "dashboard/_verification.html" %}
+{% include "dashboard/_map.html" %}
 
-<section>
+<section class="section">
   <div class="section-head"><h2>Your pickups</h2></div>
   {% if my_claims %}
     <div class="cards">{% for o in my_claims %}{{ offer_card(o, now) }}{% endfor %}</div>

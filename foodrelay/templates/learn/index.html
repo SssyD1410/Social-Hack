@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Learn more: the four roles{% endblock %}
+{% block content %}
+<section class="roles-banner">
+  <h1>Learn more about FoodRelay</h1>
+  <p>FoodRelay separates users into four roles, so everyone gets the tools that fit how they help.
+    <b>Suppliers</b> share surplus food, <b>distributors</b> deliver it to people in need,
+    <b>volunteers</b> lend a hand with pickups and shifts, and <b>consumers</b> pick up food for themselves.
+    Choose a role below to see how it works.</p>
+  <div class="role-tabs" role="tablist">
+    {% for key, r in ROLES.items() %}
+      <a class="role-tab {{ 'active' if key == role }}" id="tab-{{ key }}" role="tab" data-role="{{ key }}"
+         aria-selected="{{ 'true' if key == role else 'false' }}" aria-controls="panel-{{ key }}"
+         href="{{ url_for('main.learn', role=key) }}">
+        <span class="emoji">{{ r.icon }}</span>
+        <span><b>{{ r.label }}s</b><small>{{ r.tagline }}</small></span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+{% include "learn/_supplier.html" %}
+{% include "learn/_distributor.html" %}
+{% include "learn/_volunteer.html" %}
+{% include "learn/_consumer.html" %}
+{% endblock %}
+{% block scripts %}
+<script>
+  // Switch tabs in place; links still work without JavaScript.
+  const tabs = document.querySelectorAll('.role-tab');
+  tabs.forEach(tab => tab.addEventListener('click', (e) => {
+    e.preventDefault();
+    tabs.forEach(t => {
+      const on = t === tab;
+      t.classList.toggle('active', on);
+      t.setAttribute('aria-selected', on);
+      document.getElementById('panel-' + t.dataset.role).hidden = !on;
+    });
+    history.replaceState(null, '', tab.href);
+  }));
+</script>
+{% endblock %}

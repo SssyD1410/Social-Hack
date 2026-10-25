@@ -69,6 +69,15 @@ class FoodRelayTest(unittest.TestCase):
             r = c.get(f"/learn/{role}")
             self.assertEqual(r.status_code, 200)
         self.assertEqual(c.get("/learn/nobody").status_code, 404)
+        page = c.get("/learn").get_data(as_text=True)
+        self.assertIn("FoodRelay separates users into four roles", page)
+        for role in ("supplier", "distributor", "volunteer", "consumer"):
+            self.assertIn(f'id="panel-{role}"', page)
+        self.assertNotIn("Other roles", page)
+        home = c.get("/").get_data(as_text=True)
+        self.assertIn('href="/learn"', home)          # "Find your role" + single learn-more link
+        self.assertNotIn("offers rescued", home)      # stats are commented out
+        self.assertNotIn("How it works</a>", home)    # removed from the header
 
     def test_csrf_required(self):
         c = self.app.test_client()
@@ -182,6 +191,82 @@ class FoodRelayTest(unittest.TestCase):
         # A third user can't read it.
         other = self.client_for("consumer")
         self.assertEqual(other.get(f"/messages/{cid}").status_code, 404)
+
+    def test_volunteers_cannot_see_offers(self):
+        supplier = self.client_for("supplier")
+        vol = self.client_for("volunteer")
+        oid = self.make_offer(supplier, visible_volunteers="1")
+        self.assertEqual(vol.get(f"/offers/{oid}", follow_redirects=False).status_code, 302)
+        self.assertEqual(vol.get("/offers", follow_redirects=False).status_code, 302)
+        dash = vol.get("/dashboard").get_data(as_text=True)
+        self.assertNotIn("Food offers</a>", dash)
+        self.assertNotIn("Bread", dash)
+
+    def test_cancel_and_release_buttons_submit_without_native_confirm(self):
+        supplier = self.client_for("supplier")
+        oid = self.make_offer(supplier)
+        page = supplier.get(f"/offers/{oid}").get_data(as_text=True)
+        self.assertNotIn("return confirm(", page)
+        self.assertIn('data-confirm="Click again to confirm"', page)
+        r = self.post(supplier, f"/offers/{oid}/cancel")
+        self.assertIn("Offer cancelled", r.get_data(as_text=True))
+
+    def test_cant_make_it_relists_volunteer_spot(self):
+        supplier = self.client_for("supplier")
+        vol = self.client_for("volunteer")
+        self.post(supplier, "/volunteer/new", title="Pack", tasks="Pack", location="Bakery",
+                  start_time=future(5), end_time=future(7), slots="1")
+        self.post(vol, "/volunteer/1/apply")
+        self.post(supplier, "/volunteer/signups/1/accept")
+        self.assertIn("Filled", vol.get("/volunteer/1").get_data(as_text=True))
+        self.assertIn("I can&#39;t make it", vol.get("/volunteer/1").get_data(as_text=True))
+        r = self.post(vol, "/volunteer/1/withdraw")
+        page = r.get_data(as_text=True)
+        self.assertIn("re-listed", page)
+        self.assertIn("Open", page)
+
+    def test_own_volunteer_requests_stand_out(self):
+        supplier = self.client_for("supplier")
+        other = self.client_for("supplier", email="other@example.test")
+        for c, title in ((other, "Theirs"), (supplier, "Mine")):
+            self.post(c, "/volunteer/new", title=title, tasks="t", location="x",
+                      start_time=future(5), end_time=future(7), slots="1")
+        page = supplier.get("/volunteer").get_data(as_text=True)
+        self.assertIn("own-post", page)
+        self.assertLess(page.index("Mine"), page.index("Theirs"))  # own requests listed first
+        self.assertEqual(page.count("own-post"), 1)
+
+    def test_dashboard_map_top_six_nearest(self):
+        dist = self.client_for("distributor")
+        self.verify("distributor@example.test")
+        for i in range(8):  # 8 requests, increasingly far from the supplier
+            self.post(dist, "/food-requests/new", title=f"Req {i}", description="x", quantity="1",
+                      location="x", needed_by=future(10), lat=str(40 + i * 0.1), lng="-89")
+        supplier = self.client_for("supplier", email="s2@example.test")
+        self.post(supplier, "/profile", name="S", org_name="Org", lat="40.0", lng="-89.0")
+        with self.app.test_request_context():
+            from flask import g
+            from foodrelay.db import now_str, query
+            from foodrelay.main import _dashboard_map
+            g.user = query("SELECT * FROM users WHERE email = 's2@example.test'", one=True)
+            data = _dashboard_map(g.user, now_str())
+        self.assertEqual(len(data["targets"]), 6)
+        self.assertEqual(data["total"], 8)
+        self.assertEqual([t["title"] for t in data["targets"]], [f"Req {i}" for i in range(6)])
+        page = supplier.get("/dashboard").get_data(as_text=True)
+        self.assertIn("Showing only the top 6", page)
+        self.assertIn("dashboard-map", page)
+        self.assertIn("request-map", supplier.get("/food-requests/1").get_data(as_text=True))
+
+    def test_logout_is_on_profile(self):
+        c = self.client_for("consumer")
+        self.assertNotIn("Log out", c.get("/dashboard").get_data(as_text=True))
+        self.assertIn("Log out", c.get("/profile").get_data(as_text=True))
+
+    def test_seed(self):
+        with self.app.app_context():
+            from foodrelay.seed import seed
+            seed()
 
 
 if __name__ == "__main__":

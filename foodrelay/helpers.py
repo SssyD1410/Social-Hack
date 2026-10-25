@@ -1,4 +1,5 @@
 import functools
+import math
 from datetime import datetime
 
 from flask import flash, g, redirect, request, url_for
@@ -71,6 +72,26 @@ def verified_required(view):
             return redirect(url_for("main.profile"))
         return view(**kwargs)
     return wrapped
+
+
+def parse_latlng(form):
+    """Read lat/lng from a form's hidden map-picker fields; (None, None) if missing or invalid."""
+    try:
+        lat, lng = float(form.get("lat", "")), float(form.get("lng", ""))
+    except ValueError:
+        return None, None
+    if -90 <= lat <= 90 and -180 <= lng <= 180:
+        return round(lat, 6), round(lng, 6)
+    return None, None
+
+
+def distance_km(a_lat, a_lng, b_lat, b_lng):
+    """Great-circle distance; None when either point is unknown."""
+    if None in (a_lat, a_lng, b_lat, b_lng):
+        return None
+    a_lat, a_lng, b_lat, b_lng = map(math.radians, (a_lat, a_lng, b_lat, b_lng))
+    h = math.sin((b_lat - a_lat) / 2) ** 2 + math.cos(a_lat) * math.cos(b_lat) * math.sin((b_lng - a_lng) / 2) ** 2
+    return 6371 * 2 * math.asin(math.sqrt(h))
 
 
 def unread_count(user_id):

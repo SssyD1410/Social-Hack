@@ -1,20 +1,28 @@
 # FoodRelay
 
 FoodRelay helps surplus food reach people who need it. Shops and restaurants post food they'd otherwise throw
-away; verified organizations, individual volunteers and consumers claim it; everyone coordinates in built-in chat.
+away; verified organizations and consumers claim it, volunteers help move it, and everyone coordinates in built-in chat.
 
 ## Roles
 
 | Role | Who | Can do |
 |------|-----|--------|
-| **Supplier** | Shops, bakeries, restaurants with surplus | Post food offers (description, type, size, dietary notes, location, pickup deadline) and choose who sees each one: distributors, volunteers and/or consumers. Request volunteers. Pledge to fill distributors' food requests. |
+| **Supplier** | Shops, bakeries, restaurants with surplus | Post food offers (description, type, size, dietary notes, location, pickup deadline) and choose who sees each one: distributors and/or consumers. Request volunteers. Pledge to fill distributors' food requests. |
 | **Distributor** | Shelters, food banks, pantries | Upload certification and get verified by an admin. Once verified: claim offers (and take responsibility for pickup and delivery), post food requests (description, quantity, location, time), request volunteers. |
-| **Volunteer** | Individuals, not acting for an organization | Sign up for volunteer requests, claim offers opened to volunteers. |
+| **Volunteer** | Individuals, not acting for an organization | Sign up for volunteer requests; "I can't make it" re-lists the spot. Volunteers don't see food offers. |
 | **Consumer** | Anyone who wants food | View and reserve **small** offers that suppliers have made visible to consumers. |
 | **Admin** | FoodRelay staff | Review distributor documents and verify or reject them. |
 
-Anyone can message the person behind an offer or request they can see. Each role has a public "Learn more" page at
-`/learn/<role>`.
+Anyone can message the person behind an offer or request they can see. All four roles are explained on one tabbed
+"Learn more" page at `/learn` (`/learn/<role>` opens a specific tab).
+
+### Maps
+
+Users, offers and requests can have a map location (picked on a map in each form). Each dashboard shows your posts and
+the 6 most relevant counterparts (nearest first), with a planned driving route that switches to the next one every
+second; food requests show a map too. Maps use [Leaflet](https://leafletjs.com) with OpenStreetMap tiles, routes come
+from the public [OSRM](https://project-osrm.org) demo server (falling back to a straight line), and "Find typed address"
+uses OpenStreetMap Nominatim. Those public services are fine for demos; use your own or a paid provider in production.
 
 ## Tech stack
 
@@ -22,6 +30,7 @@ Anyone can message the person behind an offer or request they can see. Each role
 - **Database:** SQLite (`instance/foodrelay.sqlite`); schema in [`foodrelay/schema.sql`](foodrelay/schema.sql)
 - **Auth:** session cookies, Werkzeug password hashing (scrypt/pbkdf2), CSRF tokens on every POST
 - **Chat:** JSON API polled every 3 seconds from the conversation page
+- **Maps:** Leaflet + OpenStreetMap, OSRM routing (see above); demo data is located in Springfield, Illinois
 - **Uploads:** distributor certification files stored in `instance/uploads/`, visible only to the owner and admins
 
 ```

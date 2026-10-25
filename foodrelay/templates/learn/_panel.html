@@ -1,0 +1,40 @@
+{# One role's tab. Expects the variables set by learn/_<role>.html. #}
+<section class="learn-panel" id="panel-{{ panel_role }}" role="tabpanel" aria-labelledby="tab-{{ panel_role }}"
+         {{ 'hidden' if panel_role != role }}>
+  <div class="learn-hero">
+    <span class="emoji">{{ ROLES[panel_role].icon }}</span>
+    <h2>{{ headline }}</h2>
+    <p class="muted">{{ intro }}</p>
+    <div class="btn-row">
+      {% if g.user %}
+        <a class="btn" href="{{ url_for('main.dashboard') }}">Go to your dashboard</a>
+      {% else %}
+        <a class="btn" href="{{ url_for('auth.register', role=panel_role) }}">Join as {{ ROLES[panel_role].label|lower }}</a>
+        <a class="btn secondary" href="{{ url_for('auth.login') }}">Log in</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="card">
+        <h2>How it works</h2>
+        {{ steps }}
+      </div>
+      <div class="card">
+        <h2>What you can do on FoodRelay</h2>
+        {{ features }}
+      </div>
+      <div class="section faq">
+        <h2>Common questions</h2>
+        {{ faq }}
+      </div>
+    </div>
+    <aside>
+      <div class="card">
+        <h3>{{ aside_title if aside_title is defined else 'Who this is for' }}</h3>
+        {{ aside }}
+      </div>
+    </aside>
+  </div>
+</section>

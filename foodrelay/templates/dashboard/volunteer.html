@@ -1,13 +1,14 @@
 {% extends "base.html" %}
-{% from "macros.html" import offer_card, volunteer_card, status_tag %}
+{% from "macros.html" import volunteer_card, status_tag %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <div class="page-head">
   <div><h1>Hi, {{ g.user.name }}</h1><p>🙋 Volunteer dashboard</p></div>
   <div class="btn-row"><a class="btn" href="{{ url_for('posts.volunteer_requests') }}">Find volunteer shifts</a></div>
 </div>
+{% include "dashboard/_map.html" %}
 
-<section>
+<section class="section">
   <div class="section-head"><h2>Your sign-ups</h2></div>
   {% if my_signups %}
     <div class="card table-wrap"><table class="list">
@@ -35,19 +36,5 @@
   {% endif %}
 </section>
 
-<section class="section">
-  <div class="section-head"><h2>Food you could deliver</h2><a href="{{ url_for('posts.offers') }}">Browse offers</a></div>
-  {% if available_offers %}
-    <div class="cards">{% for o in available_offers %}{{ offer_card(o, now) }}{% endfor %}</div>
-  {% else %}
-    <div class="empty">No offers open to volunteers at the moment.</div>
-  {% endif %}
-</section>
 
-{% if my_claims %}
-<section class="section">
-  <div class="section-head"><h2>Your pickups</h2></div>
-  <div class="cards">{% for o in my_claims %}{{ offer_card(o, now) }}{% endfor %}</div>
-</section>
-{% endif %}
 {% endblock %}

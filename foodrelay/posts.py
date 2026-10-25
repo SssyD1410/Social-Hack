@@ -3,7 +3,7 @@
 from flask import Blueprint, abort, flash, g, redirect, render_template, request, url_for
 
 from .db import execute, get_db, now_str, query
-from .helpers import FOOD_TYPES, login_required, role_required, verified_required
+from .helpers import FOOD_TYPES, login_required, parse_latlng, role_required, verified_required
 from .visibility import (can_claim_offer, can_view_offer, offer_is_expired,
                          offer_visibility_clause)
 
@@ -39,6 +39,7 @@ def _offer_form_values(form):
     if size not in ("small", "medium", "large"):
         size = "medium"
     visible_consumers = 1 if form.get("visible_consumers") and size == "small" else 0
+    lat, lng = parse_latlng(form)
     return {
         "title": form.get("title", "").strip(),
         "description": form.get("description", "").strip(),
@@ -48,10 +49,12 @@ def _offer_form_values(form):
         "size": size,
         "location": form.get("location", "").strip(),
         "city": _clean(form, "city"),
+        "lat": lat,
+        "lng": lng,
         "pickup_start": _clean(form, "pickup_start"),
         "pickup_deadline": form.get("pickup_deadline", "").strip(),
         "visible_distributors": 1 if form.get("visible_distributors") else 0,
-        "visible_volunteers": 1 if form.get("visible_volunteers") else 0,
+        "visible_volunteers": 0,
         "visible_consumers": visible_consumers,
     }
 
@@ -65,15 +68,18 @@ def _validate_offer(form, values):
         errors.append("The pickup deadline must be in the future.")
     if values["pickup_start"] and values["pickup_deadline"] and values["pickup_start"] >= values["pickup_deadline"]:
         errors.append("Pickup start must be before the deadline.")
-    if not (values["visible_distributors"] or values["visible_volunteers"] or values["visible_consumers"]):
+    if not (values["visible_distributors"] or values["visible_consumers"]):
         errors.append("Make the offer visible to at least one group.")
     if form.get("visible_consumers") and values["size"] != "small":
         errors.append("Only small offers can be shown to individual consumers.")
     return errors
 
 
+OFFER_ROLES = ("supplier", "distributor", "consumer", "admin")
+
+
 @bp.route("/offers")
-@login_required
+@role_required(*OFFER_ROLES)
 def offers():
     u = g.user
     clause, args = offer_visibility_clause(u)
@@ -115,8 +121,8 @@ def new_offer():
             flash("Your food offer is live.", "success")
             return redirect(url_for("posts.offer", offer_id=oid))
     else:
-        values["location"] = g.user["address"] or ""
-        values["city"] = g.user["city"] or ""
+        values.update(location=g.user["address"] or "", city=g.user["city"] or "",
+                      lat=g.user["lat"], lng=g.user["lng"])
     return render_template("offers/form.html", values=values, editing=False)
 
 
@@ -145,7 +151,7 @@ def edit_offer(offer_id):
 
 
 @bp.route("/offers/<int:offer_id>")
-@login_required
+@role_required(*OFFER_ROLES)
 def offer(offer_id):
     o = _get_offer(offer_id)
     if not can_view_offer(g.user, o):
@@ -250,10 +256,11 @@ def food_requests():
 @role_required("distributor")
 @verified_required
 def new_food_request():
-    values = {"location": g.user["address"] or "", "city": g.user["city"] or ""}
+    values = {"location": g.user["address"] or "", "city": g.user["city"] or "", "lat": g.user["lat"], "lng": g.user["lng"]}
     if request.method == "POST":
         f = request.form
         values = {k: f.get(k, "").strip() for k in ("title", "description", "quantity", "location", "city", "needed_by")}
+        values["lat"], values["lng"] = parse_latlng(f)
         errors = _required(f, [("title", "Title"), ("description", "Description"), ("quantity", "Quantity"),
                                ("location", "Location"), ("needed_by", "Needed by")])
         if values["needed_by"] and values["needed_by"] <= now_str():
@@ -263,10 +270,11 @@ def new_food_request():
                 flash(e, "error")
         else:
             rid = execute(
-                """INSERT INTO food_requests (distributor_id, title, description, quantity, location, city, needed_by)
-                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                """INSERT INTO food_requests (distributor_id, title, description, quantity, location, city, lat, lng,
+                                              needed_by)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (g.user["id"], values["title"], values["description"], values["quantity"], values["location"],
-                 values["city"] or None, values["needed_by"]))
+                 values["city"] or None, values["lat"], values["lng"], values["needed_by"]))
             flash("Food request posted. Suppliers can now see it.", "success")
             return redirect(url_for("posts.food_request", req_id=rid))
     return render_template("food_requests/form.html", values=values)
@@ -318,7 +326,8 @@ def _get_vol_request(req_id):
 @bp.route("/volunteer")
 @login_required
 def volunteer_requests():
-    where, params = ["v.status = 'open' AND v.end_time >= ?"], [now_str()]
+    # Your own open requests are always listed (even if filled) so you can find them.
+    where, params = ["((v.status = 'open' OR v.poster_id = ?) AND v.end_time >= ?)"], [g.user["id"], now_str()]
     if request.args.get("mine") and g.user["role"] in ("supplier", "distributor"):
         where, params = ["v.poster_id = ?"], [g.user["id"]]
     if q := request.args.get("q", "").strip():
@@ -331,7 +340,8 @@ def volunteer_requests():
         f"""SELECT v.*, p.name AS poster_name, p.org_name AS poster_org,
                    (SELECT COUNT(*) FROM volunteer_signups s WHERE s.request_id = v.id AND s.status = 'accepted') AS accepted
             FROM volunteer_requests v JOIN users p ON p.id = v.poster_id
-            WHERE {' AND '.join(where)} ORDER BY v.start_time ASC LIMIT 200""", params)
+            WHERE {' AND '.join(where)} ORDER BY v.poster_id = ? DESC, v.start_time ASC LIMIT 200""",
+        [*params, g.user["id"]])
     return render_template("volunteer/list.html", requests=rows)
 
 
@@ -339,11 +349,13 @@ def volunteer_requests():
 @role_required("supplier", "distributor")
 @verified_required
 def new_volunteer_request():
-    values = {"location": g.user["address"] or "", "city": g.user["city"] or "", "slots": 1}
+    values = {"location": g.user["address"] or "", "city": g.user["city"] or "", "slots": 1,
+              "lat": g.user["lat"], "lng": g.user["lng"]}
     if request.method == "POST":
         f = request.form
         values = {k: f.get(k, "").strip() for k in
                   ("title", "tasks", "requirements", "location", "city", "start_time", "end_time", "slots")}
+        values["lat"], values["lng"] = parse_latlng(f)
         errors = _required(f, [("title", "Title"), ("tasks", "Tasks"), ("location", "Location"),
                                ("start_time", "Start time"), ("end_time", "End time")])
         try:
@@ -362,11 +374,12 @@ def new_volunteer_request():
                 flash(e, "error")
         else:
             vid = execute(
-                """INSERT INTO volunteer_requests (poster_id, title, tasks, requirements, location, city,
+                """INSERT INTO volunteer_requests (poster_id, title, tasks, requirements, location, city, lat, lng,
                                                    start_time, end_time, slots)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (g.user["id"], values["title"], values["tasks"], values["requirements"] or None,
-                 values["location"], values["city"] or None, values["start_time"], values["end_time"], slots))
+                 values["location"], values["city"] or None, values["lat"], values["lng"],
+                 values["start_time"], values["end_time"], slots))
             flash("Volunteer request posted.", "success")
             return redirect(url_for("posts.volunteer_request", req_id=vid))
     return render_template("volunteer/form.html", values=values)
@@ -412,7 +425,7 @@ def withdraw_volunteer(req_id):
     execute("UPDATE volunteer_signups SET status = 'withdrawn' WHERE request_id = ? AND volunteer_id = ?",
             (req_id, g.user["id"]))
     _refresh_vol_status(req_id)
-    flash("You've withdrawn from this request.", "info")
+    flash("Thanks for letting us know. Your spot has been re-listed for other volunteers.", "info")
     return redirect(url_for("posts.volunteer_request", req_id=req_id))
 
 

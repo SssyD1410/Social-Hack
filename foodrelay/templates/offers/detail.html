@@ -48,10 +48,10 @@
         {% if offer.status == 'claimed' %}
           {{ post_button(url_for('posts.complete_offer', offer_id=offer.id), 'Mark picked up') }}
           {{ message_button(offer.claimed_by, 'offer:%d' % offer.id, 'Message claimer') }}
-          {{ post_button(url_for('posts.release_offer', offer_id=offer.id), 'Release claim', 'btn danger', 'Make this offer available again?') }}
+          {{ post_button(url_for('posts.release_offer', offer_id=offer.id), 'Release claim', 'btn danger', 'Click again to confirm') }}
         {% endif %}
         {% if offer.status in ('available', 'claimed') %}
-          {{ post_button(url_for('posts.cancel_offer', offer_id=offer.id), 'Cancel offer', 'btn danger', 'Cancel this offer?') }}
+          {{ post_button(url_for('posts.cancel_offer', offer_id=offer.id), 'Cancel offer', 'btn danger', 'Click again to confirm') }}
         {% endif %}
       </div>
     {% elif claimed_by_me %}
@@ -61,7 +61,7 @@
         <div class="btn-row">
           {{ message_button(offer.supplier_id, 'offer:%d' % offer.id, 'Message supplier') }}
           {{ post_button(url_for('posts.complete_offer', offer_id=offer.id), 'Mark picked up') }}
-          {{ post_button(url_for('posts.release_offer', offer_id=offer.id), "I can't make it", 'btn danger', 'Release this offer for someone else?') }}
+          {{ post_button(url_for('posts.release_offer', offer_id=offer.id), "I can't make it", 'btn danger', 'Click again to confirm') }}
         </div>
       {% else %}
         <p class="small muted">This offer is {{ offer.status }}. Thank you!</p>

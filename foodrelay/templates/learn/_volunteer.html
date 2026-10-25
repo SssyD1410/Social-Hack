@@ -1,37 +1,39 @@
-{% extends "learn/_layout.html" %}
-{% block headline %}Give an hour, move a meal{% endblock %}
-{% block intro %}Volunteers are individuals who want to help get food where it's needed, acting on their own rather than
-on behalf of a non-profit. Pick up a shift with a local shelter, help a bakery pack its leftovers, or collect an offer and bring it to people who need it.{% endblock %}
+{# Learn-more content for the volunteer tab; rendered by learn/_panel.html #}
+{% set panel_role = "volunteer" %}
+{% set headline %}Give an hour, move a meal{% endset %}
+{% set intro %}Volunteers are individuals who want to help get food where it's needed, acting on their own rather than
+on behalf of a non-profit. Pick up a shift with a local shelter, help a bakery pack its leftovers, or help a distributor deliver food to people who need it.{% endset %}
 
-{% block steps %}
+{% set steps %}
 <ol class="steps">
   <li><b>Sign up as a volunteer</b> and add a short bio (e.g. "I have a car and free weekday evenings").</li>
   <li><b>Browse volunteer requests</b> from suppliers and distributors. Each one lists the time period, tasks and requirements.</li>
   <li><b>Sign up</b> with a short note. The organizer accepts or declines, and you'll see the status on your dashboard.</li>
-  <li><b>Claim food offers</b> that suppliers have opened to volunteers, if you can personally collect and pass them on.</li>
+  <li><b>Can't make it?</b> Press "I can't make it" on the request. Your spot is re-listed so someone else can take it.</li>
   <li><b>Chat</b> with organizers to confirm the details, then show up and help.</li>
 </ol>
-{% endblock %}
+{% endset %}
 
-{% block features %}
+{% set features %}
 <ul class="check-list">
   <li><b>Volunteer request board</b> with dates, locations, tasks and requirements, filterable by city.</li>
   <li><b>One-click sign-up</b> and withdrawal if your plans change.</li>
-  <li><b>Food offers visible to volunteers</b> that you can claim and deliver yourself.</li>
+  <li><b>A map</b> on your dashboard showing the nearest volunteer requests and a planned route to each.</li>
   <li><b>Messaging</b> with suppliers and distributors.</li>
 </ul>
-{% endblock %}
+{% endset %}
 
-{% block faq %}
+{% set faq %}
 <details><summary>How is a volunteer different from a distributor?</summary><p>Distributors are verified organizations with certifications. Volunteers are individuals: you don't need any paperwork to join, but some tasks may list requirements like a driver's license.</p></details>
 <details><summary>Do I need a car?</summary><p>No. Many tasks are sorting, packing or serving. Requests that need a car say so in their requirements.</p></details>
-<details><summary>What if I can't make a shift?</summary><p>Withdraw from the request page as early as you can and send the organizer a quick message.</p></details>
-{% endblock %}
+<details><summary>What if I can't make a shift?</summary><p>Press "I can't make it" on the request page as early as you can. Your spot is re-listed for other volunteers; a quick message to the organizer helps too.</p></details>
+{% endset %}
 
-{% block aside %}
+{% set aside %}
 <ul class="check-list small">
   <li>Students and retirees with free time</li>
   <li>Drivers with a spare hour on the way home</li>
   <li>Anyone who wants to cut food waste in their neighborhood</li>
 </ul>
-{% endblock %}
+{% endset %}
+{% include "learn/_panel.html" %}

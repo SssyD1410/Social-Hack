@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros.html" import csrf %}
+{% from "macros.html" import csrf, location_picker %}
 {% block title %}{{ 'Edit offer' if editing else 'Post food offer' }}{% endblock %}
 {% block content %}
 <div class="medium">
@@ -35,6 +35,7 @@
         <div><label for="city">City / area</label>
           <input id="city" name="city" type="text" value="{{ values.city or '' }}"></div>
       </div>
+      {{ location_picker(values.lat, values.lng, "Pickup point on map") }}
       <div class="grid-2">
         <div><label for="pickup_start">Available from <span class="hint">(optional)</span></label>
           <input id="pickup_start" name="pickup_start" type="datetime-local" value="{{ values.pickup_start or '' }}"></div>
@@ -45,7 +46,6 @@
         <legend>Who can see this offer?</legend>
         <div class="checks">
           <label><input type="checkbox" name="visible_distributors" value="1" {{ 'checked' if values.visible_distributors }}> Verified distributors</label>
-          <label><input type="checkbox" name="visible_volunteers" value="1" {{ 'checked' if values.visible_volunteers }}> Volunteers</label>
           <label><input type="checkbox" id="vis-consumers" name="visible_consumers" value="1" {{ 'checked' if values.visible_consumers }}> Consumers</label>
         </div>
         <p class="hint" id="consumer-hint" style="margin:8px 0 0">Consumers can only see <b>small</b> offers.</p>

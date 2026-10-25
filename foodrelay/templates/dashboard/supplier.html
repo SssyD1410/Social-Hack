@@ -9,8 +9,9 @@
     <a class="btn secondary" href="{{ url_for('posts.new_volunteer_request') }}">+ Request volunteers</a>
   </div>
 </div>
+{% include "dashboard/_map.html" %}
 
-<section>
+<section class="section">
   <div class="section-head"><h2>Your food offers</h2><a href="{{ url_for('posts.offers') }}">See all</a></div>
   {% if my_offers %}
     <div class="cards">{% for o in my_offers %}{{ offer_card(o, now) }}{% endfor %}</div>
@@ -19,6 +20,15 @@
   {% endif %}
 </section>
 
+
+<section class="section">
+  <div class="section-head"><h2>Distributors need food</h2><a href="{{ url_for('posts.food_requests') }}">All requests</a></div>
+  {% if food_requests %}
+    <div class="cards">{% for r in food_requests %}{{ food_request_card(r) }}{% endfor %}</div>
+  {% else %}
+    <div class="empty">No open food requests right now.</div>
+  {% endif %}
+</section>
 <section class="section">
   <div class="section-head"><h2>Your volunteer requests</h2><a href="{{ url_for('posts.volunteer_requests', mine=1) }}">See all</a></div>
   {% if my_vol_requests %}
@@ -37,15 +47,6 @@
     </div>
   {% else %}
     <div class="empty">Need help sorting, packing or delivering? <a href="{{ url_for('posts.new_volunteer_request') }}">Request volunteers</a>.</div>
-  {% endif %}
-</section>
-
-<section class="section">
-  <div class="section-head"><h2>Distributors need food</h2><a href="{{ url_for('posts.food_requests') }}">All requests</a></div>
-  {% if food_requests %}
-    <div class="cards">{% for r in food_requests %}{{ food_request_card(r) }}{% endfor %}</div>
-  {% else %}
-    <div class="empty">No open food requests right now.</div>
   {% endif %}
 </section>
 {% endblock %}

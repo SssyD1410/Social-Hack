@@ -11,8 +11,8 @@
         <a class="btn" href="{{ url_for('main.dashboard') }}">Go to your dashboard</a>
       {% else %}
         <a class="btn" href="{{ url_for('auth.register') }}">Join FoodRelay</a>
-        <a class="btn secondary" href="#roles">Find your role</a>
       {% endif %}
+      <a class="btn secondary" href="{{ url_for('main.learn') }}">Find your role</a>
     </div>
   </div>
   <div class="hero-art" aria-hidden="true">
@@ -23,40 +23,103 @@
   </div>
 </section>
 
+{# Stats hidden for now. Re-enable by removing this comment wrapper (the `stats` query in main.index is still there).
 <div class="stats">
   <div class="stat"><b>{{ stats.rescued }}</b>offers rescued</div>
   <div class="stat"><b>{{ stats.suppliers }}</b>suppliers</div>
   <div class="stat"><b>{{ stats.distributors }}</b>verified distributors</div>
   <div class="stat"><b>{{ stats.volunteers }}</b>volunteers</div>
 </div>
+#}
 
 <section class="section" id="roles">
   <div class="section-head"><h2>Four ways to take part</h2></div>
-  <div class="cards">
+  <div class="role-grid">
     {% for key, r in ROLES.items() %}
     <div class="card role-card">
       <span class="emoji">{{ r.icon }}</span>
       <h3>{{ r.label }}</h3>
       <p class="muted">{{ r.tagline }}</p>
-      <div class="btn-row">
-        <a class="btn secondary small" href="{{ url_for('main.learn', role=key) }}">Learn more</a>
-        {% if not g.user %}<a class="btn small" href="{{ url_for('auth.register', role=key) }}">Join as {{ r.label|lower }}</a>{% endif %}
-      </div>
+      {% if not g.user %}<div class="btn-row"><a class="btn small" href="{{ url_for('auth.register', role=key) }}">Join as {{ r.label|lower }}</a></div>{% endif %}
     </div>
     {% endfor %}
   </div>
+  <p class="roles-more"><a class="btn secondary" href="{{ url_for('main.learn') }}">Learn more about the four roles →</a></p>
 </section>
 
 <section class="section">
   <div class="card">
     <h2>How FoodRelay works</h2>
-    <ol class="steps">
-      <li><b>Suppliers post offers</b> with what's left, where it is and the pickup deadline, and choose who can see each offer.</li>
-      <li><b>Verified distributors, volunteers and consumers claim</b> the offers that are visible to them.</li>
-      <li><b>Distributors post requests</b> for food they need, and suppliers pledge to help.</li>
-      <li><b>Anyone can ask for volunteers</b> for pickups, sorting or delivery shifts, and volunteers sign up.</li>
-      <li><b>Everyone chats directly</b> from any offer or request to sort out the details.</li>
-    </ol>
+    <p class="muted small">Hover over (or tap) any step to see what happens there.</p>
+    {% macro node(icon, title, desc, cls='') -%}
+      <div class="fc-node {{ cls }}" tabindex="0" data-desc="{{ desc }}">
+        <span class="fc-icon">{{ icon }}</span><span class="fc-title">{{ title }}</span>
+        <span class="fc-tip" role="tooltip">{{ desc }}</span>
+      </div>
+    {%- endmacro %}
+    {% macro arrow(label='') %}<div class="fc-arrow" aria-hidden="true"><span>{{ label }}</span></div>{% endmacro %}
+
+    <div class="flowchart">
+      <div class="fc-lane">
+        <div class="fc-lane-label">Sharing surplus</div>
+        <div class="fc-row">
+          {{ node('🏪', 'Supplier has surplus', 'A shop, bakery or restaurant ends the day with good food it can\'t sell.', 'fc-supplier') }}
+          {{ arrow('posts') }}
+          {{ node('📋', 'Food offer', 'The supplier lists what it is, the quantity, dietary notes, where to collect it and a pickup deadline.') }}
+          {{ arrow('chooses') }}
+          {{ node('👁️', 'Who can see it', 'Each offer is shown to verified distributors and/or consumers. Only small offers can go to consumers.') }}
+          {{ arrow('claims') }}
+          {{ node('🚚', 'Distributor or consumer claims', 'A verified distributor claims it for the people it serves, or a consumer reserves a small offer for themselves.', 'fc-distributor') }}
+          {{ arrow() }}
+          {{ node('📦', 'Pickup & delivery', 'The claimer collects the food before the deadline. Distributors are responsible for getting it to the people they serve.', 'fc-key') }}
+          {{ arrow() }}
+          {{ node('🍽️', 'Food reaches people', 'Meals and groceries end up with people in need instead of in the bin.', 'fc-end') }}
+        </div>
+      </div>
+
+      <div class="fc-lane">
+        <div class="fc-lane-label">Asking for food</div>
+        <div class="fc-row">
+          {{ node('🚚', 'Distributor needs food', 'A verified shelter, pantry or food bank needs something specific.', 'fc-distributor') }}
+          {{ arrow('posts') }}
+          {{ node('📝', 'Food request', 'It lists a description, quantity, location and the time the food is needed by.') }}
+          {{ arrow('pledges') }}
+          {{ node('🏪', 'Supplier pledges', 'A supplier who can help pledges to fill the request, then they arrange the details in chat.', 'fc-supplier') }}
+          {{ arrow() }}
+          {{ node('📦', 'Pickup & delivery', 'Joins the main flow: the food is collected and delivered.', 'fc-key fc-join') }}
+        </div>
+      </div>
+
+      <div class="fc-lane">
+        <div class="fc-lane-label">Getting help</div>
+        <div class="fc-row">
+          {{ node('🏪🚚', 'Supplier or distributor', 'Anyone who needs extra hands: sorting, packing, driving or serving.') }}
+          {{ arrow('posts') }}
+          {{ node('🙋', 'Volunteer request', 'A time period, the tasks and any requirements, e.g. "own car".') }}
+          {{ arrow('signs up') }}
+          {{ node('🙋', 'Volunteer joins', 'An individual volunteer signs up; the organizer accepts. If they can\'t make it, the spot is re-listed.', 'fc-volunteer') }}
+          {{ arrow('helps') }}
+          {{ node('📦', 'Pickup & delivery', 'Joins the main flow: volunteers help move the food.', 'fc-key fc-join') }}
+        </div>
+      </div>
+
+      <div class="fc-chat" tabindex="0">
+        💬 <b>Chat connects every step.</b>
+        <span class="muted">Anyone can message the person behind an offer or request they can see, to agree on times and details.</span>
+      </div>
+    </div>
+    <p class="fc-desc" id="fc-desc" aria-live="polite">Select a step to read about it.</p>
   </div>
 </section>
+{% endblock %}
+{% block scripts %}
+<script>
+  // Mirror the hovered/focused step into the description line (helpful on touch screens).
+  const desc = document.getElementById('fc-desc');
+  document.querySelectorAll('.fc-node').forEach(n => {
+    const show = () => { desc.textContent = n.querySelector('.fc-title').textContent + ': ' + n.dataset.desc; };
+    n.addEventListener('mouseenter', show);
+    n.addEventListener('focus', show);
+  });
+</script>
 {% endblock %}

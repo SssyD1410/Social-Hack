@@ -3,7 +3,7 @@
 {% macro post_button(action, label, cls='btn', confirm=None) -%}
 <form method="post" action="{{ action }}">
   {{ csrf() }}
-  <button class="{{ cls }}" type="submit"{% if confirm %} onclick="return confirm('{{ confirm }}')"{% endif %}>{{ label }}</button>
+  <button class="{{ cls }}" type="submit"{% if confirm %} data-confirm="{{ confirm }}"{% endif %}>{{ label }}</button>
 </form>
 {%- endmacro %}
 
@@ -50,8 +50,9 @@
 </a>
 {% endmacro %}
 
-{% macro volunteer_card(v) %}
-<a class="card post-card" href="{{ url_for('posts.volunteer_request', req_id=v.id) }}">
+{% macro volunteer_card(v, mine=False) %}
+<a class="card post-card{{ ' own-post' if mine }}" href="{{ url_for('posts.volunteer_request', req_id=v.id) }}">
+  {% if mine %}<span class="own-badge">★ Your request</span>{% endif %}
   <div class="top"><h3>{{ v.title }}</h3>{{ status_tag(v.status) }}</div>
   <div class="meta">
     <span>👤 {{ v.poster_org or v.org_name or v.poster_name or v.name }}</span>
@@ -65,3 +66,18 @@
 {% macro message_button(user_id, ref, label='Message') -%}
 <a class="btn secondary" href="{{ url_for('chat.start', user_id=user_id, ref=ref) }}">💬 {{ label }}</a>
 {%- endmacro %}
+
+{% macro location_picker(lat, lng, label='Location on map') %}
+<div class="picker" data-location-picker>
+  <label>{{ label }} <span class="hint">(click the map to drop a pin; used for maps and routes)</span></label>
+  <input type="hidden" name="lat" value="{{ lat if lat is number else '' }}">
+  <input type="hidden" name="lng" value="{{ lng if lng is number else '' }}">
+  <div class="map map-picker"></div>
+  <div class="btn-row" style="margin-top:8px">
+    <button type="button" class="btn small secondary picker-search">Find typed address</button>
+    <button type="button" class="btn small secondary picker-locate">Use my location</button>
+    <button type="button" class="btn small secondary picker-clear">Clear</button>
+    <span class="hint picker-status">{{ 'Location set.' if lat is number else 'No location set.' }}</span>
+  </div>
+</div>
+{% endmacro %}

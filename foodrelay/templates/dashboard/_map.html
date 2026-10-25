@@ -1,0 +1,31 @@
+{# Map of your posts and the most relevant counterparts, with a planned route cycling between them. #}
+<section class="section-tight">
+  <div class="card map-card">
+    <div class="section-head">
+      <h2>Map</h2>
+      <span class="small muted">
+        {% if map_data.targets %}
+          Showing only the top {{ map_data.targets|length }} most relevant {{ map_data.label }}
+          {%- if map_data.total > map_data.targets|length %} (of {{ map_data.total }}){% endif %},
+          {{ 'nearest first' if map_data.me else 'soonest first' }}.
+        {% else %}
+          No {{ map_data.label }} with a map location yet.
+        {% endif %}
+      </span>
+    </div>
+    <div class="map map-dashboard" id="dashboard-map"></div>
+    <div class="map-legend small">
+      {% if map_data.me %}<span><i class="dot" style="background:#2f6fd1"></i>You</span>{% endif %}
+      {% if map_data.posts %}<span><i class="dot" style="background:#2f7d4f"></i>Your posts</span>{% endif %}
+      {% if map_data.targets %}<span><i class="dot" style="background:#e8893a"></i>{{ map_data.label|capitalize }} (numbered)</span>
+      <span><i class="dot" style="background:#c4410c"></i>Planned route (switches every second; hover the map to pause)</span>{% endif %}
+    </div>
+    <p class="small route-caption" id="route-caption">
+      {% if not map_data.me %}<a href="{{ url_for('main.profile') }}">Set your location</a> to see planned routes.{% endif %}
+    </p>
+  </div>
+</section>
+<script>
+  document.addEventListener('DOMContentLoaded', () =>
+    FRMap.dashboard(document.getElementById('dashboard-map'), {{ map_data|tojson }}, document.getElementById('route-caption')));
+</script>

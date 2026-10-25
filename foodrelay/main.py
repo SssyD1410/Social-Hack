@@ -5,7 +5,7 @@ from flask import (Blueprint, abort, current_app, flash, g, redirect, render_tem
                    send_from_directory, url_for)
 
 from .db import execute, now_str, query
-from .helpers import ROLES, login_required
+from .helpers import ROLES, distance_km, login_required, parse_latlng
 from .visibility import offer_visibility_clause
 
 bp = Blueprint("main", __name__)
@@ -25,11 +25,69 @@ def index():
     return render_template("index.html", stats=stats)
 
 
+@bp.route("/learn")
 @bp.route("/learn/<role>")
-def learn(role):
+def learn(role="supplier"):
     if role not in ROLES:
         abort(404)
-    return render_template(f"learn/{role}.html", role=role)
+    return render_template("learn/index.html", role=role)
+
+
+MAP_LIMIT = 6
+
+
+def _point(row, title, url, subtitle=""):
+    return {"lat": row["lat"], "lng": row["lng"], "title": title, "url": url, "subtitle": subtitle}
+
+
+def _dashboard_map(u, now):
+    """Your own posts, plus the most relevant counterparts (nearest first, else soonest)."""
+    if u["role"] == "supplier":
+        posts = [_point(o, o["title"], url_for("posts.offer", offer_id=o["id"]), "Your offer") for o in query(
+            "SELECT * FROM food_offers WHERE supplier_id = ? AND status IN ('available', 'claimed') "
+            "AND lat IS NOT NULL", (u["id"],))]
+        rows = query("""SELECT r.*, d.org_name, d.name FROM food_requests r JOIN users d ON d.id = r.distributor_id
+                        WHERE r.status = 'open' AND r.needed_by >= ? AND r.lat IS NOT NULL ORDER BY r.needed_by""", (now,))
+        targets = [_point(r, r["title"], url_for("posts.food_request", req_id=r["id"]), r["org_name"] or r["name"]) for r in rows]
+        label = "food requests from distributors"
+    elif u["role"] == "distributor":
+        posts = [_point(r, r["title"], url_for("posts.food_request", req_id=r["id"]), "Your food request") for r in query(
+            "SELECT * FROM food_requests WHERE distributor_id = ? AND status IN ('open', 'pledged') AND lat IS NOT NULL",
+            (u["id"],))]
+        clause, args = offer_visibility_clause(u)
+        rows = query(f"""SELECT o.*, s.org_name, s.name FROM food_offers o JOIN users s ON s.id = o.supplier_id
+                         WHERE {clause} AND o.status = 'available' AND o.pickup_deadline >= ? AND o.lat IS NOT NULL
+                         ORDER BY o.pickup_deadline""", (*args, now))
+        targets = [_point(o, o["title"], url_for("posts.offer", offer_id=o["id"]), o["org_name"] or o["name"]) for o in rows]
+        label = "food offers from suppliers"
+    elif u["role"] == "volunteer":
+        posts = []
+        rows = query("""SELECT v.*, p.org_name, p.name FROM volunteer_requests v JOIN users p ON p.id = v.poster_id
+                        WHERE v.status = 'open' AND v.end_time >= ? AND v.lat IS NOT NULL ORDER BY v.start_time""", (now,))
+        targets = [_point(v, v["title"], url_for("posts.volunteer_request", req_id=v["id"]), v["org_name"] or v["name"])
+                   for v in rows]
+        label = "volunteer requests"
+    else:
+        posts = []
+        clause, args = offer_visibility_clause(u)
+        rows = query(f"""SELECT o.*, s.org_name, s.name FROM food_offers o JOIN users s ON s.id = o.supplier_id
+                         WHERE {clause} AND o.status = 'available' AND o.pickup_deadline >= ? AND o.lat IS NOT NULL
+                         ORDER BY o.pickup_deadline""", (*args, now))
+        targets = [_point(o, o["title"], url_for("posts.offer", offer_id=o["id"]), o["org_name"] or o["name"]) for o in rows]
+        label = "food offers"
+
+    me = None
+    if u["lat"] is not None:
+        me = {"lat": u["lat"], "lng": u["lng"], "title": "You", "subtitle": u["address"] or u["city"] or ""}
+    elif posts:
+        me = {**posts[0], "title": "You (from your first post)"}
+    if me:
+        # Python's sort is stable, so ties keep the soonest-deadline order from SQL.
+        targets.sort(key=lambda t: distance_km(me["lat"], me["lng"], t["lat"], t["lng"]))
+        for t in targets:
+            t["km"] = round(distance_km(me["lat"], me["lng"], t["lat"], t["lng"]), 1)
+    return {"me": me, "posts": posts, "targets": targets[:MAP_LIMIT], "total": len(targets),
+            "label": label, "limit": MAP_LIMIT}
 
 
 @bp.route("/dashboard")
@@ -37,9 +95,9 @@ def learn(role):
 def dashboard():
     u = g.user
     now = now_str()
-    ctx = {"now": now}
     if u["role"] == "admin":
         return redirect(url_for("admin.index"))
+    ctx = {"now": now, "map_data": _dashboard_map(u, now)}
 
     if u["role"] == "supplier":
         ctx["my_offers"] = query(
@@ -50,7 +108,7 @@ def dashboard():
         ctx["food_requests"] = query(
             """SELECT r.*, d.org_name, d.name FROM food_requests r JOIN users d ON d.id = r.distributor_id
                WHERE r.status = 'open' AND r.needed_by >= ? ORDER BY r.needed_by LIMIT 6""", (now,))
-    else:
+    elif u["role"] != "volunteer":
         clause, args = offer_visibility_clause(u)
         ctx["available_offers"] = query(
             f"""SELECT o.*, s.org_name, s.name FROM food_offers o JOIN users s ON s.id = o.supplier_id
@@ -96,16 +154,18 @@ def profile():
     if request.method == "POST":
         f = request.form
         name = f.get("name", "").strip()
+        lat, lng = parse_latlng(f)
         if not name:
             flash("Name is required.", "error")
         else:
             execute(
-                """UPDATE users SET name = ?, org_name = ?, phone = ?, city = ?, address = ?, bio = ?,
+                """UPDATE users SET name = ?, org_name = ?, phone = ?, city = ?, address = ?, bio = ?, lat = ?, lng = ?,
                                     registration_number = COALESCE(?, registration_number)
                    WHERE id = ?""",
                 (name, f.get("org_name", "").strip() or None, f.get("phone", "").strip() or None,
                  f.get("city", "").strip() or None, f.get("address", "").strip() or None,
-                 f.get("bio", "").strip() or None, f.get("registration_number", "").strip() or None, u["id"]))
+                 f.get("bio", "").strip() or None, lat, lng, f.get("registration_number", "").strip() or None,
+                 u["id"]))
             flash("Profile saved.", "success")
         return redirect(url_for("main.profile"))
 

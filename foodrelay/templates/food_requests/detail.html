@@ -20,6 +20,17 @@
       <dt>Requested by</dt><dd><a href="{{ url_for('main.user_profile', user_id=r.distributor_id) }}">{{ r.distributor_org or r.distributor_name }}</a> <span class="tag blue">✓ Verified distributor</span></dd>
       {% if r.pledged_by %}<dt>Pledged by</dt><dd><a href="{{ url_for('main.user_profile', user_id=r.pledged_by) }}">{{ r.pledger_org or r.pledger_name }}</a></dd>{% endif %}
     </dl>
+    {% if r.lat is number %}
+      {% set me = {'lat': g.user.lat, 'lng': g.user.lng, 'title': 'You', 'subtitle': g.user.address or g.user.city or ''} if g.user.lat is number else none %}
+      <div class="map map-detail" id="request-map" style="margin-top:16px"></div>
+      <p class="small muted" id="request-route">{% if not me %}<a href="{{ url_for('main.profile') }}">Set your location</a> to see a planned route.{% endif %}</p>
+      <script>
+        document.addEventListener('DOMContentLoaded', () => FRMap.points(document.getElementById('request-map'), {
+          me: {{ me|tojson }}, focus: true, captionEl: document.getElementById('request-route'),
+          points: [{{ {'lat': r.lat, 'lng': r.lng, 'title': r.title, 'subtitle': r.location}|tojson }}],
+        }));
+      </script>
+    {% endif %}
   </div>
   <aside class="card">
     {% if mine %}
@@ -29,7 +40,7 @@
           {% if r.pledged_by %}{{ message_button(r.pledged_by, 'food_request:%d' % r.id, 'Message supplier') }}{% endif %}
           {{ post_button(url_for('posts.food_request_action', req_id=r.id, action='fulfil'), 'Mark fulfilled') }}
           {% if r.status == 'pledged' %}{{ post_button(url_for('posts.food_request_action', req_id=r.id, action='unpledge'), 'Remove pledge', 'btn danger') }}{% endif %}
-          {{ post_button(url_for('posts.food_request_action', req_id=r.id, action='close'), 'Close request', 'btn danger', 'Close this request?') }}
+          {{ post_button(url_for('posts.food_request_action', req_id=r.id, action='close'), 'Close request', 'btn danger', 'Click again to confirm') }}
         {% else %}
           <p class="small muted">This request is {{ r.status }}.</p>
         {% endif %}
