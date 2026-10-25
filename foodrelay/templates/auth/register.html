@@ -14,7 +14,7 @@
           {% for key, r in ROLES.items() %}
           <div>
             <input type="radio" name="role" id="role-{{ key }}" value="{{ key }}" {{ 'checked' if role == key }} required>
-            <label for="role-{{ key }}"><span class="emoji">{{ r.icon }}</span> {{ r.label }}<small>{{ r.tagline }}</small></label>
+            <label for="role-{{ key }}"><span class="emoji">{{ icon(r.icon) }}</span> {{ r.label }}<small>{{ r.tagline }}</small></label>
           </div>
           {% endfor %}
         </div>

@@ -17,7 +17,7 @@
       <dt>Quantity</dt><dd>{{ r.quantity }}</dd>
       <dt>Location</dt><dd>{{ r.location }}{% if r.city %}, {{ r.city }}{% endif %}</dd>
       <dt>Needed by</dt><dd><b>{{ r.needed_by|dt }}</b></dd>
-      <dt>Requested by</dt><dd><a href="{{ url_for('main.user_profile', user_id=r.distributor_id) }}">{{ r.distributor_org or r.distributor_name }}</a> <span class="tag blue">✓ Verified distributor</span></dd>
+      <dt>Requested by</dt><dd><a href="{{ url_for('main.user_profile', user_id=r.distributor_id) }}">{{ r.distributor_org or r.distributor_name }}</a> <span class="tag blue">{{ icon('badge-check') }} Verified distributor</span></dd>
       {% if r.pledged_by %}<dt>Pledged by</dt><dd><a href="{{ url_for('main.user_profile', user_id=r.pledged_by) }}">{{ r.pledger_org or r.pledger_name }}</a></dd>{% endif %}
     </dl>
     {% if r.lat is number %}

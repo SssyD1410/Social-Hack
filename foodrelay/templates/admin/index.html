@@ -37,7 +37,7 @@
       <input id="note-{{ d.id }}" type="text" name="note"></div>
     <div class="btn-row">
       {% if d.verification_status != 'verified' %}
-        <button class="btn" formaction="{{ url_for('admin.decide', user_id=d.id, decision='verify') }}">✓ Verify</button>
+        <button class="btn" formaction="{{ url_for('admin.decide', user_id=d.id, decision='verify') }}">{{ icon('check') }} Verify</button>
       {% endif %}
       {% if d.verification_status != 'rejected' %}
         <button class="btn danger" formaction="{{ url_for('admin.decide', user_id=d.id, decision='reject') }}">{{ 'Revoke' if d.verification_status == 'verified' else 'Reject' }}</button>

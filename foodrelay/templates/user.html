@@ -10,8 +10,8 @@
       <div>
         <h1 style="margin:0">{{ person.org_name or person.name }}</h1>
         <div class="tags" style="margin-top:6px">
-          <span class="tag">{{ ROLES[person.role].icon }} {{ ROLES[person.role].label }}</span>
-          {% if person.role == 'distributor' and person.verification_status == 'verified' %}<span class="tag blue">✓ Verified</span>{% endif %}
+          <span class="tag">{{ icon(ROLES[person.role].icon) }} {{ ROLES[person.role].label }}</span>
+          {% if person.role == 'distributor' and person.verification_status == 'verified' %}<span class="tag blue">{{ icon('badge-check') }} Verified</span>{% endif %}
         </div>
       </div>
     </div>

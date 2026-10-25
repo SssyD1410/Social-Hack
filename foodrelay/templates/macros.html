@@ -30,10 +30,10 @@
     {% if o.dietary_tags %}<span class="tag green">{{ o.dietary_tags }}</span>{% endif %}
   </div>
   <div class="meta">
-    <span>🏪 {{ o.supplier_org or o.org_name or o.supplier_name or o.name }}</span>
-    <span>📦 {{ o.quantity }}</span>
-    <span>📍 {{ o.location }}{% if o.city %}, {{ o.city }}{% endif %}</span>
-    <span>⏰ Pick up by {{ o.pickup_deadline|dt }}</span>
+    <span>{{ icon('store') }} {{ o.supplier_org or o.org_name or o.supplier_name or o.name }}</span>
+    <span>{{ icon('package') }} {{ o.quantity }}</span>
+    <span>{{ icon('map-pin') }} {{ o.location }}{% if o.city %}, {{ o.city }}{% endif %}</span>
+    <span>{{ icon('clock') }} Pick up by {{ o.pickup_deadline|dt }}</span>
   </div>
 </a>
 {% endmacro %}
@@ -42,29 +42,29 @@
 <a class="card post-card" href="{{ url_for('posts.food_request', req_id=r.id) }}">
   <div class="top"><h3>{{ r.title }}</h3>{{ status_tag(r.status) }}</div>
   <div class="meta">
-    <span>🚚 {{ r.distributor_org or r.org_name or r.distributor_name or r.name }}</span>
-    <span>📦 {{ r.quantity }}</span>
-    <span>📍 {{ r.location }}{% if r.city %}, {{ r.city }}{% endif %}</span>
-    <span>⏰ Needed by {{ r.needed_by|dt }}</span>
+    <span>{{ icon('truck') }} {{ r.distributor_org or r.org_name or r.distributor_name or r.name }}</span>
+    <span>{{ icon('package') }} {{ r.quantity }}</span>
+    <span>{{ icon('map-pin') }} {{ r.location }}{% if r.city %}, {{ r.city }}{% endif %}</span>
+    <span>{{ icon('clock') }} Needed by {{ r.needed_by|dt }}</span>
   </div>
 </a>
 {% endmacro %}
 
 {% macro volunteer_card(v, mine=False) %}
 <a class="card post-card{{ ' own-post' if mine }}" href="{{ url_for('posts.volunteer_request', req_id=v.id) }}">
-  {% if mine %}<span class="own-badge">★ Your request</span>{% endif %}
+  {% if mine %}<span class="own-badge">{{ icon('star') }} Your request</span>{% endif %}
   <div class="top"><h3>{{ v.title }}</h3>{{ status_tag(v.status) }}</div>
   <div class="meta">
-    <span>👤 {{ v.poster_org or v.org_name or v.poster_name or v.name }}</span>
-    <span>🗓️ {{ v.start_time|dt }} to {{ v.end_time|dt }}</span>
-    <span>📍 {{ v.location }}{% if v.city %}, {{ v.city }}{% endif %}</span>
-    {% if v.accepted is defined %}<span>🙋 {{ v.accepted }} / {{ v.slots }} volunteers confirmed</span>{% endif %}
+    <span>{{ icon('user') }} {{ v.poster_org or v.org_name or v.poster_name or v.name }}</span>
+    <span>{{ icon('calendar') }} {{ v.start_time|dt }} to {{ v.end_time|dt }}</span>
+    <span>{{ icon('map-pin') }} {{ v.location }}{% if v.city %}, {{ v.city }}{% endif %}</span>
+    {% if v.accepted is defined %}<span>{{ icon('users') }} {{ v.accepted }} / {{ v.slots }} volunteers confirmed</span>{% endif %}
   </div>
 </a>
 {% endmacro %}
 
 {% macro message_button(user_id, ref, label='Message') -%}
-<a class="btn secondary" href="{{ url_for('chat.start', user_id=user_id, ref=ref) }}">💬 {{ label }}</a>
+<a class="btn secondary" href="{{ url_for('chat.start', user_id=user_id, ref=ref) }}">{{ icon('message-circle') }} {{ label }}</a>
 {%- endmacro %}
 
 {% macro location_picker(lat, lng, label='Location on map') %}

@@ -4,7 +4,7 @@
 {% block content %}
 <div class="page-head">
   <div><h1>{{ g.user.org_name or g.user.name }}</h1>
-    <p>🚚 Distributor dashboard {% if g.user.verification_status == 'verified' %}<span class="tag blue">✓ Verified</span>{% endif %}</p></div>
+    <p>{{ icon('truck') }} Distributor dashboard {% if g.user.verification_status == 'verified' %}<span class="tag blue">{{ icon('badge-check') }} Verified</span>{% endif %}</p></div>
   {% if is_verified(g.user) %}
   <div class="btn-row">
     <a class="btn" href="{{ url_for('posts.new_food_request') }}">+ Request food</a>

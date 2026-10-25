@@ -15,10 +15,15 @@
     return map;
   }
 
+  // Pin content: ME (a person icon), DOT (a plain dot), or a short label such as a number.
+  const ME = 'me', DOT = 'dot';
+  const ICONS = '/static/icons.svg';
   function pin(color, label) {
+    const inner = label === ME ? `<svg class="icon"><use href="${ICONS}#user"></use></svg>`
+                : label === DOT ? '<i class="pin-dot"></i>' : (label ?? '');
     return L.divIcon({
       className: 'fr-pin',
-      html: `<span style="background:${color}">${label || ''}</span>`,
+      html: `<span style="background:${color}">${inner}</span>`,
       iconSize: [26, 26], iconAnchor: [13, 26], popupAnchor: [0, -24],
     });
   }
@@ -63,8 +68,8 @@
   function dashboard(el, data, captionEl) {
     const map = baseMap(el);
     const all = [];
-    if (data.me) { L.marker([data.me.lat, data.me.lng], {icon: pin(COLORS.me, '★'), zIndexOffset: 1000}).addTo(map).bindPopup(popup(data.me)); all.push([data.me.lat, data.me.lng]); }
-    data.posts.forEach(p => { L.marker([p.lat, p.lng], {icon: pin(COLORS.post, '●')}).addTo(map).bindPopup(popup(p)); all.push([p.lat, p.lng]); });
+    if (data.me) { L.marker([data.me.lat, data.me.lng], {icon: pin(COLORS.me, ME), zIndexOffset: 1000}).addTo(map).bindPopup(popup(data.me)); all.push([data.me.lat, data.me.lng]); }
+    data.posts.forEach(p => { L.marker([p.lat, p.lng], {icon: pin(COLORS.post, DOT)}).addTo(map).bindPopup(popup(p)); all.push([p.lat, p.lng]); });
     const markers = data.targets.map((t, i) => {
       all.push([t.lat, t.lng]);
       return L.marker([t.lat, t.lng], {icon: pin(COLORS.target, i + 1)}).addTo(map).bindPopup(popup(t));
@@ -104,9 +109,9 @@
   function points(el, data) {
     const map = baseMap(el);
     const all = [];
-    if (data.me) { L.marker([data.me.lat, data.me.lng], {icon: pin(COLORS.me, '★')}).addTo(map).bindPopup(popup(data.me)); all.push([data.me.lat, data.me.lng]); }
+    if (data.me) { L.marker([data.me.lat, data.me.lng], {icon: pin(COLORS.me, ME)}).addTo(map).bindPopup(popup(data.me)); all.push([data.me.lat, data.me.lng]); }
     data.points.forEach((p, i) => {
-      L.marker([p.lat, p.lng], {icon: pin(data.focus ? COLORS.active : COLORS.target, data.points.length > 1 ? i + 1 : '●')}).addTo(map).bindPopup(popup(p));
+      L.marker([p.lat, p.lng], {icon: pin(data.focus ? COLORS.active : COLORS.target, data.points.length > 1 ? i + 1 : DOT)}).addTo(map).bindPopup(popup(p));
       all.push([p.lat, p.lng]);
     });
     fit(map, all);
@@ -132,7 +137,7 @@
     function set(lat, lng, zoom) {
       latIn.value = lat.toFixed(6); lngIn.value = lng.toFixed(6);
       if (marker) marker.setLatLng([lat, lng]);
-      else marker = L.marker([lat, lng], {icon: pin(COLORS.post, '●'), draggable: true}).addTo(map)
+      else marker = L.marker([lat, lng], {icon: pin(COLORS.post, DOT), draggable: true}).addTo(map)
         .on('dragend', e => { const p = e.target.getLatLng(); set(p.lat, p.lng); });
       if (zoom) map.setView([lat, lng], zoom);
       status.textContent = 'Location set. Drag the pin or click the map to adjust.';

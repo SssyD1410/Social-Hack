@@ -3,7 +3,7 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <div class="page-head">
-  <div><h1>Hi, {{ g.user.name }}</h1><p>🍽️ Free food near you</p></div>
+  <div><h1>Hi, {{ g.user.name }}</h1><p>{{ icon('utensils') }} Free food near you</p></div>
   <div class="btn-row"><a class="btn" href="{{ url_for('posts.offers') }}">Browse all offers</a></div>
 </div>
 

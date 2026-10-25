@@ -16,10 +16,10 @@
     </div>
   </div>
   <div class="hero-art" aria-hidden="true">
-    <div class="flow-step"><span class="emoji">🏪</span><div><b>A bakery posts</b><br><span class="muted small">"25 loaves, pick up by 8pm"</span></div></div>
-    <div class="flow-step"><span class="emoji">🚚</span><div><b>A shelter claims it</b><br><span class="muted small">and arranges pickup in chat</span></div></div>
-    <div class="flow-step"><span class="emoji">🙋</span><div><b>A volunteer drives it over</b><br><span class="muted small">after signing up for a shift</span></div></div>
-    <div class="flow-step"><span class="emoji">🍽️</span><div><b>Dinner is served</b><br><span class="muted small">instead of a full bin</span></div></div>
+    <div class="flow-step"><span class="emoji">{{ icon('store') }}</span><div><b>A bakery posts</b><br><span class="muted small">"25 loaves, pick up by 8pm"</span></div></div>
+    <div class="flow-step"><span class="emoji">{{ icon('truck') }}</span><div><b>A shelter claims it</b><br><span class="muted small">and arranges pickup in chat</span></div></div>
+    <div class="flow-step"><span class="emoji">{{ icon('hand-heart') }}</span><div><b>A volunteer drives it over</b><br><span class="muted small">after signing up for a shift</span></div></div>
+    <div class="flow-step"><span class="emoji">{{ icon('utensils') }}</span><div><b>Dinner is served</b><br><span class="muted small">instead of a full bin</span></div></div>
   </div>
 </section>
 
@@ -37,7 +37,7 @@
   <div class="role-grid">
     {% for key, r in ROLES.items() %}
     <div class="card role-card">
-      <span class="emoji">{{ r.icon }}</span>
+      <span class="emoji">{{ icon(r.icon) }}</span>
       <h3>{{ r.label }}</h3>
       <p class="muted">{{ r.tagline }}</p>
       {% if not g.user %}<div class="btn-row"><a class="btn small" href="{{ url_for('auth.register', role=key) }}">Join as {{ r.label|lower }}</a></div>{% endif %}
@@ -53,10 +53,10 @@
     <p class="muted small">Hover over (or tap) any step or arrow to see what happens there.</p>
     {# Flowchart: both lanes share one 7-column grid (step, arrow, step, arrow, step, arrow, step), so
        "Pickup & delivery" lines up in column 5. Steps and arrows both show a tooltip on hover/focus. #}
-    {% macro node(icon, title, desc, cls='', href=none, style='') -%}
+    {% macro node(glyph, title, desc, cls='', href=none, style='') -%}
       <{{ 'a' if href else 'div' }} class="fc-node {{ cls }}" tabindex="0" data-title="{{ title }}" data-desc="{{ desc }}"
         {%- if href %} href="{{ href }}"{% endif %}{% if style %} style="{{ style }}"{% endif %}>
-        <span class="fc-icon">{{ icon }}</span><span class="fc-title">{{ title }}</span>
+        <span class="fc-icon">{{ icon(glyph) }}</span><span class="fc-title">{{ title }}</span>
         <span class="fc-tip" role="tooltip">{{ desc }}</span>
       </{{ 'a' if href else 'div' }}>
     {%- endmacro %}
@@ -70,7 +70,7 @@
     <div class="flowchart">
       <div class="fc-lane-label">Moving food</div>
       <div class="fc-grid">
-        {{ node('🏪', 'Supplier', 'A shop, bakery or restaurant with good food it can’t sell. Click to learn more about suppliers.', 'fc-supplier', url_for('main.learn', role='supplier'), 'grid-column: 1') }}
+        {{ node('store', 'Supplier', 'A shop, bakery or restaurant with good food it can’t sell. Click to learn more about suppliers.', 'fc-supplier', url_for('main.learn', role='supplier'), 'grid-column: 1') }}
         <div class="fc-stack" style="grid-column: 2">
           <div class="fc-double">
             {{ arrow('offers food', 'The supplier posts a food offer (what it is, quantity, dietary notes, pickup spot and deadline), and verified distributors claim it.') }}
@@ -79,29 +79,29 @@
           {{ arrow('small offers', 'Small offers, like a box of pastries or a few meals, can be shown straight to consumers, who reserve them.') }}
         </div>
         <div class="fc-pair" style="grid-column: 3">
-          {{ node('🚚', 'Distributor', 'A verified shelter, pantry or food bank that delivers food to people in need. Click to learn more.', 'fc-distributor', url_for('main.learn', role='distributor')) }}
-          {{ node('🍽️', 'Consumer', 'Anyone who wants food for themselves; they see only small offers. Click to learn more.', 'fc-consumer', url_for('main.learn', role='consumer')) }}
+          {{ node('truck', 'Distributor', 'A verified shelter, pantry or food bank that delivers food to people in need. Click to learn more.', 'fc-distributor', url_for('main.learn', role='distributor')) }}
+          {{ node('utensils', 'Consumer', 'Anyone who wants food for themselves; they see only small offers. Click to learn more.', 'fc-consumer', url_for('main.learn', role='consumer')) }}
         </div>
         <div class="fc-stack" style="grid-column: 4">
           {{ arrow('collects', 'The distributor collects the food before the pickup deadline and is responsible for delivering it.') }}
           {{ arrow('picks up', 'The consumer picks up their reserved food at the supplier before the deadline.') }}
         </div>
-        {{ node('📦', 'Pickup & delivery', 'Food is collected before the deadline and taken where it is needed. Everyone arranges times in chat.', 'fc-key', none, 'grid-column: 5') }}
+        {{ node('package', 'Pickup & delivery', 'Food is collected before the deadline and taken where it is needed. Everyone arranges times in chat.', 'fc-key', none, 'grid-column: 5') }}
         {{ arrow('delivers', 'Distributors hand out meals and groceries; consumers take their food home.', '', 'grid-column: 6') }}
-        {{ node('❤️', 'Food reaches people', 'Good food is eaten instead of thrown away.', 'fc-end', none, 'grid-column: 7') }}
+        {{ node('heart-handshake', 'Food reaches people', 'Good food is eaten instead of thrown away.', 'fc-end', none, 'grid-column: 7') }}
       </div>
 
       <div class="fc-lane-label">Getting help</div>
       <div class="fc-grid">
-        {{ node('📣', 'Volunteer request', 'Suppliers and distributors post a time period, tasks and requirements (e.g. “own car”) when they need extra hands.', '', none, 'grid-column: 1') }}
+        {{ node('megaphone', 'Volunteer request', 'Suppliers and distributors post a time period, tasks and requirements (e.g. “own car”) when they need extra hands.', '', none, 'grid-column: 1') }}
         {{ arrow('signs up', 'A volunteer signs up and the organizer accepts. If the volunteer can’t make it, the spot is re-listed.', '', 'grid-column: 2') }}
-        {{ node('🙋', 'Volunteer', 'An individual (not an organization) who gives their time to sort, pack, drive or serve. Click to learn more.', 'fc-volunteer', url_for('main.learn', role='volunteer'), 'grid-column: 3') }}
+        {{ node('hand-heart', 'Volunteer', 'An individual (not an organization) who gives their time to sort, pack, drive or serve. Click to learn more.', 'fc-volunteer', url_for('main.learn', role='volunteer'), 'grid-column: 3') }}
         {{ arrow('helps with', 'Volunteers help collect, sort and deliver the food.', '', 'grid-column: 4') }}
-        {{ node('📦', 'Pickup & delivery', 'The same step as above: volunteers join in to move the food.', 'fc-key fc-join', none, 'grid-column: 5') }}
+        {{ node('package', 'Pickup & delivery', 'The same step as above: volunteers join in to move the food.', 'fc-key fc-join', none, 'grid-column: 5') }}
       </div>
 
       <div class="fc-chat" tabindex="0">
-        💬 <b>Chat connects every step.</b>
+        {{ icon('message-circle') }} <b>Chat connects every step.</b>
         <span class="muted">Anyone can message the person behind an offer or request they can see, to agree on times and details.</span>
       </div>
     </div>

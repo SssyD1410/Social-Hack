@@ -275,6 +275,20 @@ class EcoServingTest(unittest.TestCase):
         self.assertNotIn("mapkit", page.lower())
         self.assertNotIn("googleapis", page)
 
+    def test_no_emoji_and_icons_render(self):
+        emoji = re.compile(r"[\U0001F000-\U0001FFFF⌀-⏿☀-➿️]")
+        supplier = self.client_for("supplier")
+        oid = self.make_offer(supplier)
+        anon = self.app.test_client()
+        pages = [(anon, "/"), (anon, "/learn"), (anon, "/register"),
+                 (supplier, "/dashboard"), (supplier, f"/offers/{oid}"), (supplier, "/profile")]
+        for c, url in pages:
+            html = c.get(url).get_data(as_text=True)
+            self.assertIsNone(emoji.search(html), f"emoji on {url}: {emoji.findall(html)[:3]}")
+            self.assertIn("icons.svg#", html, url)
+        with anon.get("/favicon.ico") as r:
+            self.assertEqual(r.status_code, 200)
+
     def test_seed(self):
         with self.app.app_context():
             from foodrelay.seed import seed

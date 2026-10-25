@@ -3,7 +3,7 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <div class="page-head">
-  <div><h1>{{ g.user.org_name or g.user.name }}</h1><p>🏪 Supplier dashboard</p></div>
+  <div><h1>{{ g.user.org_name or g.user.name }}</h1><p>{{ icon('store') }} Supplier dashboard</p></div>
   <div class="btn-row">
     <a class="btn" href="{{ url_for('posts.new_offer') }}">+ Post food offer</a>
     <a class="btn secondary" href="{{ url_for('posts.new_volunteer_request') }}">+ Request volunteers</a>

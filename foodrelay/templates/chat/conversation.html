@@ -15,7 +15,7 @@
     {% if pending_ref %}
       <div class="ref-banner" id="ref-banner">
         <span>About: <a href="{{ pending_ref.url }}">{{ pending_ref.title }}</a></span>
-        <button class="linklike small" type="button" id="clear-ref" aria-label="Remove reference">✕</button>
+        <button class="linklike small" type="button" id="clear-ref" aria-label="Remove reference">{{ icon('x') }}</button>
       </div>
     {% endif %}
     <div class="chat-body" id="chat-body">

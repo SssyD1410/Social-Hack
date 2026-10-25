@@ -14,7 +14,7 @@
       <a class="role-tab {{ 'active' if key == role }}" id="tab-{{ key }}" role="tab" data-role="{{ key }}"
          aria-selected="{{ 'true' if key == role else 'false' }}" aria-controls="panel-{{ key }}"
          href="{{ url_for('main.learn', role=key) }}">
-        <span class="emoji">{{ r.icon }}</span>
+        <span class="emoji">{{ icon(r.icon) }}</span>
         <span><b>{{ r.label }}s</b><small>{{ r.tagline }}</small></span>
       </a>
     {% endfor %}

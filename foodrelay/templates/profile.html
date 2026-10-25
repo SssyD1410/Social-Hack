@@ -4,7 +4,7 @@
 {% block content %}
 {% set u = g.user %}
 <div class="page-head">
-  <div><h1>Your profile</h1><p>{{ ROLES[u.role].icon if u.role in ROLES }} {{ ROLES[u.role].label if u.role in ROLES else 'Administrator' }} · {{ u.email }}</p></div>
+  <div><h1>Your profile</h1><p>{{ icon(ROLES[u.role].icon) if u.role in ROLES }} {{ ROLES[u.role].label if u.role in ROLES else 'Administrator' }} · {{ u.email }}</p></div>
   <div class="btn-row">
     {% if u.role != 'admin' %}<a class="btn secondary" href="{{ url_for('main.user_profile', user_id=u.id) }}">View public profile</a>{% endif %}
     <form method="post" action="{{ url_for('auth.logout') }}">

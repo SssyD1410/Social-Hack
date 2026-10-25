@@ -37,7 +37,7 @@
             <td><div class="btn-row">
               {% if s.status in ('pending', 'declined') %}{{ post_button(url_for('posts.decide_signup', signup_id=s.id, decision='accept'), 'Accept', 'btn small') }}{% endif %}
               {% if s.status in ('pending', 'accepted') %}{{ post_button(url_for('posts.decide_signup', signup_id=s.id, decision='decline'), 'Decline', 'btn small danger') }}{% endif %}
-              <a class="btn small secondary" href="{{ url_for('chat.start', user_id=s.volunteer_id, ref='volunteer_request:%d' % v.id) }}">💬</a>
+              <a class="btn small secondary" href="{{ url_for('chat.start', user_id=s.volunteer_id, ref='volunteer_request:%d' % v.id) }}" aria-label="Message {{ s.name }}">{{ icon('message-circle') }}</a>
             </div></td>
           </tr>
           {% endfor %}

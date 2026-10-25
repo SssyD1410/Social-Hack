@@ -25,6 +25,12 @@ def index():
     return render_template("index.html", stats=stats)
 
 
+@bp.route("/favicon.ico")
+def favicon():
+    # Browsers ask for /favicon.ico directly; serve the generated one instead of a 404.
+    return send_from_directory(os.path.join(current_app.static_folder, "favicon"), "favicon.ico")
+
+
 @bp.route("/learn")
 @bp.route("/learn/<role>")
 def learn(role="supplier"):

@@ -2,7 +2,7 @@
 <section class="learn-panel" id="panel-{{ panel_role }}" role="tabpanel" aria-labelledby="tab-{{ panel_role }}"
          {{ 'hidden' if panel_role != role }}>
   <div class="learn-hero">
-    <span class="emoji">{{ ROLES[panel_role].icon }}</span>
+    <span class="emoji">{{ icon(ROLES[panel_role].icon) }}</span>
     <h2>{{ headline }}</h2>
     <p class="muted">{{ intro }}</p>
     <div class="btn-row">

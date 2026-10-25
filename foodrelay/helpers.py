@@ -3,6 +3,7 @@ import math
 from datetime import datetime
 
 from flask import flash, g, redirect, request, url_for
+from markupsafe import Markup, escape
 
 from .db import query
 
@@ -10,22 +11,22 @@ ROLES = {
     "supplier": {
         "label": "Supplier",
         "tagline": "Shops, bakeries and restaurants with surplus food to give away.",
-        "icon": "🏪",
+        "icon": "store",
     },
     "distributor": {
         "label": "Distributor",
         "tagline": "Verified organizations that deliver food to people in need.",
-        "icon": "🚚",
+        "icon": "truck",
     },
     "volunteer": {
         "label": "Volunteer",
         "tagline": "Individuals who give their time to pick up and hand out food.",
-        "icon": "🙋",
+        "icon": "hand-heart",
     },
     "consumer": {
         "label": "Consumer",
         "tagline": "Anyone who could use a free meal or groceries nearby.",
-        "icon": "🍽️",
+        "icon": "utensils",
     },
 }
 
@@ -115,8 +116,16 @@ def fmt_dt(value):
     return value
 
 
+def icon(name, label=None, cls=""):
+    """Inline SVG icon from static/icons.svg (Lucide). Decorative unless a label is given."""
+    href = f"{url_for('static', filename='icons.svg')}#{escape(name)}"
+    a11y = f'role="img" aria-label="{escape(label)}"' if label else 'aria-hidden="true"'
+    return Markup(f'<svg class="icon {escape(cls)}" {a11y}><use href="{href}"></use></svg>')
+
+
 def register_template_helpers(app):
     app.jinja_env.filters["dt"] = fmt_dt
+    app.jinja_env.globals["icon"] = icon
 
     @app.context_processor
     def inject():

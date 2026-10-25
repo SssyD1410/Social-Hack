@@ -3,7 +3,7 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <div class="page-head">
-  <div><h1>Hi, {{ g.user.name }}</h1><p>🙋 Volunteer dashboard</p></div>
+  <div><h1>Hi, {{ g.user.name }}</h1><p>{{ icon('hand-heart') }} Volunteer dashboard</p></div>
   <div class="btn-row"><a class="btn" href="{{ url_for('posts.volunteer_requests') }}">Find volunteer shifts</a></div>
 </div>
 {% include "dashboard/_map.html" %}
