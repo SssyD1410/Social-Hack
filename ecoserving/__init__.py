@@ -77,11 +77,12 @@ def create_app(test_config=None):
             "object-src 'none'",
             "base-uri 'self'",
             "form-action 'self'",
-            "frame-ancestors 'none'",
+            # The local demo shows the site in frames of its own page; everywhere else nothing may frame it.
+            "frame-ancestors 'self'" if app.config.get("DEMO_MODE") else "frame-ancestors 'none'",
         ])
         resp.headers.setdefault("Content-Security-Policy", csp)
         resp.headers.setdefault("X-Content-Type-Options", "nosniff")
-        resp.headers.setdefault("X-Frame-Options", "DENY")
+        resp.headers.setdefault("X-Frame-Options", "SAMEORIGIN" if app.config.get("DEMO_MODE") else "DENY")
         resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         resp.headers.setdefault("Permissions-Policy", "geolocation=(self), camera=(), microphone=(), payment=()")
         resp.headers.setdefault("Cross-Origin-Opener-Policy", "same-origin")
@@ -92,6 +93,10 @@ def create_app(test_config=None):
     from . import admin, auth, chat, main, posts, reports
     for bp in (auth.bp, main.bp, posts.bp, chat.bp, admin.bp, reports.bp):
         app.register_blueprint(bp)
+
+    if app.config.get("DEMO_MODE"):   # only ever set by ecoserving.demo.main(), never by the normal app
+        from . import demo
+        demo.init_app(app)
 
     from .helpers import register_template_helpers
     register_template_helpers(app)

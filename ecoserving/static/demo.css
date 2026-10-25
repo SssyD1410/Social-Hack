@@ -1,0 +1,61 @@
+/* The four-screen demo page (/demo). Dark surround so the four app screens stand out on a projector. */
+:root { --ground: #0f1511; --panel: #18211b; --ink: #f2f5f0; --muted: #9fb2a4; --green: #1f7f3a; --orange: #ff6d1f; }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--ground); color: var(--ink); font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  display: flex; flex-direction: column; overflow: hidden; }
+
+.demo-bar { display: flex; align-items: center; gap: 18px; padding: 8px 16px; flex: none; }
+.demo-brand { display: flex; align-items: center; gap: 10px; font-size: 1.3rem; font-weight: 800; white-space: nowrap; }
+.demo-brand b { color: var(--orange); }
+.demo-brand em { font-style: normal; font-weight: 500; font-size: .95rem; color: var(--muted); margin-left: 6px; }
+.demo-spacer { flex: 1; }
+.demo-clock { font-variant-numeric: tabular-nums; font-weight: 700; min-width: 3.2em; text-align: right; color: var(--muted); }
+.demo-btn { font: inherit; font-weight: 700; border: 0; border-radius: 8px; padding: 8px 14px; background: var(--orange); color: #1f2a24; cursor: pointer; }
+.demo-btn:hover { background: #ff8a4c; }
+.demo-btn.ghost { background: #26332a; color: var(--ink); }
+.demo-btn.ghost:hover { background: #31412f; }
+.demo-btn.big { padding: 14px 28px; font-size: 1.2rem; border-radius: 10px; }
+.demo-btn:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+.demo-grid { position: relative; flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; padding: 0 10px 10px; }
+.pane { --accent: var(--green); background: var(--panel); border-radius: 12px; display: flex; flex-direction: column; min-height: 0; min-width: 0; overflow: hidden;
+  outline: 3px solid transparent; transition: outline-color .3s; }
+.pane-supplier { --accent: #ff6d1f; }
+.pane-distributor { --accent: #3d8bfd; }
+.pane-volunteer { --accent: #b98cff; }
+.pane-consumer { --accent: #38c172; }
+.pane-admin { --accent: #ff4d6d; position: absolute; left: 50%; top: 50%; width: 52%; height: 62%; z-index: 8;
+  transform: translate(-50%, -46%) scale(.94); opacity: 0; pointer-events: none; transition: opacity .5s, transform .5s;
+  background: #1c2620; outline: 3px solid var(--accent); box-shadow: 0 24px 70px rgba(0, 0, 0, .65); }
+.pane-admin.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+body.paused .demo-bar::after { content: "Paused"; position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 30;
+  background: #ffd23f; color: #1f2a24; font-weight: 800; padding: 4px 14px; border-radius: 999px; }
+.pane.active { outline-color: var(--accent); }
+.pane-head { display: flex; align-items: center; gap: 8px; padding: 6px 12px; font-size: .95rem; flex: none; }
+.pane-head b { font-size: 1.05rem; }
+.pane-head span:last-child { color: var(--muted); }
+.pane-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
+.pane-caption { margin: 0; padding: 4px 12px 8px; min-height: 2.5em; font-size: clamp(15px, 1.35vw, 24px); font-weight: 650; line-height: 1.25; flex: none;
+  transition: opacity .25s; }
+.pane-caption.swap { opacity: 0; }
+.pane-screen { position: relative; flex: 1; min-height: 0; overflow: hidden; background: #f7f6f1; }
+.pane-screen iframe { position: absolute; left: 0; top: 0; border: 0; background: #f7f6f1; transform-origin: 0 0; }
+
+.cursor { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 5; opacity: 0; transition: transform .7s cubic-bezier(.4, .1, .2, 1), opacity .3s; }
+.cursor svg { display: block; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .4)); }
+.cursor .ripple { position: absolute; left: -10px; top: -10px; width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--accent); opacity: 0; }
+.cursor.click .ripple { animation: ripple .5s ease-out; }
+@keyframes ripple { from { transform: scale(.3); opacity: .9; } to { transform: scale(1.8); opacity: 0; } }
+
+.overlay { position: fixed; inset: 0; background: rgba(8, 12, 9, .92); display: grid; place-items: center; z-index: 20; padding: 24px; }
+.overlay[hidden] { display: none; }
+.overlay-card { max-width: 640px; text-align: center; display: grid; justify-items: center; gap: 14px; }
+.overlay-card h1 { margin: 6px 0 0; font-size: clamp(34px, 4vw, 60px); line-height: 1.05; letter-spacing: -.03em; }
+.overlay-card p { margin: 0; font-size: 1.2rem; color: #d3dfd6; max-width: 34em; }
+.overlay-card small { color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor, .pane-caption, .pane-admin { transition: none; }
+  .cursor.click .ripple { animation: none; }
+}

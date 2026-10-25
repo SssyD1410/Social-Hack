@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>EcoServing live demo</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='demo.css') }}">
+</head>
+<body>
+<header class="demo-bar">
+  <div class="demo-brand"><img src="{{ url_for('static', filename='logo.svg') }}" alt="" width="30" height="30">
+    <span>Eco<b>Serving</b></span><em>live demo: four people, one food relay</em></div>
+  <div class="demo-spacer"></div>
+  <div class="demo-clock" id="clock" aria-live="off">0:00</div>
+  <button class="demo-btn ghost" id="pause" type="button">Pause (P)</button>
+  <button class="demo-btn" id="restart" type="button">Restart</button>
+  <button class="demo-btn ghost" id="fullscreen" type="button" aria-label="Full screen">Full screen (F)</button>
+</header>
+
+<main class="demo-grid" id="grid">
+  {% for role, label, who in [('supplier', 'Supplier', 'Sunrise Bakery'), ('distributor', 'Distributor', 'Harbor Street Shelter'),
+                              ('volunteer', 'Volunteer', 'Sam Rivera'), ('consumer', 'Consumer', 'Jordan Lee')] %}
+  <section class="pane pane-{{ role }}" data-role="{{ role }}" aria-label="{{ label }}: {{ who }}">
+    <header class="pane-head"><span class="pane-dot"></span><b>{{ label }}</b><span>{{ who }}</span></header>
+    <p class="pane-caption" aria-live="polite"></p>
+    <div class="pane-screen">
+      <iframe title="{{ label }} screen" src="about:blank"></iframe>
+      <div class="cursor" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M4 2l15 9-6.5 1.6L9 19z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg><i class="ripple"></i></div>
+    </div>
+  </section>
+  {% endfor %}
+  <section class="pane pane-admin" data-role="admin" data-tempo="2.2" aria-label="Admin: EcoServing team">
+    <header class="pane-head"><span class="pane-dot"></span><b>Admin</b><span>EcoServing team</span></header>
+    <p class="pane-caption" aria-live="polite"></p>
+    <div class="pane-screen">
+      <iframe title="Admin screen" src="about:blank"></iframe>
+      <div class="cursor" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M4 2l15 9-6.5 1.6L9 19z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg><i class="ripple"></i></div>
+    </div>
+  </section>
+</main>
+
+<div class="overlay" id="overlay" role="dialog" aria-labelledby="overlay-title">
+  <div class="overlay-card">
+    <img src="{{ url_for('static', filename='logo.svg') }}" alt="" width="84" height="84">
+    <h1 id="overlay-title">Surplus food, served nearby.</h1>
+    <p id="overlay-text">Watch a bakery, a shelter, a volunteer and a neighbor use EcoServing at the same time. It runs by itself for a few minutes and ends with an admin stopping a scam.</p>
+    <button class="demo-btn big" id="start" type="button">Start the demo</button>
+    <small>Space or Enter starts it. P pauses so you can talk. F toggles full screen. Esc stops it.</small>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='demo.js') }}"></script>
+</body>
+</html>

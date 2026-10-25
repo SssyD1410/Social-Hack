@@ -534,6 +534,68 @@ class EcoServingTest(unittest.TestCase):
             self.assertEqual(query("SELECT status FROM food_requests WHERE id = ?", (rid,), one=True)["status"], "closed")
             self.assertEqual(query("SELECT COUNT(*) AS n FROM reports", one=True)["n"], 2)
 
+    # -- demo ------------------------------------------------------------------
+    def demo_app(self):
+        tmp = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, tmp, True)
+        app = create_app({"TESTING": True, "DEMO_MODE": True, "RATELIMIT_ENABLED": False,
+                          "DATABASE": os.path.join(tmp, "demo.sqlite"), "UPLOAD_FOLDER": os.path.join(tmp, "up")})
+        with app.app_context():
+            from ecoserving.seed import seed
+            seed()
+        return app
+
+    def test_demo_is_off_in_the_normal_app(self):
+        c = self.app.test_client()
+        self.assertEqual(c.get("/demo").status_code, 404)
+        self.assertEqual(c.get("/demo/frame/supplier/_demo_login").status_code, 404)
+        self.assertEqual(c.post("/demo/reset").status_code, 400)           # no CSRF token, and no such route
+        self.assertEqual(c.get("/").headers["X-Frame-Options"], "DENY")
+        self.assertIn("frame-ancestors 'none'", c.get("/").headers["Content-Security-Policy"])
+
+    def test_demo_panes_have_separate_logins(self):
+        c = self.demo_app().test_client()
+        page = c.get("/demo")
+        self.assertEqual(page.status_code, 200)
+        self.assertEqual(page.headers["X-Frame-Options"], "SAMEORIGIN")
+        self.assertIn("demo.js", page.get_data(as_text=True))
+        seen = {}
+        for role in ("supplier", "distributor", "volunteer", "consumer"):
+            r = c.get(f"/demo/frame/{role}/_demo_login")
+            self.assertEqual(r.status_code, 302)
+            self.assertEqual(r.headers["Location"], f"/demo/frame/{role}/dashboard")
+        # One cookie jar, four roles: each pane still sees its own dashboard.
+        for role, heading in (("supplier", "Supplier dashboard"), ("distributor", "Distributor dashboard"),
+                              ("volunteer", "Volunteer dashboard"), ("consumer", "Free food near you")):
+            html = c.get(f"/demo/frame/{role}/dashboard").get_data(as_text=True)
+            self.assertIn(heading, html, role)
+            self.assertIn(f'href="/demo/frame/{role}/offers"' if role != "volunteer" else f'/demo/frame/{role}/volunteer', html)
+
+    def test_demo_scam_finale_and_admin_pane(self):
+        c = self.demo_app().test_client()
+        token = re.search(r'name="csrf-token" content="([^"]+)"', c.get("/demo").get_data(as_text=True)).group(1)
+        self.assertNotIn("progress", c.get("/demo").get_data(as_text=True))                    # no progress bar
+        self.assertIn('class="pane pane-admin"', c.get("/demo").get_data(as_text=True))
+        c.get("/demo/frame/consumer/_demo_login")
+        self.assertNotIn("pay $15", c.get("/demo/frame/consumer/offers").get_data(as_text=True))
+        c.post("/demo/plant-scam", headers={"X-CSRF-Token": token})
+        offers = c.get("/demo/frame/consumer/offers").get_data(as_text=True)
+        self.assertIn("FREE food box: pay $15 delivery fee first", offers)
+        # Admin pane logs straight into the reports page (and only a same-site `next` is followed).
+        r = c.get("/demo/frame/admin/_demo_login?next=/admin/reports")
+        self.assertEqual(r.headers["Location"], "/demo/frame/admin/admin/reports")
+        r = c.get("/demo/frame/admin/_demo_login?next=//evil.example")
+        self.assertEqual(r.headers["Location"], "/demo/frame/admin/dashboard")
+        self.assertEqual(c.get("/demo/frame/admin/admin/reports").status_code, 200)
+
+    def test_demo_reset_restores_fresh_data(self):
+        c = self.demo_app().test_client()
+        token = re.search(r'name="csrf-token" content="([^"]+)"', c.get("/demo").get_data(as_text=True)).group(1)
+        c.get("/demo/frame/supplier/_demo_login")
+        r = c.post("/demo/reset", headers={"X-CSRF-Token": token})
+        self.assertEqual(r.get_json(), {"ok": True})
+        self.assertEqual(c.get("/demo/frame/supplier/_demo_login").status_code, 302)   # accounts exist again
+
     def test_seed(self):
         with self.app.app_context():
             from ecoserving.seed import seed

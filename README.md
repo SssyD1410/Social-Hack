@@ -30,6 +30,26 @@ by their words). The stock photos are CC0, CC BY or public domain, from Wikimedi
 sources and licences are in [`ecoserving/static/photos/credits.json`](ecoserving/static/photos/credits.json) and on the
 `/credits` page, linked from every footer.
 
+## Live demo (four screens, then an admin)
+
+```bash
+python run_demo.py        # then open http://127.0.0.1:5001/demo and press Start (F = full screen, Esc = stop)
+```
+
+The page splits into four live screens, one per role (a bakery, a shelter, a volunteer and a neighbor). A script
+types into the real forms and clicks the real buttons: the supplier posts an offer and pledges to a request, the
+shelter requests food and volunteers, claims the offer and chats, the volunteer signs up and gets accepted, the
+neighbor reserves a muffin box. At the end a scam post appears, the neighbor reports it, and an admin window opens
+in the middle of the screen to take the post down, suspend the account and resolve the report. Captions and a fake
+cursor explain each step, and every caption is followed by a pause (4 seconds) so a presenter can talk about it.
+It takes roughly six to seven minutes. Press **P** (or the Pause button) to freeze everything while you talk. Options
+on the address: `?beat=2` shorter pauses after captions (seconds), `?pace=1` quicker cursor and typing, `?speed=2`
+run everything faster, `?autostart=1` skip the start screen.
+
+The demo uses its own throwaway database (`instance/demo.sqlite`, reset on every run), is only started by
+`run_demo.py`, and is never part of the normal app or `wsgi.py`. Do not deploy it. Code: `ecoserving/demo.py`,
+`static/demo.js`, `static/demo.css`, `templates/demo.html`.
+
 ## Safety and security
 
 - **Reporting scams and fraud:** every offer, food request, volunteer request, user profile and chat has a *Report*
