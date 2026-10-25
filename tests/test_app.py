@@ -595,6 +595,18 @@ class EcoServingTest(unittest.TestCase):
                          "http://127.0.0.1:5002/demo?beat=6&pace=1&speed=2&admin=3&autostart=1")
         self.assertEqual(build_url(beat=2.5), "http://127.0.0.1:5001/demo?beat=2.5")
 
+    def test_demo_refuses_a_port_that_is_taken(self):
+        import socket
+        from ecoserving.demo import main, port_in_use
+        with socket.socket() as taken:
+            taken.bind(("127.0.0.1", 0))
+            taken.listen()
+            port = taken.getsockname()[1]
+            self.assertTrue(port_in_use(port))
+            with self.assertRaises(SystemExit) as ctx:
+                main(["--port", str(port)])
+            self.assertIn("already in use", str(ctx.exception))
+
     def test_demo_reset_restores_fresh_data(self):
         c = self.demo_app().test_client()
         token = re.search(r'name="csrf-token" content="([^"]+)"', c.get("/demo").get_data(as_text=True)).group(1)

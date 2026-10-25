@@ -109,6 +109,15 @@ def init_app(app):
     app.register_blueprint(bp)
 
 
+def port_in_use(port, host="127.0.0.1"):
+    """True when something is already listening there. (On Windows two programs can share a port, which would
+    split the demo's requests between two servers with different data, so the demo refuses to start instead.)"""
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(0.5)
+        return s.connect_ex((host, port)) == 0
+
+
 def build_url(port=5001, beat=None, pace=None, speed=None, admin=None, autostart=False):
     """The demo address with the chosen timing options (only the ones given are added)."""
     options = {"beat": beat, "pace": pace, "speed": speed, "admin": admin, "autostart": 1 if autostart else None}
@@ -132,6 +141,9 @@ def main(argv=None):
     ap.add_argument("--port", type=int, default=5001)
     args = ap.parse_args(argv)
     port = args.port
+    if port_in_use(port):
+        raise SystemExit(f"Port {port} is already in use, probably by another copy of the demo. Stop that one "
+                         f"(Ctrl+C in its window) or pick another port with --port {port + 1}.")
 
     from . import create_app
     from .seed import seed
