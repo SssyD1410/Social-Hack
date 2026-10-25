@@ -1,4 +1,4 @@
-"""WSGI entry point for production hosts (PythonAnywhere, gunicorn, ...). See DEPLOY.md."""
+"""WSGI entry point for production hosts (PythonAnywhere, gunicorn, ...)."""
 
 import os
 
