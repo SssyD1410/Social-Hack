@@ -1,6 +1,6 @@
 """Demo data so every role has something to look at. Run: flask --app foodrelay seed
 
-Locations are real points around Springfield, Illinois so the maps and routes work."""
+Accounts and posts are located around Minneapolis-St. Paul so the maps and routes work."""
 
 from datetime import datetime, timedelta
 
@@ -9,22 +9,22 @@ from werkzeug.security import generate_password_hash
 from .db import execute
 
 DEMO_PASSWORD = "foodrelay-demo"
-CITY = "Springfield, IL"
+MPLS, STP = "Minneapolis, MN", "St. Paul, MN"
 
-# Demo places: (address, lat, lng)
-BAKERY = ("700 E Adams St", 39.80055, -89.64578)
-BISTRO = ("215 S 6th St", 39.79932, -89.64927)
-SHELTER = ("1015 E Madison St", 39.80484, -89.64033)
-PANTRY = ("1500 N 5th St", 39.82120, -89.64955)
-VOLUNTEER = ("1800 S Grand Ave W", 39.77925, -89.67155)
-CONSUMER = ("400 S Walnut St", 39.79740, -89.66050)
+# Demo places around the Twin Cities: (address, city, lat, lng). Businesses are fictional.
+BAKERY = ("2400 Nicollet Ave", MPLS, 44.96012, -93.27795)
+BISTRO = ("315 1st Ave N", MPLS, 44.98408, -93.27305)
+SHELTER = ("900 E Franklin Ave", MPLS, 44.96275, -93.26095)
+PANTRY = ("500 University Ave W", STP, 44.95580, -93.11700)
+VOLUNTEER = ("1600 Grand Ave", STP, 44.94000, -93.16900)
+CONSUMER = ("3000 Lyndale Ave S", MPLS, 44.94880, -93.28810)
 EXTRA_REQUESTS = [  # more distributor drop-off points, so the dashboard map has several targets
-    ("Senior center lunch boxes", "2101 S 11th St", 39.77690, -89.63830),
-    ("After-school snacks", "1110 N 15th St", 39.81580, -89.63350),
-    ("Family pantry restock", "3001 Clear Lake Ave", 39.80590, -89.59800),
-    ("Outreach van dinners", "2200 W Monroe St", 39.79680, -89.68290),
-    ("Weekend groceries", "4200 Wabash Ave", 39.76840, -89.71240),
-    ("Tenant association breakfast", "2500 S MacArthur Blvd", 39.77300, -89.67000),
+    ("Senior center lunch boxes", ("2200 Minnehaha Ave", MPLS, 44.96010, -93.24120)),
+    ("After-school snacks", ("1500 E Lake St", MPLS, 44.94855, -93.25290)),
+    ("Family pantry restock", ("800 W Broadway Ave", MPLS, 44.99900, -93.29300)),
+    ("Outreach van dinners", ("700 E 7th St", STP, 44.96010, -93.07520)),
+    ("Weekend groceries", ("2600 Central Ave NE", MPLS, 45.01550, -93.24700)),
+    ("Tenant association breakfast", ("1000 Payne Ave", STP, 44.97020, -93.07310)),
 ]
 
 
@@ -36,12 +36,12 @@ def seed():
     pw = generate_password_hash(DEMO_PASSWORD)
 
     def user(email, name, role, place=None, org=None, status="not_required", reg=None, bio=None):
-        address, lat, lng = place or (None, None, None)
+        address, city, lat, lng = place or (None, MPLS, None, None)
         return execute(
             """INSERT INTO users (email, password_hash, name, role, org_name, city, address, lat, lng,
                                   verification_status, registration_number, bio)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (email, pw, name, role, org, CITY, address, lat, lng, status, reg, bio))
+            (email, pw, name, role, org, city, address, lat, lng, status, reg, bio))
 
     user("admin@foodrelay.test", "FoodRelay Admin", "admin")
     bakery = user("bakery@foodrelay.test", "Maria Lopez", "supplier", BAKERY, "Sunrise Bakery",
@@ -61,8 +61,8 @@ def seed():
 
     def offer(supplier, place, title, desc, food_type, tags, qty, size, start, deadline, dist, cons,
               status="available", claimed_by=None, claimed_at=None):
-        address, lat, lng = place
-        execute(offer_sql, (supplier, title, desc, food_type, tags, qty, size, address, CITY, lat, lng,
+        address, city, lat, lng = place
+        execute(offer_sql, (supplier, title, desc, food_type, tags, qty, size, address, city, lat, lng,
                             start, deadline, dist, cons, status, claimed_by, claimed_at))
 
     offer(bakery, BAKERY, "End-of-day bread & pastries", "Sourdough loaves, baguettes and croissants baked this morning.",
@@ -79,18 +79,18 @@ def seed():
                                             needed_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"""
     execute(req_sql, (shelter, "Breakfast items for weekend",
                       "Bread, eggs, fruit or cereal for Saturday and Sunday breakfast.",
-                      "Enough for 60 people x 2 days", SHELTER[0], CITY, SHELTER[1], SHELTER[2], _t(48)))
-    for i, (title, address, lat, lng) in enumerate(EXTRA_REQUESTS):
+                      "Enough for 60 people x 2 days", *SHELTER, _t(48)))
+    for i, (title, place) in enumerate(EXTRA_REQUESTS):
         execute(req_sql, (shelter, title, "Any fresh or packaged food that's easy to hand out.",
-                          f"{20 + 10 * i} portions", address, CITY, lat, lng, _t(24 + 6 * i)))
+                          f"{20 + 10 * i} portions", *place, _t(24 + 6 * i)))
 
     vol_sql = """INSERT INTO volunteer_requests (poster_id, title, tasks, requirements, location, city, lat, lng,
                                                   start_time, end_time, slots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
     v1 = execute(vol_sql, (shelter, "Evening food run",
                            "Pick up donations from 2-3 restaurants and bring them to the shelter.",
-                           "Own car, valid driver's license", SHELTER[0], CITY, SHELTER[1], SHELTER[2], _t(26), _t(29), 2))
+                           "Own car, valid driver's license", *SHELTER, _t(26), _t(29), 2))
     execute(vol_sql, (bakery, "Sort and pack leftover bread", "Bag bread into portions and label with date.",
-                      "None, gloves provided", BAKERY[0], CITY, BAKERY[1], BAKERY[2], _t(30), _t(32), 1))
+                      "None, gloves provided", *BAKERY, _t(30), _t(32), 1))
     execute("INSERT INTO volunteer_signups (request_id, volunteer_id, message, status) VALUES (?, ?, ?, 'accepted')",
             (v1, vol, "I can drive, have a hatchback."))
 

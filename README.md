@@ -30,7 +30,7 @@ uses OpenStreetMap Nominatim. Those public services are fine for demos; use your
 - **Database:** SQLite (`instance/foodrelay.sqlite`); schema in [`foodrelay/schema.sql`](foodrelay/schema.sql)
 - **Auth:** session cookies, Werkzeug password hashing (scrypt/pbkdf2), CSRF tokens on every POST
 - **Chat:** JSON API polled every 3 seconds from the conversation page
-- **Maps:** Leaflet + OpenStreetMap, OSRM routing (see above); demo data is located in Springfield, Illinois
+- **Maps:** Leaflet + OpenStreetMap, OSRM routing (see above); demo accounts are located around Minneapolis-St. Paul
 - **Uploads:** distributor certification files stored in `instance/uploads/`, visible only to the owner and admins
 
 ```

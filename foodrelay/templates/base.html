@@ -61,6 +61,22 @@
   </div>
 </footer>
 <script>
+  /* Back buttons: remember, per page, the page on this site the user arrived from. Reloads and
+     form posts that redirect back to the same page don't overwrite it, so "Back" still leads
+     to where the user was before acting on this page. */
+  (() => {
+    const key = 'fr-back:' + location.pathname;
+    let from = null;
+    try {
+      const ref = document.referrer ? new URL(document.referrer) : null;
+      if (ref && ref.origin === location.origin && ref.pathname !== location.pathname) {
+        sessionStorage.setItem(key, ref.pathname + ref.search + ref.hash);
+      }
+      from = sessionStorage.getItem(key);
+    } catch (e) { /* storage blocked: use the fallback link */ }
+    document.querySelectorAll('a[data-back]').forEach(a => { if (from) a.href = from; });
+  })();
+
   /* Two-step confirm for destructive buttons. (Native confirm() dialogs are blocked in some
      embedded browsers, which silently cancelled these forms.) */
   document.addEventListener('click', (e) => {

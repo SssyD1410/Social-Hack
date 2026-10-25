@@ -1,8 +1,9 @@
 {% extends "base.html" %}
-{% from "macros.html" import csrf, location_picker %}
+{% from "macros.html" import csrf, location_picker, back_button %}
 {% block title %}{{ 'Edit offer' if editing else 'Post food offer' }}{% endblock %}
 {% block content %}
 <div class="medium">
+  <p class="small">{{ back_button(url_for('main.dashboard')) }}</p>
   <div class="card">
     <h1>{{ 'Edit offer' if editing else 'Post a food offer' }}</h1>
     <p class="muted">Describe what you have and when it needs to be collected. All food on FoodRelay is free.</p>
@@ -52,7 +53,7 @@
       </fieldset>
       <div class="btn-row">
         <button class="btn" type="submit">{{ 'Save changes' if editing else 'Post offer' }}</button>
-        <a class="btn secondary" href="{{ url_for('posts.offer', offer_id=offer.id) if editing else url_for('main.dashboard') }}">Cancel</a>
+        <a class="btn secondary" href="{{ url_for('posts.offer', offer_id=offer.id) if editing else url_for('main.dashboard') }}" data-back>Cancel</a>
       </div>
     </form>
   </div>

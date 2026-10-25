@@ -1,7 +1,7 @@
 /* FoodRelay maps: Leaflet + OpenStreetMap tiles, driving routes from the public OSRM demo server.
  * If routing is unavailable, a straight dashed line is drawn instead. */
 (function () {
-  const DEFAULT_CENTER = [39.8, -98.6];   // continental US, when nothing is known yet
+  const DEFAULT_CENTER = [44.9778, -93.2650];   // Minneapolis, when nothing is known yet
   const COLORS = {me: '#2f6fd1', post: '#2f7d4f', target: '#e8893a', active: '#c4410c'};
   const routeCache = new Map();
 
@@ -11,7 +11,7 @@
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
-    map.setView(DEFAULT_CENTER, 4);
+    map.setView(DEFAULT_CENTER, 11);
     return map;
   }
 

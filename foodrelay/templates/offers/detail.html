@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% from "macros.html" import status_tag, post_button, message_button %}
+{% from "macros.html" import status_tag, post_button, message_button, back_button %}
 {% block title %}{{ offer.title }}{% endblock %}
 {% block content %}
 {% set mine = offer.supplier_id == g.user.id %}
 {% set claimed_by_me = offer.claimed_by == g.user.id %}
 <div class="page-head">
   <div>
-    <p class="small"><a href="{{ url_for('posts.offers') }}">← Food offers</a></p>
+    <p class="small">{{ back_button(url_for('posts.offers')) }}</p>
     <h1>{{ offer.title }}</h1>
     <div class="tags" style="margin-top:8px">
       {{ status_tag(offer.status, expired) }}

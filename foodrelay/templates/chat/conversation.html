@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% from "macros.html" import csrf %}
+{% from "macros.html" import csrf, back_button %}
 {% block title %}Chat with {{ other.org_name or other.name }}{% endblock %}
 {% block content %}
 <div class="medium">
-  <p class="small"><a href="{{ url_for('chat.inbox') }}">← All messages</a></p>
+  <p class="small">{{ back_button(url_for('chat.inbox')) }}</p>
   <div class="card chat">
     <div class="chat-head">
       <div>

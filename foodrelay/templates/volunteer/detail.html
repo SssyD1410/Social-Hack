@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% from "macros.html" import csrf, status_tag, post_button, message_button %}
+{% from "macros.html" import csrf, status_tag, post_button, message_button, back_button %}
 {% block title %}{{ v.title }}{% endblock %}
 {% block content %}
 {% set mine = v.poster_id == g.user.id %}
 <div class="page-head">
   <div>
-    <p class="small"><a href="{{ url_for('posts.volunteer_requests') }}">← Volunteer requests</a></p>
+    <p class="small">{{ back_button(url_for('posts.volunteer_requests')) }}</p>
     <h1>{{ v.title }}</h1>
     <div class="tags" style="margin-top:8px">{{ status_tag(v.status) }}<span class="tag">{{ v.accepted }} / {{ v.slots }} confirmed</span></div>
   </div>

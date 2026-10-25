@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% from "macros.html" import status_tag, post_button, message_button %}
+{% from "macros.html" import status_tag, post_button, message_button, back_button %}
 {% block title %}{{ r.title }}{% endblock %}
 {% block content %}
 {% set mine = r.distributor_id == g.user.id %}
 <div class="page-head">
   <div>
-    <p class="small"><a href="{{ url_for('posts.food_requests') }}">← Food requests</a></p>
+    <p class="small">{{ back_button(url_for('posts.food_requests')) }}</p>
     <h1>{{ r.title }}</h1>
     <div class="tags" style="margin-top:8px">{{ status_tag(r.status) }}</div>
   </div>

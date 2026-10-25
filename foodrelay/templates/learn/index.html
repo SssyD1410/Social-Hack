@@ -1,6 +1,8 @@
 {% extends "base.html" %}
+{% from "macros.html" import back_button %}
 {% block title %}Learn more: the four roles{% endblock %}
 {% block content %}
+<p class="small">{{ back_button(url_for('main.index')) }}</p>
 <section class="roles-banner">
   <h1>Learn more about FoodRelay</h1>
   <p>FoodRelay separates users into four roles, so everyone gets the tools that fit how they help.

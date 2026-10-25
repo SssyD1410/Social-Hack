@@ -263,6 +263,18 @@ class FoodRelayTest(unittest.TestCase):
         self.assertNotIn("Log out", c.get("/dashboard").get_data(as_text=True))
         self.assertIn("Log out", c.get("/profile").get_data(as_text=True))
 
+    def test_back_buttons(self):
+        supplier = self.client_for("supplier")
+        oid = self.make_offer(supplier)
+        for url in (f"/offers/{oid}", "/offers/new", f"/offers/{oid}/edit", "/volunteer/new", "/users/1", "/learn"):
+            self.assertIn("data-back", supplier.get(url).get_data(as_text=True), url)
+
+    def test_free_maps(self):
+        page = self.client_for("supplier").get("/dashboard").get_data(as_text=True)
+        self.assertIn("leaflet", page)
+        self.assertNotIn("mapkit", page.lower())
+        self.assertNotIn("googleapis", page)
+
     def test_seed(self):
         with self.app.app_context():
             from foodrelay.seed import seed

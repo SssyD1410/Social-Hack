@@ -1,8 +1,9 @@
 {% extends "base.html" %}
-{% from "macros.html" import csrf, location_picker %}
+{% from "macros.html" import csrf, location_picker, back_button %}
 {% block title %}Request volunteers{% endblock %}
 {% block content %}
 <div class="medium">
+  <p class="small">{{ back_button(url_for('main.dashboard')) }}</p>
   <div class="card">
     <h1>Request volunteers</h1>
     <p class="muted">Describe the time period, what needs doing and anything volunteers should bring or have.</p>
@@ -31,7 +32,7 @@
       {{ location_picker(values.lat, values.lng, "Meeting point on map") }}
       <div class="btn-row">
         <button class="btn" type="submit">Post request</button>
-        <a class="btn secondary" href="{{ url_for('main.dashboard') }}">Cancel</a>
+        <a class="btn secondary" href="{{ url_for('main.dashboard') }}" data-back>Cancel</a>
       </div>
     </form>
   </div>

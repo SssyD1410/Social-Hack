@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+{% from "macros.html" import back_button %}
 {% block title %}{{ person.org_name or person.name }}{% endblock %}
 {% block content %}
 <div class="medium">
+  <p class="small">{{ back_button(url_for('main.dashboard')) }}</p>
   <div class="card">
     <div style="display:flex;gap:16px;align-items:center;margin-bottom:12px">
       <span class="avatar" style="width:56px;height:56px;font-size:1.4rem">{{ (person.org_name or person.name)[:1]|upper }}</span>

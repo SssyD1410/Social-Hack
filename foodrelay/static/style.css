@@ -159,27 +159,40 @@ table.list th { font-size: .82rem; text-transform: uppercase; letter-spacing: .0
 .role-tab.active { border-color: var(--brand); background: var(--brand-soft); }
 
 /* ---- flowchart ---- */
-.flowchart { display: grid; gap: 14px; margin-top: 8px; }
-.fc-lane { display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: center; }
-.fc-lane-label { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
-.fc-row { display: flex; align-items: stretch; flex-wrap: wrap; gap: 4px 0; }
-.fc-node { position: relative; flex: 1 1 0; min-width: 110px; max-width: 170px; background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 10px; text-align: center; cursor: help; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; transition: border-color .15s, transform .15s; }
+.flowchart { display: grid; gap: 6px; margin-top: 8px; }
+.fc-lane-label { font-size: .74rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-top: 10px; }
+/* Same columns in every lane: step | arrow | step | arrow | step | arrow | step */
+.fc-grid { display: grid; grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr) 72px minmax(0, 1fr) 64px minmax(0, 1fr); align-items: stretch; }
+.fc-stack, .fc-pair { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.fc-stack > *, .fc-pair > * { flex: 1 1 0; }
+.fc-double { display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+.fc-node { position: relative; min-width: 0; background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 10px 6px; text-align: center; cursor: help; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: inherit; text-decoration: none; transition: border-color .15s, transform .15s; }
+a.fc-node { cursor: pointer; }
 .fc-node:hover, .fc-node:focus { border-color: var(--brand); transform: translateY(-2px); outline: none; z-index: 5; }
-.fc-icon { font-size: 1.4rem; line-height: 1; }
-.fc-title { font-size: .85rem; font-weight: 600; line-height: 1.25; }
+.fc-icon { font-size: 1.35rem; line-height: 1; }
+.fc-title { font-size: .84rem; font-weight: 600; line-height: 1.25; overflow-wrap: anywhere; hyphens: auto; }
 .fc-supplier { border-color: #f2cfa9; }
 .fc-distributor { border-color: #c9d7ef; }
+.fc-consumer { border-color: #efc9dc; }
 .fc-volunteer { border-color: #d9c9ef; }
 .fc-key { background: var(--brand-soft); border-color: #9ccaae; }
 .fc-end { background: var(--brand); border-color: var(--brand); color: #fff; }
 .fc-join { border-style: dashed; }
-.fc-arrow { flex: 0 0 auto; width: 46px; display: flex; align-items: center; justify-content: center; position: relative; }
-.fc-arrow::before { content: ""; position: absolute; left: 6px; right: 10px; top: 50%; border-top: 2px solid #b9b6a8; }
-.fc-arrow::after { content: ""; position: absolute; right: 4px; top: calc(50% - 5px); border: 5px solid transparent; border-left: 7px solid #b9b6a8; }
-.fc-arrow span { position: relative; top: -11px; font-size: .68rem; color: var(--muted); background: var(--surface); padding: 0 2px; white-space: nowrap; }
+/* Arrows: a line plus a head; .back points the other way. */
+.fc-arrow { --line: #b9b6a8; display: flex; align-items: center; justify-content: center; position: relative; min-width: 0; min-height: 30px; cursor: help; outline: none; }
+.fc-arrow:hover, .fc-arrow:focus { --line: var(--brand); z-index: 5; }
+.fc-arrow::before { content: ""; position: absolute; left: 4px; right: 8px; top: 50%; border-top: 2px solid var(--line); }
+.fc-arrow::after { content: ""; position: absolute; right: 2px; top: calc(50% - 5px); border: 5px solid transparent; border-left: 7px solid var(--line); }
+.fc-arrow.back::before { left: 8px; right: 4px; }
+.fc-arrow.back::after { right: auto; left: 2px; border-left-color: transparent; border-right: 7px solid var(--line); }
+.fc-label { position: relative; top: -11px; font-size: .68rem; font-weight: 600; color: var(--muted); background: var(--surface); padding: 0 3px; white-space: nowrap; }
+.fc-arrow.back .fc-label { top: 11px; }
+.fc-arrow:hover .fc-label, .fc-arrow:focus .fc-label { color: var(--brand-dark); }
 .fc-tip { visibility: hidden; opacity: 0; position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); width: 230px; background: var(--text); color: #fff; font-size: .82rem; font-weight: 400; line-height: 1.4; text-align: left; padding: 10px 12px; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.18); transition: opacity .15s; pointer-events: none; z-index: 20; }
 .fc-tip::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -6px; border: 6px solid transparent; border-top-color: var(--text); }
-.fc-node:hover .fc-tip, .fc-node:focus .fc-tip { visibility: visible; opacity: 1; }
+.fc-node:hover .fc-tip, .fc-node:focus .fc-tip, .fc-arrow:hover .fc-tip, .fc-arrow:focus .fc-tip { visibility: visible; opacity: 1; }
+.fc-arrow.back .fc-tip { bottom: auto; top: calc(100% + 10px); }
+.fc-arrow.back .fc-tip::after { top: auto; bottom: 100%; border-top-color: transparent; border-bottom-color: var(--text); }
 .fc-chat { border: 2px dashed var(--border); border-radius: 12px; padding: 10px 14px; text-align: center; font-size: .92rem; }
 .fc-desc { margin: 14px 0 0; padding: 10px 14px; background: var(--bg); border-radius: 10px; font-size: .92rem; min-height: 2.6em; }
 
@@ -257,7 +270,6 @@ button.armed { background: var(--danger) !important; color: #fff !important; bor
 
 @media (max-width: 960px) {
   .role-grid, .roles-banner .role-tabs { grid-template-columns: repeat(2, 1fr); }
-  .fc-lane { grid-template-columns: 1fr; gap: 6px; }
 }
 @media (max-width: 860px) {
   .hero { grid-template-columns: 1fr; padding-top: 28px; }
@@ -267,17 +279,27 @@ button.armed { background: var(--danger) !important; color: #fff !important; bor
 }
 @media (max-width: 600px) {
   .grid-2, .grid-3, .role-picker, .role-grid, .roles-banner .role-tabs { grid-template-columns: 1fr; }
-  .fc-row { flex-direction: column; align-items: stretch; }
-  .fc-node { max-width: none; }
-  .fc-arrow { width: auto; height: 26px; }
-  .fc-arrow::before { left: 50%; right: auto; top: 3px; bottom: 9px; border-top: 0; border-left: 2px solid #b9b6a8; }
-  .fc-arrow::after { right: auto; left: calc(50% - 4px); top: auto; bottom: 0; border: 5px solid transparent; border-top: 7px solid #b9b6a8; }
-  .fc-arrow span { top: 0; left: 14px; }
-  .fc-tip { bottom: auto; top: calc(100% + 8px); }
-  .fc-tip::after { top: auto; bottom: 100%; border-top-color: transparent; border-bottom-color: var(--text); }
   .map-dashboard { height: 300px; }
   .nav { margin-left: 0; width: 100%; }
   .msg { max-width: 90%; }
   dl.details { grid-template-columns: 1fr; gap: 2px; }
   dl.details dd { margin-bottom: 8px; }
+}
+
+.back-link { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; text-decoration: none; padding: 4px 10px 4px 6px; border-radius: 8px; color: var(--brand-dark); }
+.back-link:hover { background: var(--brand-soft); }
+
+/* Flowchart: stack vertically once the one-line lanes would get too narrow. */
+@media (max-width: 720px) {
+  .fc-grid { display: flex; flex-direction: column; align-items: stretch; }
+  .fc-grid > * { grid-column: auto !important; }
+  .fc-stack, .fc-pair, .fc-double { flex-direction: row; gap: 8px; }
+  .fc-arrow { min-height: 38px; }
+  .fc-arrow::before, .fc-arrow.back::before { left: 50%; right: auto; top: 3px; bottom: 9px; border-top: 0; border-left: 2px solid var(--line); }
+  .fc-arrow::after { right: auto; left: calc(50% - 4px); top: auto; bottom: 0; border: 5px solid transparent; border-top: 7px solid var(--line); }
+  .fc-arrow.back::before { top: 9px; bottom: 3px; }
+  .fc-arrow.back::after { left: calc(50% - 4px); top: 0; bottom: auto; border: 5px solid transparent; border-bottom: 7px solid var(--line); }
+  .fc-label, .fc-arrow.back .fc-label { top: 0; }
+  .fc-tip, .fc-arrow.back .fc-tip { bottom: auto; top: calc(100% + 8px); }
+  .fc-tip::after, .fc-arrow.back .fc-tip::after { top: auto; bottom: 100%; border-top-color: transparent; border-bottom-color: var(--text); }
 }

@@ -81,3 +81,8 @@
   </div>
 </div>
 {% endmacro %}
+
+{# "← Back" to the page the user came from on this site; `fallback` is used when there's no such page. #}
+{% macro back_button(fallback) -%}
+<a class="back-link" href="{{ fallback }}" data-back>← Back</a>
+{%- endmacro %}

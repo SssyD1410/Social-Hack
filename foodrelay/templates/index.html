@@ -50,57 +50,54 @@
 <section class="section">
   <div class="card">
     <h2>How FoodRelay works</h2>
-    <p class="muted small">Hover over (or tap) any step to see what happens there.</p>
-    {% macro node(icon, title, desc, cls='') -%}
-      <div class="fc-node {{ cls }}" tabindex="0" data-desc="{{ desc }}">
+    <p class="muted small">Hover over (or tap) any step or arrow to see what happens there.</p>
+    {# Flowchart: both lanes share one 7-column grid (step, arrow, step, arrow, step, arrow, step), so
+       "Pickup & delivery" lines up in column 5. Steps and arrows both show a tooltip on hover/focus. #}
+    {% macro node(icon, title, desc, cls='', href=none, style='') -%}
+      <{{ 'a' if href else 'div' }} class="fc-node {{ cls }}" tabindex="0" data-title="{{ title }}" data-desc="{{ desc }}"
+        {%- if href %} href="{{ href }}"{% endif %}{% if style %} style="{{ style }}"{% endif %}>
         <span class="fc-icon">{{ icon }}</span><span class="fc-title">{{ title }}</span>
+        <span class="fc-tip" role="tooltip">{{ desc }}</span>
+      </{{ 'a' if href else 'div' }}>
+    {%- endmacro %}
+    {% macro arrow(label, desc, cls='', style='') -%}
+      <div class="fc-arrow {{ cls }}" tabindex="0" data-title="{{ label|capitalize }}" data-desc="{{ desc }}"{% if style %} style="{{ style }}"{% endif %}>
+        <span class="fc-label">{{ label }}</span>
         <span class="fc-tip" role="tooltip">{{ desc }}</span>
       </div>
     {%- endmacro %}
-    {% macro arrow(label='') %}<div class="fc-arrow" aria-hidden="true"><span>{{ label }}</span></div>{% endmacro %}
 
     <div class="flowchart">
-      <div class="fc-lane">
-        <div class="fc-lane-label">Sharing surplus</div>
-        <div class="fc-row">
-          {{ node('🏪', 'Supplier has surplus', 'A shop, bakery or restaurant ends the day with good food it can\'t sell.', 'fc-supplier') }}
-          {{ arrow('posts') }}
-          {{ node('📋', 'Food offer', 'The supplier lists what it is, the quantity, dietary notes, where to collect it and a pickup deadline.') }}
-          {{ arrow('chooses') }}
-          {{ node('👁️', 'Who can see it', 'Each offer is shown to verified distributors and/or consumers. Only small offers can go to consumers.') }}
-          {{ arrow('claims') }}
-          {{ node('🚚', 'Distributor or consumer claims', 'A verified distributor claims it for the people it serves, or a consumer reserves a small offer for themselves.', 'fc-distributor') }}
-          {{ arrow() }}
-          {{ node('📦', 'Pickup & delivery', 'The claimer collects the food before the deadline. Distributors are responsible for getting it to the people they serve.', 'fc-key') }}
-          {{ arrow() }}
-          {{ node('🍽️', 'Food reaches people', 'Meals and groceries end up with people in need instead of in the bin.', 'fc-end') }}
+      <div class="fc-lane-label">Moving food</div>
+      <div class="fc-grid">
+        {{ node('🏪', 'Supplier', 'A shop, bakery or restaurant with good food it can’t sell. Click to learn more about suppliers.', 'fc-supplier', url_for('main.learn', role='supplier'), 'grid-column: 1') }}
+        <div class="fc-stack" style="grid-column: 2">
+          <div class="fc-double">
+            {{ arrow('offers food', 'The supplier posts a food offer (what it is, quantity, dietary notes, pickup spot and deadline), and verified distributors claim it.') }}
+            {{ arrow('requests food', 'A distributor posts a food request (description, quantity, location, needed-by time), and a supplier pledges to fill it.', 'back') }}
+          </div>
+          {{ arrow('small offers', 'Small offers, like a box of pastries or a few meals, can be shown straight to consumers, who reserve them.') }}
         </div>
+        <div class="fc-pair" style="grid-column: 3">
+          {{ node('🚚', 'Distributor', 'A verified shelter, pantry or food bank that delivers food to people in need. Click to learn more.', 'fc-distributor', url_for('main.learn', role='distributor')) }}
+          {{ node('🍽️', 'Consumer', 'Anyone who wants food for themselves; they see only small offers. Click to learn more.', 'fc-consumer', url_for('main.learn', role='consumer')) }}
+        </div>
+        <div class="fc-stack" style="grid-column: 4">
+          {{ arrow('collects', 'The distributor collects the food before the pickup deadline and is responsible for delivering it.') }}
+          {{ arrow('picks up', 'The consumer picks up their reserved food at the supplier before the deadline.') }}
+        </div>
+        {{ node('📦', 'Pickup & delivery', 'Food is collected before the deadline and taken where it is needed. Everyone arranges times in chat.', 'fc-key', none, 'grid-column: 5') }}
+        {{ arrow('delivers', 'Distributors hand out meals and groceries; consumers take their food home.', '', 'grid-column: 6') }}
+        {{ node('❤️', 'Food reaches people', 'Good food is eaten instead of thrown away.', 'fc-end', none, 'grid-column: 7') }}
       </div>
 
-      <div class="fc-lane">
-        <div class="fc-lane-label">Asking for food</div>
-        <div class="fc-row">
-          {{ node('🚚', 'Distributor needs food', 'A verified shelter, pantry or food bank needs something specific.', 'fc-distributor') }}
-          {{ arrow('posts') }}
-          {{ node('📝', 'Food request', 'It lists a description, quantity, location and the time the food is needed by.') }}
-          {{ arrow('pledges') }}
-          {{ node('🏪', 'Supplier pledges', 'A supplier who can help pledges to fill the request, then they arrange the details in chat.', 'fc-supplier') }}
-          {{ arrow() }}
-          {{ node('📦', 'Pickup & delivery', 'Joins the main flow: the food is collected and delivered.', 'fc-key fc-join') }}
-        </div>
-      </div>
-
-      <div class="fc-lane">
-        <div class="fc-lane-label">Getting help</div>
-        <div class="fc-row">
-          {{ node('🏪🚚', 'Supplier or distributor', 'Anyone who needs extra hands: sorting, packing, driving or serving.') }}
-          {{ arrow('posts') }}
-          {{ node('🙋', 'Volunteer request', 'A time period, the tasks and any requirements, e.g. "own car".') }}
-          {{ arrow('signs up') }}
-          {{ node('🙋', 'Volunteer joins', 'An individual volunteer signs up; the organizer accepts. If they can\'t make it, the spot is re-listed.', 'fc-volunteer') }}
-          {{ arrow('helps') }}
-          {{ node('📦', 'Pickup & delivery', 'Joins the main flow: volunteers help move the food.', 'fc-key fc-join') }}
-        </div>
+      <div class="fc-lane-label">Getting help</div>
+      <div class="fc-grid">
+        {{ node('📣', 'Volunteer request', 'Suppliers and distributors post a time period, tasks and requirements (e.g. “own car”) when they need extra hands.', '', none, 'grid-column: 1') }}
+        {{ arrow('signs up', 'A volunteer signs up and the organizer accepts. If the volunteer can’t make it, the spot is re-listed.', '', 'grid-column: 2') }}
+        {{ node('🙋', 'Volunteer', 'An individual (not an organization) who gives their time to sort, pack, drive or serve. Click to learn more.', 'fc-volunteer', url_for('main.learn', role='volunteer'), 'grid-column: 3') }}
+        {{ arrow('helps with', 'Volunteers help collect, sort and deliver the food.', '', 'grid-column: 4') }}
+        {{ node('📦', 'Pickup & delivery', 'The same step as above: volunteers join in to move the food.', 'fc-key fc-join', none, 'grid-column: 5') }}
       </div>
 
       <div class="fc-chat" tabindex="0">
@@ -108,7 +105,7 @@
         <span class="muted">Anyone can message the person behind an offer or request they can see, to agree on times and details.</span>
       </div>
     </div>
-    <p class="fc-desc" id="fc-desc" aria-live="polite">Select a step to read about it.</p>
+    <p class="fc-desc" id="fc-desc" aria-live="polite">Select a step or arrow to read about it.</p>
   </div>
 </section>
 {% endblock %}
@@ -116,8 +113,8 @@
 <script>
   // Mirror the hovered/focused step into the description line (helpful on touch screens).
   const desc = document.getElementById('fc-desc');
-  document.querySelectorAll('.fc-node').forEach(n => {
-    const show = () => { desc.textContent = n.querySelector('.fc-title').textContent + ': ' + n.dataset.desc; };
+  document.querySelectorAll('.flowchart [data-desc]').forEach(n => {
+    const show = () => { desc.textContent = n.dataset.title + ': ' + n.dataset.desc; };
     n.addEventListener('mouseenter', show);
     n.addEventListener('focus', show);
   });
