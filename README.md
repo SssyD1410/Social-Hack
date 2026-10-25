@@ -20,7 +20,7 @@ Anyone can message the person behind an offer or request they can see. All four 
 
 Users, offers and requests can have a map location (picked on a map in each form). Each dashboard shows your posts and
 the 6 most relevant counterparts (nearest first), with a planned driving route that switches to the next one every
-second; food requests show a map too. Maps use [Leaflet](https://leafletjs.com) with OpenStreetMap tiles, routes come
+second; food requests show a map too. Maps use [Leaflet](https://leafletjs.com) with a minimal grey basemap (Esri Light Gray Canvas, keyless, credit shown on the map), routes come
 from the public [OSRM](https://project-osrm.org) demo server (falling back to a straight line), and "Find typed address"
 uses OpenStreetMap Nominatim. Those public services are fine for demos; use your own or a paid provider in production.
 

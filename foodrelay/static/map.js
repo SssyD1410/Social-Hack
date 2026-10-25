@@ -6,11 +6,18 @@
   const routeCache = new Map();
 
   function baseMap(el) {
-    const map = L.map(el, {scrollWheelZoom: false});
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    // Minimal look: Esri "Light Gray Canvas" (pale grey, faint roads and water, no buildings or
+    // transit), no Leaflet prefix, a short credit. Free for light use without a key; credit required.
+    const map = L.map(el, {scrollWheelZoom: false, attributionControl: false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 16, minZoom: 9,
     }).addTo(map);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 16, minZoom: 9, opacity: 0.8,   // faint place names only
+    }).addTo(map);
+    L.control.attribution({prefix: false}).addAttribution(
+      'Tiles &copy; <a href="https://www.esri.com">Esri</a>, HERE, Garmin, OpenStreetMap contributors'
+    ).addTo(map);
     map.setView(DEFAULT_CENTER, 11);
     return map;
   }

@@ -201,7 +201,14 @@ a.fc-node { cursor: pointer; }
 .fc-desc { margin: 14px 0 0; padding: 10px 14px; background: var(--bg); border-radius: 10px; font-size: .92rem; min-height: 2.6em; }
 
 /* ---- maps ---- */
-.map { width: 100%; border-radius: 10px; border: 1px solid var(--border); z-index: 0; }
+.map { width: 100%; border-radius: 10px; border: 1px solid var(--border); z-index: 0; background: #f4f4f1; }
+/* Quiet map chrome: small flat zoom buttons and a faint credit. */
+.map .leaflet-bar { border: 0; box-shadow: none; }
+.map .leaflet-bar a { width: 26px; height: 26px; line-height: 26px; color: var(--muted); border: 1px solid var(--border); background: rgba(255,255,255,.9); }
+.map .leaflet-bar a:first-child { border-radius: 8px 8px 0 0; }
+.map .leaflet-bar a:last-child { border-radius: 0 0 8px 8px; border-top: 0; }
+.map .leaflet-control-attribution { font-size: 10px; color: var(--muted); background: rgba(255,255,255,.7); }
+.map .leaflet-popup-content-wrapper { border-radius: 10px; box-shadow: none; border: 1px solid var(--border); }
 .map-dashboard { height: 380px; }
 .map-detail { height: 280px; }
 .map-list { height: 320px; }
