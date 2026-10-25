@@ -4,11 +4,11 @@
   --text: #1f2a24;
   --muted: #5f6b64;
   --border: #e2e0d6;
-  --brand: #2f7d4f;
-  --brand-dark: #1f5c39;
-  --brand-soft: #e3f1e8;
-  --accent: #e8893a;
-  --accent-soft: #fdf0e3;
+  --brand: #1f7f3a;
+  --brand-dark: #175f2b;
+  --brand-soft: #e2f2e6;
+  --accent: #ff6d1f;
+  --accent-soft: #fff0e6;
   --danger: #b83a3a;
   --danger-soft: #fbe9e9;
   --info-soft: #e7eef9;
@@ -42,7 +42,7 @@ main.container { padding-top: 28px; padding-bottom: 56px; min-height: 70vh; }
 .nav a:hover, .nav button.linklike:hover { background: var(--brand-soft); }
 .nav a.active { background: var(--brand-soft); color: var(--brand-dark); font-weight: 600; }
 .nav form { margin: 0; }
-.badge-count { background: var(--accent); color: #fff; border-radius: 999px; font-size: .72rem; padding: 1px 7px; margin-left: 3px; font-weight: 700; }
+.badge-count { background: var(--accent); color: var(--text); border-radius: 999px; font-size: .72rem; padding: 1px 7px; margin-left: 3px; font-weight: 700; }
 button.linklike { background: none; border: 0; font: inherit; cursor: pointer; }
 
 /* ---- flash ---- */
@@ -61,8 +61,8 @@ button.linklike { background: none; border: 0; font: inherit; cursor: pointer; }
 .btn:hover { background: var(--brand-dark); border-color: var(--brand-dark); }
 .btn.secondary { background: var(--surface); color: var(--brand-dark); border-color: var(--border); }
 .btn.secondary:hover { background: var(--brand-soft); }
-.btn.accent { background: var(--accent); border-color: var(--accent); }
-.btn.accent:hover { background: #cf7425; border-color: #cf7425; }
+.btn.accent { background: var(--accent); border-color: var(--accent); color: var(--text); }
+.btn.accent:hover { background: #ff8a4c; border-color: #ff8a4c; }   /* lighter on hover: dark text stays readable */
 .btn.danger { background: var(--surface); color: var(--danger); border-color: #e6c0c0; }
 .btn.danger:hover { background: var(--danger-soft); }
 .btn.small { padding: 5px 10px; font-size: .88rem; border-radius: 8px; }
@@ -114,7 +114,7 @@ a.post-card:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(0,0
 
 .tag { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: .78rem; font-weight: 600; background: #efeee8; color: var(--muted); white-space: nowrap; }
 .tag.green { background: var(--brand-soft); color: var(--brand-dark); }
-.tag.orange { background: var(--accent-soft); color: #a65516; }
+.tag.orange { background: var(--accent-soft); color: #b2470c; }
 .tag.red { background: var(--danger-soft); color: var(--danger); }
 .tag.blue { background: var(--info-soft); color: #2f4f86; }
 .tags { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -212,8 +212,8 @@ a.fc-node { cursor: pointer; }
 .fr-pin span { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; color: #fff; font-size: .72rem; font-weight: 800; line-height: 1; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
 
 /* ---- your own posts stand out ---- */
-.post-card.own-post { border: 2px solid var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 4px rgba(232,137,58,.15), var(--shadow); }
-.own-badge { align-self: flex-start; background: var(--accent); color: #fff; font-size: .75rem; font-weight: 700; padding: 2px 10px; border-radius: 999px; }
+.post-card.own-post { border: 2px solid var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 4px rgba(255,109,31,.15), var(--shadow); }
+.own-badge { align-self: flex-start; background: var(--accent); color: var(--text); font-size: .75rem; font-weight: 700; padding: 2px 10px; border-radius: 999px; }
 
 button.armed { background: var(--danger) !important; color: #fff !important; border-color: var(--danger) !important; }
 .role-card .btn-row { margin-top: auto; }

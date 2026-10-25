@@ -2,7 +2,7 @@
  * If routing is unavailable, a straight dashed line is drawn instead. */
 (function () {
   const DEFAULT_CENTER = [44.9778, -93.2650];   // Minneapolis, when nothing is known yet
-  const COLORS = {me: '#2f6fd1', post: '#2f7d4f', target: '#e8893a', active: '#c4410c'};
+  const COLORS = {me: '#2f6fd1', post: '#1f7f3a', target: '#ff6d1f', active: '#c4410c'};
   const routeCache = new Map();
 
   function baseMap(el) {
