@@ -377,8 +377,6 @@ body { overflow-x: clip; }           /* lets full-bleed sections use 100vw witho
 .stage-1 .relay-text { grid-column: 5 / 9; grid-row: 2; }
 .stage-2 .photo-frame { grid-column: 6 / 9; grid-row: 3 / 5; aspect-ratio: 1; margin-top: 64px; }
 .stage-2 .relay-text { grid-column: 9 / 13; grid-row: 3; margin-top: 64px; }
-.stage-3 .photo-frame { grid-column: 7 / 13; grid-row: 5; aspect-ratio: 16 / 10; margin-top: 90px; }
-.stage-3 .relay-text { grid-column: 3 / 7; grid-row: 5; margin-top: 90px; align-self: start; }
 
 /* "Four ways to take part": a run of frames, the supplier lifted above the rest. */
 .roles-run { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; margin-top: 160px; padding-top: 12px; }
@@ -432,7 +430,6 @@ body { overflow-x: clip; }           /* lets full-bleed sections use 100vw witho
   .stage-1 .photo-frame { width: 100%; aspect-ratio: 4 / 3; }
   .stage-2 .photo-frame { width: 62%; margin-left: auto; }
   .stage-2 .relay-text { margin-left: auto; max-width: 62%; }
-  .stage-3 .photo-frame { width: 78%; }
   .section.how { margin-top: 96px; }
   .closing-photo { margin-bottom: 24px; }
 }

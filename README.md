@@ -26,7 +26,7 @@ uses OpenStreetMap Nominatim. Those public services are fine for demos; use your
 
 Every food offer, food request and volunteer request shows a photo: the one its poster uploaded (JPG, PNG or WebP,
 stored in `instance/uploads/photos/`), or otherwise a real stock photo matched to its food type (requests are matched
-by their words). The stock photos and the homepage clip are CC0, CC BY or public domain, from Wikimedia Commons; their
+by their words). The stock photos are CC0, CC BY or public domain, from Wikimedia Commons; their
 sources and licences are in [`ecoserving/static/photos/credits.json`](ecoserving/static/photos/credits.json) and on the
 `/credits` page, linked from every footer.
 

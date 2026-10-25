@@ -348,7 +348,6 @@ class EcoServingTest(unittest.TestCase):
         anon = self.app.test_client()
         home = anon.get("/").get_data(as_text=True)
         self.assertGreaterEqual(home.count("/static/photos/"), 8)
-        self.assertIn("plating.webm", home)
         self.assertIn("prefers-reduced-motion", home)
         credits = anon.get("/credits").get_data(as_text=True)
         self.assertIn("Wikimedia Commons", credits)

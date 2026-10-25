@@ -55,16 +55,6 @@
     <p class="relay-text" data-reveal style="--d:90ms"><b>Within the hour,</b> a verified shelter or pantry claims it and agrees on
       pickup in chat. A volunteer with a car signs up to drive.</p>
   </div>
-  <div class="relay-stage stage-3">
-    <div class="photo-frame" data-reveal>
-      <video class="relay-clip" muted loop playsinline preload="metadata" width="1280" height="720" aria-hidden="true"
-             poster="{{ url_for('static', filename='photos/plating.jpg') }}">
-        <source src="{{ url_for('static', filename='photos/plating.webm') }}" type="video/webm">
-      </video>
-    </div>
-    <p class="relay-text" data-reveal style="--d:90ms"><b>By dinner,</b> the food is on plates across the city instead of in a bin
-      behind the shop.</p>
-  </div>
 </section>
 
 {# The four roles as a run of photographs, the supplier (where food starts) lifted above the others. #}
@@ -176,17 +166,6 @@
         if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
       }), {rootMargin: '0px 0px -8% 0px'});
       parts.forEach(el => io.observe(el));
-    }
-
-    // The plating clip loops only while it is on screen; with reduced motion it stays on its poster frame.
-    // Only its middle (5.4s to 11.6s) is plain footage; the rest are logo and title cards.
-    const clip = document.querySelector('.relay-clip'), CLIP_IN = 5.4, CLIP_OUT = 11.6;
-    if (clip && !still && 'IntersectionObserver' in window) {
-      clip.addEventListener('loadedmetadata', () => { clip.currentTime = CLIP_IN; });
-      clip.addEventListener('timeupdate', () => {
-        if (clip.currentTime < CLIP_IN || clip.currentTime > CLIP_OUT) clip.currentTime = CLIP_IN;
-      });
-      new IntersectionObserver(([e]) => { e.isIntersecting ? clip.play().catch(() => {}) : clip.pause(); }).observe(clip);
     }
 
     // Hero: slow crossfade between the photographs, with the caption following. Pauses in hidden tabs.
