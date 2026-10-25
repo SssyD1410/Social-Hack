@@ -63,6 +63,7 @@
     <span>
       Learn more:
       {% for key, r in ROLES.items() %}<a href="{{ url_for('main.learn', role=key) }}">{{ r.label }}s</a>{{ ' · ' if not loop.last }}{% endfor %}
+      · <a href="{{ url_for('main.credits') }}">Photo credits</a>
     </span>
   </div>
 </footer>

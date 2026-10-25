@@ -33,7 +33,7 @@ img { max-width: 100%; }
 main.container { padding-top: 28px; padding-bottom: 56px; min-height: 70vh; }
 
 /* ---- header ---- */
-.site-header { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+.site-header { background: var(--surface); position: sticky; top: 0; z-index: 10; }
 .site-header .container { display: flex; align-items: center; gap: 16px; min-height: 60px; flex-wrap: wrap; }
 .logo { font-weight: 800; font-size: 1.25rem; color: var(--brand-dark); text-decoration: none; display: flex; align-items: center; gap: 6px; }
 .logo .logo-word { color: var(--brand-dark); }
@@ -134,12 +134,6 @@ table.list th { font-size: .82rem; text-transform: uppercase; letter-spacing: .0
 .filters input, .filters select { width: auto; flex: 1 1 160px; }
 
 /* ---- hero / landing ---- */
-.hero { padding: 56px 0 36px; display: grid; grid-template-columns: 1.3fr 1fr; gap: 32px; align-items: center; }
-.hero h1 { font-size: 2.6rem; letter-spacing: -.02em; }
-.hero p.lead { font-size: 1.15rem; color: var(--muted); }
-.hero-art { background: var(--brand-soft); border-radius: 20px; padding: 28px; display: grid; gap: 12px; }
-.flow-step { background: #fff; border-radius: 12px; padding: 12px 14px; display: flex; gap: 12px; align-items: center; box-shadow: var(--shadow); }
-.flow-step .emoji { font-size: 1.6rem; }
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 12px 0 8px; }
 .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
 .stat b { display: block; font-size: 1.7rem; color: var(--brand-dark); }
@@ -162,7 +156,7 @@ table.list th { font-size: .82rem; text-transform: uppercase; letter-spacing: .0
 
 /* ---- flowchart ---- */
 .flowchart { display: grid; gap: 6px; margin-top: 8px; }
-.fc-lane-label { font-size: .74rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-top: 10px; }
+.fc-lane-label { font-size: .9rem; font-weight: 700; color: var(--muted); margin-top: 10px; }
 /* Same columns in every lane: step | arrow | step | arrow | step | arrow | step */
 .fc-grid { display: grid; grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr) 72px minmax(0, 1fr) 64px minmax(0, 1fr); align-items: stretch; }
 .fc-stack, .fc-pair { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
@@ -276,16 +270,17 @@ button.armed { background: var(--danger) !important; color: #fff !important; bor
 .notice.ok { background: var(--brand-soft); border-color: #bfdcc9; }
 .notice.bad { background: var(--danger-soft); border-color: #efc6c6; }
 
-.site-footer { border-top: 1px solid var(--border); padding: 24px 0; color: var(--muted); font-size: .9rem; background: var(--surface); }
+.site-footer { padding: 24px 0; color: var(--muted); font-size: .9rem; background: var(--surface); }
 .site-footer .container { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .site-footer a { color: var(--muted); }
+
+/* The flowchart sits on the page ground here; the card chrome is for app screens. */
+.section.how .card { box-shadow: none; border-color: transparent; }
 
 @media (max-width: 960px) {
   .role-grid, .roles-banner .role-tabs { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 860px) {
-  .hero { grid-template-columns: 1fr; padding-top: 28px; }
-  .hero h1 { font-size: 2rem; }
   .two-col { grid-template-columns: 1fr; }
   .stats { grid-template-columns: repeat(2, 1fr); }
 }
@@ -329,3 +324,133 @@ button.armed { background: var(--danger) !important; color: #fff !important; bor
 .fc-chat .icon { color: var(--brand); }
 .fr-pin span .icon { font-size: 14px; stroke-width: 2.5; }
 .pin-dot { display: block; width: 8px; height: 8px; border-radius: 50%; background: #fff; }
+
+/* ---- photos on offers & requests ---- */
+.post-photo { margin: -20px -20px 4px; aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--radius) var(--radius) 0 0; background: #e9e7df; }
+.post-photo img, .detail-photo img, .photo-frame img, .photo-frame video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.post-photo img { transition: transform .6s cubic-bezier(.2, .7, .2, 1); }
+a.post-card:hover .post-photo img { transform: scale(1.045); }
+.post-card.own-post .post-photo { margin: -19px -19px 4px; }
+.detail-photo { margin: -20px -20px 18px; aspect-ratio: 2 / 1; overflow: hidden; border-radius: var(--radius) var(--radius) 0 0; background: #e9e7df; }
+.photo-current { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+.photo-current img { width: 120px; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; }
+label.inline { display: flex; gap: 6px; align-items: center; font-weight: 500; margin: 0; }
+.photo-field .hint { margin: 4px 0 0; }
+
+/* ---- homepage ---- */
+body { overflow-x: clip; }           /* lets full-bleed sections use 100vw without a sideways scrollbar */
+.btn { transition: background-color .15s, border-color .15s, transform .1s; }
+.btn:active { transform: translateY(1px); }
+.photo-frame { display: block; overflow: hidden; background: #e9e7df; }
+.photo-frame img { transition: transform .8s cubic-bezier(.2, .7, .2, 1); }
+
+.home-hero { position: relative; overflow: hidden; width: 100vw; margin: -28px calc(50% - 50vw) 0;
+  height: min(86svh, 780px); min-height: 520px; background: #2a332d; color: #fff; }
+.hero-slides { position: absolute; inset: 0; will-change: transform; }
+.hero-slide { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; opacity: 0;
+  transition: opacity 1.6s ease; }
+.hero-slide.is-on { opacity: 1; animation: hero-drift 9s ease-out both; }
+@keyframes hero-drift { from { transform: scale(1.07); } to { transform: scale(1); } }
+/* Neutral scrim so white type stays readable on any photograph. */
+.home-hero::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to top, rgba(10, 14, 12, .72) 0%, rgba(10, 14, 12, .35) 45%, rgba(10, 14, 12, 0) 75%); }
+.hero-inner { position: absolute; inset: 0; z-index: 1; display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 32px; padding-bottom: 56px; }
+.hero-copy { max-width: 640px; }
+.home-hero h1 { font-size: clamp(42px, 6vw, 84px); line-height: 1; letter-spacing: -.035em; max-width: 13ch; margin: 0 0 24px; }
+.hero-lead { font-size: clamp(17px, 1.4vw, 20px); line-height: 1.5; max-width: 46ch; margin: 0 0 28px; color: rgba(255, 255, 255, .92); }
+.home-hero .btn { padding: 12px 22px; font-size: 1.02rem; }
+.hero-link { color: #fff; font-weight: 600; text-underline-offset: 4px; padding: 10px 4px; }
+.hero-link:hover { text-decoration-thickness: 2px; }
+.hero-link.dark { color: var(--brand-dark); padding: 0; }
+.hero-caption { margin: 0; font-size: 14px; color: rgba(255, 255, 255, .85); text-align: right; max-width: 28ch; }
+.hero-caption span { transition: opacity .4s; }
+.hero-caption span.swap { opacity: 0; }
+
+/* "From shelf to supper": three photographs down a falling diagonal on a 12-column grid. */
+.relay { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; margin-top: 140px; padding-top: 12px; }
+.relay-stage { display: contents; }
+.relay-title { grid-column: 5 / 13; grid-row: 1; margin-bottom: 20px !important; font-size: clamp(34px, 3.6vw, 54px); line-height: 1.02; letter-spacing: -.03em; margin: 0; }
+.relay-text { font-size: 17px; line-height: 1.55; max-width: 36ch; margin: 0; }
+.relay-text b { color: var(--brand-dark); }
+.stage-1 .photo-frame { grid-column: 1 / 5; grid-row: 1 / 4; aspect-ratio: 3 / 4; }
+.stage-1 .relay-text { grid-column: 5 / 9; grid-row: 2; }
+.stage-2 .photo-frame { grid-column: 6 / 9; grid-row: 3 / 5; aspect-ratio: 1; margin-top: 64px; }
+.stage-2 .relay-text { grid-column: 9 / 13; grid-row: 3; margin-top: 64px; }
+.stage-3 .photo-frame { grid-column: 7 / 13; grid-row: 5; aspect-ratio: 16 / 10; margin-top: 90px; }
+.stage-3 .relay-text { grid-column: 3 / 7; grid-row: 5; margin-top: 90px; align-self: start; }
+
+/* "Four ways to take part": a run of frames, the supplier lifted above the rest. */
+.roles-run { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; margin-top: 160px; padding-top: 12px; }
+.roles-side { grid-column: 1 / 4; }
+.roles-side h2 { font-size: clamp(28px, 2.4vw, 36px); line-height: 1.08; letter-spacing: -.02em; }
+.roles-side p { font-size: 17px; }
+.roles-frames { grid-column: 4 / 13; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 14px; align-items: end; }
+.role-frame { display: grid; gap: 12px; text-decoration: none; color: var(--text); }
+.role-frame .photo-frame { aspect-ratio: 4 / 5; }
+.role-frame.lifted .photo-frame { aspect-ratio: 3 / 4.4; }
+.role-frame:hover .photo-frame img, .role-frame:focus-visible .photo-frame img { transform: scale(1.06); }
+.role-frame-text { display: grid; gap: 4px; font-size: 15px; line-height: 1.4; }
+.role-frame-text b { font-size: 18px; }
+.role-frame-text > span:not(.role-frame-go) { color: var(--muted); }
+.role-frame-go { color: var(--brand-dark); font-weight: 600; transition: transform .2s; }
+.role-frame:hover .role-frame-go { transform: translateX(4px); }
+/* Equal text height under every frame, so the photographs' bottoms line up. */
+.roles-frames .role-frame-text { min-height: 7.5em; align-content: start; }
+
+.section.how { margin-top: 170px; }
+
+.closing { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: center; margin: 170px 0 40px; }
+.closing-photo { grid-column: 1 / 7; aspect-ratio: 4 / 3; }
+.closing-copy { grid-column: 8 / 13; }
+.closing-copy h2 { font-size: clamp(32px, 3.6vw, 54px); line-height: 1.02; letter-spacing: -.03em; }
+.closing-copy p { font-size: 18px; max-width: 40ch; }
+
+/* Entrances: parts rise into place as their section arrives (only once scripts are running). */
+.js [data-reveal] { opacity: 0; transform: translateY(24px);
+  transition: opacity .7s ease var(--d, 0ms), transform .9s cubic-bezier(.2, .7, .2, 1) var(--d, 0ms); }
+.js [data-reveal].in { opacity: 1; transform: none; }
+/* Headings only travel, so a section never reads as untitled before its entrance has run. */
+.js h1[data-reveal], .js h2[data-reveal] { opacity: 1; }
+
+@media (max-width: 900px) {
+  .roles-side, .roles-frames { grid-column: 1 / -1; }
+  .roles-frames { grid-template-columns: repeat(3, 1fr); margin-top: 12px; }
+  .role-frame.lifted { grid-column: 1 / -1; }
+  .role-frame.lifted .photo-frame { aspect-ratio: 16 / 9; }
+  .roles-frames .role-frame-text { min-height: 0; }
+}
+@media (max-width: 760px) {
+  .home-hero { height: 88svh; min-height: 480px; }
+  .hero-inner { flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 16px; padding-bottom: 28px; }
+  .hero-caption { text-align: left; }
+  .relay, .roles-run, .closing { display: block; margin-top: 96px; }
+  .relay-title { margin-bottom: 24px; }
+  .relay-stage { display: block; margin-bottom: 48px; }
+  .relay-stage .photo-frame, .relay-stage .relay-text { margin-top: 0; }
+  .relay-stage .photo-frame { margin-bottom: 14px; }
+  .stage-1 .photo-frame { width: 100%; aspect-ratio: 4 / 3; }
+  .stage-2 .photo-frame { width: 62%; margin-left: auto; }
+  .stage-2 .relay-text { margin-left: auto; max-width: 62%; }
+  .stage-3 .photo-frame { width: 78%; }
+  .section.how { margin-top: 96px; }
+  .closing-photo { margin-bottom: 24px; }
+}
+@media (max-width: 560px) {
+  /* Phones: the lifted frame stays on top; the others become rows, photo beside its text. */
+  .roles-frames { grid-template-columns: 1fr; gap: 16px; }
+  .role-frame:not(.lifted) { grid-template-columns: 38% 1fr; align-items: start; gap: 14px; }
+  .role-frame:not(.lifted) .photo-frame { aspect-ratio: 1; }
+}
+@media (max-width: 480px) {
+  .stage-2 .relay-text { max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .hero-slide { transition: none; }
+  .hero-slide.is-on { animation: none; }
+  .photo-frame img, .post-photo img, .role-frame-go { transition: none; }
+}
+.credit-list { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 14px; }
+.credit-list li { display: flex; gap: 14px; align-items: center; }
+.credit-list img { width: 96px; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; flex: none; }

@@ -289,6 +289,58 @@ class EcoServingTest(unittest.TestCase):
         with anon.get("/favicon.ico") as r:
             self.assertEqual(r.status_code, 200)
 
+    def test_photos_on_offers_and_requests(self):
+        supplier = self.client_for("supplier")
+        # No photo: a stock photo of the food type, with its alt text.
+        oid = self.make_offer(supplier)
+        page = supplier.get(f"/offers/{oid}").get_data(as_text=True)
+        self.assertRegex(page, r'class="detail-photo"><img src="/static/photos/(fresh-bread|bakery-shelves|bakery-counter)\.jpg"')
+        self.assertIn('class="post-photo"', supplier.get("/offers").get_data(as_text=True))
+        # An uploaded photo replaces it and is served to logged-in users only.
+        png = b"\x89PNG\r\n\x1a\n" + b"\0" * 32
+        r = self.post(supplier, "/offers/new", follow=False, title="Soup", description="Lentil soup",
+                      food_type="Prepared meals", quantity="8", size="medium", location="1 Main St",
+                      pickup_deadline=future(3), visible_distributors="1", photo=(BytesIO(png), "soup.png"))
+        self.assertEqual(r.status_code, 302)
+        page = supplier.get(r.headers["Location"]).get_data(as_text=True)
+        name = re.search(r'src="/photos/([0-9a-f]{32}\.png)"', page).group(1)
+        with supplier.get(f"/photos/{name}") as r:
+            self.assertEqual(r.status_code, 200)
+        self.assertEqual(self.app.test_client().get(f"/photos/{name}").status_code, 302)
+        # Files that aren't images are refused.
+        r = self.post(supplier, "/offers/new", title="Soup", description="x", food_type="Prepared meals",
+                      quantity="8", location="1 Main St", pickup_deadline=future(3), visible_distributors="1",
+                      photo=(BytesIO(b"<script>"), "soup.png"))
+        self.assertIn("Photos must be JPG, PNG or WebP images.", r.get_data(as_text=True))
+        # Food and volunteer requests get photos too; a request's words pick a fitting stock photo.
+        dist = self.client_for("distributor")
+        self.verify("distributor@example.test")
+        self.post(dist, "/food-requests/new", title="Bread for breakfast", description="Loaves", quantity="20",
+                  location="2 Main St", needed_by=future(5))
+        self.assertRegex(dist.get("/food-requests").get_data(as_text=True),
+                         r'class="post-photo"><img src="/static/photos/sm/(fresh-bread|bakery-shelves|bakery-counter)\.jpg"')
+        self.post(dist, "/volunteer/new", title="Drivers", tasks="Drive", location="2 Main St",
+                  start_time=future(2), end_time=future(4), slots="1")
+        self.assertIn('class="post-photo"', dist.get("/volunteer").get_data(as_text=True))
+
+    def test_homepage_photos_and_credits(self):
+        anon = self.app.test_client()
+        home = anon.get("/").get_data(as_text=True)
+        self.assertGreaterEqual(home.count("/static/photos/"), 8)
+        self.assertIn("plating.webm", home)
+        self.assertIn("prefers-reduced-motion", home)
+        credits = anon.get("/credits").get_data(as_text=True)
+        self.assertIn("Wikimedia Commons", credits)
+        self.assertIn("Photo credits", home)
+        with self.app.app_context():
+            from foodrelay.photos import STOCK_BY_TYPE, stock_credits
+            from foodrelay.helpers import FOOD_TYPES
+            self.assertEqual(set(STOCK_BY_TYPE), set(FOOD_TYPES))
+            for names in STOCK_BY_TYPE.values():
+                for name in names:
+                    self.assertIn(name, stock_credits())
+                    self.assertTrue(os.path.exists(os.path.join(self.app.static_folder, "photos", "sm", name + ".jpg")))
+
     def test_seed(self):
         with self.app.app_context():
             from foodrelay.seed import seed

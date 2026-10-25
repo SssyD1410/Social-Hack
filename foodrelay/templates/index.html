@@ -1,25 +1,35 @@
 {% extends "base.html" %}
 {% block title %}Share surplus food{% endblock %}
 {% block content %}
-<section class="hero">
-  <div>
-    <h1>Surplus food, served to the people who need it.</h1>
-    <p class="lead">EcoServing connects shops and restaurants that have food left over with shelters, community
-      organizations, volunteers and neighbors, so good food gets eaten instead of thrown away.</p>
-    <div class="btn-row">
-      {% if g.user %}
-        <a class="btn" href="{{ url_for('main.dashboard') }}">Go to your dashboard</a>
-      {% else %}
-        <a class="btn" href="{{ url_for('auth.register') }}">Join EcoServing</a>
-      {% endif %}
-      <a class="btn secondary" href="{{ url_for('main.learn') }}">Find your role</a>
-    </div>
+{% set slides = [
+  ('minneapolis', 'Minneapolis, across the Mississippi'),
+  ('fresh-bread', 'Bread at the end of a market day'),
+  ('vegetables', 'Produce that won’t keep till Monday'),
+  ('apple-crates', 'Apples by the crate'),
+] %}
+<script>document.documentElement.classList.add('js');</script>
+<section class="home-hero" aria-labelledby="hero-title">
+  <div class="hero-slides" aria-hidden="true">
+    {% for name, caption in slides %}
+      <img class="hero-slide{{ ' is-on' if loop.first }}" src="{{ url_for('static', filename='photos/' ~ name ~ '.jpg') }}"
+           alt="" width="1600" height="1067" data-caption="{{ caption }}"{% if not loop.first %} loading="lazy"{% endif %}>
+    {% endfor %}
   </div>
-  <div class="hero-art" aria-hidden="true">
-    <div class="flow-step"><span class="emoji">{{ icon('store') }}</span><div><b>A bakery posts</b><br><span class="muted small">"25 loaves, pick up by 8pm"</span></div></div>
-    <div class="flow-step"><span class="emoji">{{ icon('truck') }}</span><div><b>A shelter claims it</b><br><span class="muted small">and arranges pickup in chat</span></div></div>
-    <div class="flow-step"><span class="emoji">{{ icon('hand-heart') }}</span><div><b>A volunteer drives it over</b><br><span class="muted small">after signing up for a shift</span></div></div>
-    <div class="flow-step"><span class="emoji">{{ icon('utensils') }}</span><div><b>Dinner is served</b><br><span class="muted small">instead of a full bin</span></div></div>
+  <div class="hero-inner container">
+    <div class="hero-copy">
+      <h1 id="hero-title" data-reveal>Surplus food, served nearby.</h1>
+      <p class="hero-lead" data-reveal style="--d:90ms">EcoServing passes good food from Twin Cities bakeries and restaurants
+        to shelters, volunteers and neighbors before closing time turns it into waste.</p>
+      <div class="btn-row" data-reveal style="--d:180ms">
+        {% if g.user %}
+          <a class="btn" href="{{ url_for('main.dashboard') }}">Go to your dashboard</a>
+        {% else %}
+          <a class="btn" href="{{ url_for('auth.register') }}">Join EcoServing</a>
+        {% endif %}
+        <a class="hero-link" href="{{ url_for('main.learn') }}">Find your role →</a>
+      </div>
+    </div>
+    <p class="hero-caption" aria-hidden="true"><span id="hero-caption">{{ slides[0][1] }}</span></p>
   </div>
 </section>
 
@@ -32,24 +42,54 @@
 </div>
 #}
 
-<section class="section" id="roles">
-  <div class="section-head"><h2>Four ways to take part</h2></div>
-  <div class="role-grid">
-    {% for key, r in ROLES.items() %}
-    <div class="card role-card">
-      <span class="emoji">{{ icon(r.icon) }}</span>
-      <h3>{{ r.label }}</h3>
-      <p class="muted">{{ r.tagline }}</p>
-      {% if not g.user %}<div class="btn-row"><a class="btn small" href="{{ url_for('auth.register', role=key) }}">Join as {{ r.label|lower }}</a></div>{% endif %}
-    </div>
-    {% endfor %}
+{# One batch of food, followed from the shop shelf to a dinner plate, down a falling diagonal. #}
+<section class="relay" aria-labelledby="relay-title">
+  <h2 id="relay-title" class="relay-title" data-reveal>From shelf to supper</h2>
+  <div class="relay-stage stage-1">
+    <div class="photo-frame" data-reveal><img src="{{ url_for('static', filename='photos/sm/bakery-counter.jpg') }}" alt="{{ stock_alt('bakery-counter') }}" width="720" height="480" loading="lazy"></div>
+    <p class="relay-text" data-reveal style="--d:90ms"><b>At closing time,</b> a bakery posts what’s left: 25 croissants, pick up by 8pm.
+      It takes a minute, and only the people who can use it will see it.</p>
   </div>
-  <p class="roles-more"><a class="btn secondary" href="{{ url_for('main.learn') }}">Learn more about the four roles →</a></p>
+  <div class="relay-stage stage-2">
+    <div class="photo-frame" data-reveal><img src="{{ url_for('static', filename='photos/sm/canned-greens.jpg') }}" alt="{{ stock_alt('canned-greens') }}" width="720" height="480" loading="lazy"></div>
+    <p class="relay-text" data-reveal style="--d:90ms"><b>Within the hour,</b> a verified shelter or pantry claims it and agrees on
+      pickup in chat. A volunteer with a car signs up to drive.</p>
+  </div>
+  <div class="relay-stage stage-3">
+    <div class="photo-frame" data-reveal>
+      <video class="relay-clip" muted loop playsinline preload="metadata" width="1280" height="720" aria-hidden="true"
+             poster="{{ url_for('static', filename='photos/plating.jpg') }}">
+        <source src="{{ url_for('static', filename='photos/plating.webm') }}" type="video/webm">
+      </video>
+    </div>
+    <p class="relay-text" data-reveal style="--d:90ms"><b>By dinner,</b> the food is on plates across the city instead of in a bin
+      behind the shop.</p>
+  </div>
 </section>
 
-<section class="section">
-  <div class="card">
-    <h2>How EcoServing works</h2>
+{# The four roles as a run of photographs, the supplier (where food starts) lifted above the others. #}
+{% set role_photos = {'supplier': 'chefs-kitchen', 'distributor': 'pantry-aisle', 'volunteer': 'food-bank-sorting', 'consumer': 'lunch-plate'} %}
+<section class="roles-run" id="roles" aria-labelledby="roles-title">
+  <div class="roles-side">
+    <h2 id="roles-title" data-reveal>Four ways to take part</h2>
+    <p data-reveal style="--d:90ms">Shops give, shelters collect, volunteers carry, and neighbors eat. Pick the one that fits you.</p>
+    <p data-reveal style="--d:180ms"><a class="hero-link dark" href="{{ url_for('main.learn') }}">Learn more about the four roles&nbsp;→</a></p>
+  </div>
+  <div class="roles-frames">
+    {% for key, r in ROLES.items() %}
+    <a class="role-frame{{ ' lifted' if loop.first }}" href="{{ url_for('auth.register', role=key) if not g.user else url_for('main.learn', role=key) }}"
+       data-reveal style="--d:{{ loop.index0 * 80 }}ms">
+      <span class="photo-frame"><img src="{{ url_for('static', filename='photos/sm/' ~ role_photos[key] ~ '.jpg') }}" alt="{{ stock_alt(role_photos[key]) }}" width="720" height="480" loading="lazy"></span>
+      <span class="role-frame-text"><b>{{ r.label }}</b><span>{{ r.tagline }}</span>
+        <span class="role-frame-go">{{ 'Join as ' ~ r.label|lower if not g.user else 'About ' ~ r.label|lower ~ 's' }} →</span></span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section how" aria-labelledby="how-title">
+  <div class="card" data-reveal>
+    <h2 id="how-title">How EcoServing works</h2>
     <p class="muted small">Hover over (or tap) any step or arrow to see what happens there.</p>
     {# Flowchart: both lanes share one 7-column grid (step, arrow, step, arrow, step, arrow, step), so
        "Pickup & delivery" lines up in column 5. Steps and arrows both show a tooltip on hover/focus. #}
@@ -108,9 +148,68 @@
     <p class="fc-desc" id="fc-desc" aria-live="polite">Select a step or arrow to read about it.</p>
   </div>
 </section>
+
+<section class="closing" aria-labelledby="closing-title">
+  <div class="closing-photo photo-frame" data-reveal><img src="{{ url_for('static', filename='photos/bakery-shelves.jpg') }}" alt="{{ stock_alt('bakery-shelves') }}" width="1600" height="1067" loading="lazy"></div>
+  <div class="closing-copy">
+    <h2 id="closing-title" data-reveal>Food left at closing?</h2>
+    <p data-reveal style="--d:90ms">Post it tonight and a shelter, a volunteer or a neighbor nearby can have it on a plate by morning.
+      If you run a shelter or pantry, join to see what’s on offer near you.</p>
+    <div class="btn-row" data-reveal style="--d:180ms">
+      {% if g.user %}<a class="btn" href="{{ url_for('main.dashboard') }}">Go to your dashboard</a>
+      {% else %}<a class="btn" href="{{ url_for('auth.register') }}">Join EcoServing</a>{% endif %}
+    </div>
+  </div>
+</section>
 {% endblock %}
 {% block scripts %}
 <script>
+  (() => {
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Section entrances: each part rises in once as it scrolls into view.
+    const parts = document.querySelectorAll('[data-reveal]');
+    if (still || !('IntersectionObserver' in window)) {
+      parts.forEach(el => el.classList.add('in'));
+    } else {
+      const io = new IntersectionObserver(entries => entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      }), {rootMargin: '0px 0px -8% 0px'});
+      parts.forEach(el => io.observe(el));
+    }
+
+    // The plating clip loops only while it is on screen; with reduced motion it stays on its poster frame.
+    // Only its middle (5.4s to 11.6s) is plain footage; the rest are logo and title cards.
+    const clip = document.querySelector('.relay-clip'), CLIP_IN = 5.4, CLIP_OUT = 11.6;
+    if (clip && !still && 'IntersectionObserver' in window) {
+      clip.addEventListener('loadedmetadata', () => { clip.currentTime = CLIP_IN; });
+      clip.addEventListener('timeupdate', () => {
+        if (clip.currentTime < CLIP_IN || clip.currentTime > CLIP_OUT) clip.currentTime = CLIP_IN;
+      });
+      new IntersectionObserver(([e]) => { e.isIntersecting ? clip.play().catch(() => {}) : clip.pause(); }).observe(clip);
+    }
+
+    // Hero: slow crossfade between the photographs, with the caption following. Pauses in hidden tabs.
+    const slides = [...document.querySelectorAll('.hero-slide')], caption = document.getElementById('hero-caption');
+    if (still || slides.length < 2) return;
+    let i = 0;
+    setInterval(() => {
+      if (document.hidden) return;
+      slides[i].classList.remove('is-on');
+      i = (i + 1) % slides.length;
+      slides[i].classList.add('is-on');
+      caption.classList.add('swap');
+      setTimeout(() => { caption.textContent = slides[i].dataset.caption; caption.classList.remove('swap'); }, 400);
+    }, 5600);
+
+    // A gentle parallax on the hero photograph while the first screen scrolls away.
+    const hero = document.querySelector('.hero-slides');
+    addEventListener('scroll', () => {
+      const y = Math.min(scrollY, innerHeight);
+      hero.style.transform = `translate3d(0, ${y * 0.18}px, 0)`;
+    }, {passive: true});
+  })();
+
   // Mirror the hovered/focused step into the description line (helpful on touch screens).
   const desc = document.getElementById('fc-desc');
   // Keep an open tooltip fully on screen: shift it sideways by --dx when it would cross an edge.

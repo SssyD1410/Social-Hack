@@ -43,5 +43,7 @@ def create_app(test_config=None):
 
     from .helpers import register_template_helpers
     register_template_helpers(app)
+    from . import photos
+    photos.register(app)
 
     return app

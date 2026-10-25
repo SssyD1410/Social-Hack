@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros.html" import csrf, location_picker, back_button %}
+{% from "macros.html" import csrf, location_picker, back_button, photo_field %}
 {% block title %}{{ 'Edit offer' if editing else 'Post food offer' }}{% endblock %}
 {% block content %}
 <div class="medium">
@@ -7,7 +7,7 @@
   <div class="card">
     <h1>{{ 'Edit offer' if editing else 'Post a food offer' }}</h1>
     <p class="muted">Describe what you have and when it needs to be collected. All food on EcoServing is free.</p>
-    <form method="post" class="stack">
+    <form method="post" class="stack" enctype="multipart/form-data">
       {{ csrf() }}
       <div><label for="title">Title</label>
         <input id="title" name="title" type="text" required maxlength="120" placeholder="e.g. End-of-day bread &amp; pastries" value="{{ values.title }}"></div>
@@ -36,6 +36,7 @@
         <div><label for="city">City / area</label>
           <input id="city" name="city" type="text" value="{{ values.city or '' }}"></div>
       </div>
+      {{ photo_field(offer if editing else none, "offer") }}
       {{ location_picker(values.lat, values.lng, "Pickup point on map") }}
       <div class="grid-2">
         <div><label for="pickup_start">Available from <span class="hint">(optional)</span></label>

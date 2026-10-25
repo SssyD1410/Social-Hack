@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros.html" import status_tag, post_button, message_button, back_button %}
+{% from "macros.html" import post_photo, status_tag, post_button, message_button, back_button %}
 {% block title %}{{ offer.title }}{% endblock %}
 {% block content %}
 {% set mine = offer.supplier_id == g.user.id %}
@@ -19,6 +19,7 @@
 
 <div class="two-col">
   <div class="card">
+    {{ post_photo('offer', offer, 'detail-photo', 'lg') }}
     <p style="white-space:pre-wrap">{{ offer.description }}</p>
     <dl class="details">
       <dt>Quantity</dt><dd>{{ offer.quantity }}</dd>

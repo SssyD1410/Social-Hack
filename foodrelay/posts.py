@@ -4,6 +4,7 @@ from flask import Blueprint, abort, flash, g, redirect, render_template, request
 
 from .db import execute, get_db, now_str, query
 from .helpers import FOOD_TYPES, login_required, parse_latlng, role_required, verified_required
+from .photos import delete_photo, save_photo
 from .visibility import (can_claim_offer, can_view_offer, offer_is_expired,
                          offer_visibility_clause)
 
@@ -17,6 +18,20 @@ def _required(form, fields):
 
 def _clean(form, key):
     return form.get(key, "").strip() or None
+
+
+def _photo_upload(errors, current=None):
+    """Handle the optional photo field. Call after validation; returns the photo to store."""
+    if errors:
+        return current
+    stored, error = save_photo(request.files.get("photo"))
+    if error:
+        errors.append(error)
+        return current
+    if stored or request.form.get("remove_photo"):
+        delete_photo(current)
+        return stored
+    return current
 
 
 # ---------------------------------------------------------------------------
@@ -111,6 +126,7 @@ def new_offer():
     if request.method == "POST":
         values = _offer_form_values(request.form)
         errors = _validate_offer(request.form, values)
+        values["photo"] = _photo_upload(errors)
         if errors:
             for e in errors:
                 flash(e, "error")
@@ -139,11 +155,12 @@ def edit_offer(offer_id):
     if request.method == "POST":
         values = _offer_form_values(request.form)
         errors = _validate_offer(request.form, values)
+        values["photo"] = _photo_upload(errors, offer["photo"])
         if errors:
             for e in errors:
                 flash(e, "error")
         else:
-            sets = ", ".join(f"{k} = ?" for k in values)
+            sets =", ".join(f"{k} = ?" for k in values)
             execute(f"UPDATE food_offers SET {sets} WHERE id = ?", (*values.values(), offer_id))
             flash("Offer updated.", "success")
             return redirect(url_for("posts.offer", offer_id=offer_id))
@@ -265,16 +282,17 @@ def new_food_request():
                                ("location", "Location"), ("needed_by", "Needed by")])
         if values["needed_by"] and values["needed_by"] <= now_str():
             errors.append("'Needed by' must be in the future.")
+        photo = _photo_upload(errors)
         if errors:
             for e in errors:
                 flash(e, "error")
         else:
             rid = execute(
                 """INSERT INTO food_requests (distributor_id, title, description, quantity, location, city, lat, lng,
-                                              needed_by)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                              needed_by, photo)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (g.user["id"], values["title"], values["description"], values["quantity"], values["location"],
-                 values["city"] or None, values["lat"], values["lng"], values["needed_by"]))
+                 values["city"] or None, values["lat"], values["lng"], values["needed_by"], photo))
             flash("Food request posted. Suppliers can now see it.", "success")
             return redirect(url_for("posts.food_request", req_id=rid))
     return render_template("food_requests/form.html", values=values)
@@ -369,17 +387,18 @@ def new_volunteer_request():
             errors.append("End time must be after start time.")
         if values["end_time"] and values["end_time"] <= now_str():
             errors.append("The time period must be in the future.")
+        photo = _photo_upload(errors)
         if errors:
             for e in errors:
                 flash(e, "error")
         else:
             vid = execute(
                 """INSERT INTO volunteer_requests (poster_id, title, tasks, requirements, location, city, lat, lng,
-                                                   start_time, end_time, slots)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                                   start_time, end_time, slots, photo)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (g.user["id"], values["title"], values["tasks"], values["requirements"] or None,
                  values["location"], values["city"] or None, values["lat"], values["lng"],
-                 values["start_time"], values["end_time"], slots))
+                 values["start_time"], values["end_time"], slots, photo))
             flash("Volunteer request posted.", "success")
             return redirect(url_for("posts.volunteer_request", req_id=vid))
     return render_template("volunteer/form.html", values=values)

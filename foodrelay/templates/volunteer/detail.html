@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros.html" import csrf, status_tag, post_button, message_button, back_button %}
+{% from "macros.html" import post_photo, csrf, status_tag, post_button, message_button, back_button %}
 {% block title %}{{ v.title }}{% endblock %}
 {% block content %}
 {% set mine = v.poster_id == g.user.id %}
@@ -13,6 +13,7 @@
 <div class="two-col">
   <div>
     <div class="card">
+      {{ post_photo('volunteer', v, 'detail-photo', 'lg') }}
       <h3>Tasks</h3>
       <p style="white-space:pre-wrap">{{ v.tasks }}</p>
       {% if v.requirements %}<h3>Requirements</h3><p style="white-space:pre-wrap">{{ v.requirements }}</p>{% endif %}

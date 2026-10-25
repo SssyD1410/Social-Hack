@@ -24,6 +24,12 @@ second; food requests show a map too. Maps use [Leaflet](https://leafletjs.com) 
 from the public [OSRM](https://project-osrm.org) demo server (falling back to a straight line), and "Find typed address"
 uses OpenStreetMap Nominatim. Those public services are fine for demos; use your own or a paid provider in production.
 
+Every food offer, food request and volunteer request shows a photo: the one its poster uploaded (JPG, PNG or WebP,
+stored in `instance/uploads/photos/`), or otherwise a real stock photo matched to its food type (requests are matched
+by their words). The stock photos and the homepage clip are CC0, CC BY or public domain, from Wikimedia Commons; their
+sources and licences are in [`foodrelay/static/photos/credits.json`](foodrelay/static/photos/credits.json) and on the
+`/credits` page, linked from every footer.
+
 ## Tech stack
 
 - **Backend:** Python 3.10+ / Flask, server-rendered Jinja templates
@@ -45,6 +51,7 @@ foodrelay/
   chat.py         conversations and messages
   admin.py        distributor verification
   visibility.py   who can see / claim which offers
+  photos.py       photo uploads and the stock photo for each offer / request
   templates/      Jinja templates (one dashboard per role, learn/<role>.html, ...)
   static/style.css
 tests/test_app.py end-to-end tests with Flask's test client

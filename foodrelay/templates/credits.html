@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "macros.html" import back_button %}
+{% block title %}Photo credits{% endblock %}
+{% block content %}
+<div class="medium">
+  <p class="small">{{ back_button(url_for('main.index')) }}</p>
+  <h1>Photo credits</h1>
+  <p class="muted">The photographs on EcoServing come from Wikimedia Commons. They show food and food work in general,
+    not the businesses or people using EcoServing. Photos that users attach to their own offers and requests belong to them.</p>
+  <ul class="credit-list">
+    {% for p in photos %}
+    <li>
+      <img src="{{ url_for('static', filename='photos/sm/' ~ p.name ~ '.jpg') }}" alt="{{ p.alt }}" loading="lazy">
+      <div>
+        <a href="{{ p.page }}" rel="noopener">{{ p.title }}</a><br>
+        <span class="muted small">by {{ p.creator or 'unknown' }} · <a href="{{ p.license_url }}" rel="noopener">{{ p.license }}</a> · via {{ p.via }}</span>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

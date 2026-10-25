@@ -6,6 +6,7 @@ from flask import (Blueprint, abort, current_app, flash, g, redirect, render_tem
 
 from .db import execute, now_str, query
 from .helpers import ROLES, distance_km, login_required, parse_latlng
+from .photos import photo_folder, stock_credits
 from .visibility import offer_visibility_clause
 
 bp = Blueprint("main", __name__)
@@ -29,6 +30,18 @@ def index():
 def favicon():
     # Browsers ask for /favicon.ico directly; serve the generated one instead of a 404.
     return send_from_directory(os.path.join(current_app.static_folder, "favicon"), "favicon.ico")
+
+
+@bp.route("/photos/<name>")
+@login_required
+def photo(name):
+    # Photos users attach to offers and requests.
+    return send_from_directory(photo_folder(), name, max_age=86400)
+
+
+@bp.route("/credits")
+def credits():
+    return render_template("credits.html", photos=list(stock_credits().values()))
 
 
 @bp.route("/learn")

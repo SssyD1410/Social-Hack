@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros.html" import csrf, location_picker, back_button %}
+{% from "macros.html" import csrf, location_picker, back_button, photo_field %}
 {% block title %}Request volunteers{% endblock %}
 {% block content %}
 <div class="medium">
@@ -7,7 +7,7 @@
   <div class="card">
     <h1>Request volunteers</h1>
     <p class="muted">Describe the time period, what needs doing and anything volunteers should bring or have.</p>
-    <form method="post" class="stack">
+    <form method="post" class="stack" enctype="multipart/form-data">
       {{ csrf() }}
       <div><label for="title">Title</label>
         <input id="title" name="title" type="text" required maxlength="120" placeholder="e.g. Evening food run" value="{{ values.title }}"></div>
@@ -29,6 +29,7 @@
         <div><label for="city">City / area</label>
           <input id="city" name="city" type="text" value="{{ values.city }}"></div>
       </div>
+      {{ photo_field() }}
       {{ location_picker(values.lat, values.lng, "Meeting point on map") }}
       <div class="btn-row">
         <button class="btn" type="submit">Post request</button>

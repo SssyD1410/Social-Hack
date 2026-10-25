@@ -18,8 +18,28 @@
   {%- endif -%}
 {%- endmacro %}
 
+{# Photo at the top of a card or detail page: the poster's own, or a stock photo of the food type. #}
+{% macro post_photo(kind, row, cls='post-photo', size='sm') -%}
+<div class="{{ cls }}"><img src="{{ photo_url(kind, row, size) }}" alt="{{ photo_alt(kind, row) }}" loading="lazy" decoding="async"></div>
+{%- endmacro %}
+
+{% macro photo_field(current=none, kind='offer') %}
+<div class="photo-field">
+  <label for="photo">Photo <span class="hint">(optional; JPG, PNG or WebP, up to 8 MB)</span></label>
+  {% if current and current.photo %}
+    <div class="photo-current">
+      <img src="{{ photo_url(kind, current) }}" alt="Current photo">
+      <label class="inline"><input type="checkbox" name="remove_photo" value="1"> Remove this photo</label>
+    </div>
+  {% endif %}
+  <input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="photo-hint">
+  <p class="hint" id="photo-hint">Without a photo, a picture of the food type is shown.</p>
+</div>
+{% endmacro %}
+
 {% macro offer_card(o, now) %}
 <a class="card post-card" href="{{ url_for('posts.offer', offer_id=o.id) }}">
+  {{ post_photo('offer', o) }}
   <div class="top">
     <h3>{{ o.title }}</h3>
     {{ status_tag(o.status, o.status == 'available' and o.pickup_deadline < now) }}
@@ -40,6 +60,7 @@
 
 {% macro food_request_card(r) %}
 <a class="card post-card" href="{{ url_for('posts.food_request', req_id=r.id) }}">
+  {{ post_photo('request', r) }}
   <div class="top"><h3>{{ r.title }}</h3>{{ status_tag(r.status) }}</div>
   <div class="meta">
     <span>{{ icon('truck') }} {{ r.distributor_org or r.org_name or r.distributor_name or r.name }}</span>
@@ -52,6 +73,7 @@
 
 {% macro volunteer_card(v, mine=False) %}
 <a class="card post-card{{ ' own-post' if mine }}" href="{{ url_for('posts.volunteer_request', req_id=v.id) }}">
+  {{ post_photo('volunteer', v) }}
   {% if mine %}<span class="own-badge">{{ icon('star') }} Your request</span>{% endif %}
   <div class="top"><h3>{{ v.title }}</h3>{{ status_tag(v.status) }}</div>
   <div class="meta">

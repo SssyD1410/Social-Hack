@@ -66,9 +66,9 @@ def migrate():
     db = get_db()
     for table in ("users", "food_offers", "food_requests", "volunteer_requests"):
         cols = {r["name"] for r in db.execute(f"PRAGMA table_info({table})")}
-        for col in ("lat", "lng"):
-            if col not in cols:
-                db.execute(f"ALTER TABLE {table} ADD COLUMN {col} REAL")
+        for col, kind in (("lat", "REAL"), ("lng", "REAL"), ("photo", "TEXT")):
+            if col not in cols and not (table == "users" and col == "photo"):
+                db.execute(f"ALTER TABLE {table} ADD COLUMN {col} {kind}")
     db.commit()
 
 
