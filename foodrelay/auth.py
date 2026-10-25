@@ -52,7 +52,7 @@ def register():
                  "unverified" if role == "distributor" else "not_required"))
             session.clear()
             session["user_id"] = uid
-            flash(f"Welcome to FoodRelay, {name}!", "success")
+            flash(f"Welcome to EcoServing, {name}!", "success")
             if role == "distributor":
                 flash("Next step: upload your certification so we can verify your organization.", "info")
                 return redirect(url_for("main.profile"))

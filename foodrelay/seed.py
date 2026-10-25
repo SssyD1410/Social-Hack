@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash
 
 from .db import execute
 
-DEMO_PASSWORD = "foodrelay-demo"
+DEMO_PASSWORD = "ecoserving-demo"
 MPLS, STP = "Minneapolis, MN", "St. Paul, MN"
 
 # Demo places around the Twin Cities: (address, city, lat, lng). Businesses are fictional.
@@ -43,16 +43,16 @@ def seed():
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (email, pw, name, role, org, city, address, lat, lng, status, reg, bio))
 
-    user("admin@foodrelay.test", "FoodRelay Admin", "admin")
-    bakery = user("bakery@foodrelay.test", "Maria Lopez", "supplier", BAKERY, "Sunrise Bakery",
+    user("admin@ecoserving.test", "EcoServing Admin", "admin")
+    bakery = user("bakery@ecoserving.test", "Maria Lopez", "supplier", BAKERY, "Sunrise Bakery",
                   bio="Neighborhood bakery. We usually have bread left at closing.")
-    bistro = user("bistro@foodrelay.test", "Tom Becker", "supplier", BISTRO, "Green Fork Bistro")
-    shelter = user("shelter@foodrelay.test", "Aisha Khan", "distributor", SHELTER, "Harbor Street Shelter",
+    bistro = user("bistro@ecoserving.test", "Tom Becker", "supplier", BISTRO, "Green Fork Bistro")
+    shelter = user("shelter@ecoserving.test", "Aisha Khan", "distributor", SHELTER, "Harbor Street Shelter",
                    status="verified", reg="CH-204518", bio="Overnight shelter serving ~60 guests a night.")
-    user("pantry@foodrelay.test", "Leo Park", "distributor", PANTRY, "Eastside Community Pantry",
+    user("pantry@ecoserving.test", "Leo Park", "distributor", PANTRY, "Eastside Community Pantry",
          status="pending", reg="NP-778120")
-    vol = user("volunteer@foodrelay.test", "Sam Rivera", "volunteer", VOLUNTEER, bio="Have a car and free evenings.")
-    user("consumer@foodrelay.test", "Jordan Lee", "consumer", CONSUMER)
+    vol = user("volunteer@ecoserving.test", "Sam Rivera", "volunteer", VOLUNTEER, bio="Have a car and free evenings.")
+    user("consumer@ecoserving.test", "Jordan Lee", "consumer", CONSUMER)
 
     offer_sql = """INSERT INTO food_offers (supplier_id, title, description, food_type, dietary_tags, quantity, size,
                        location, city, lat, lng, pickup_start, pickup_deadline, visible_distributors,

@@ -3,14 +3,14 @@
 {% block content %}
 <section class="hero">
   <div>
-    <h1>Surplus food, relayed to the people who need it.</h1>
-    <p class="lead">FoodRelay connects shops and restaurants that have food left over with shelters, community
+    <h1>Surplus food, served to the people who need it.</h1>
+    <p class="lead">EcoServing connects shops and restaurants that have food left over with shelters, community
       organizations, volunteers and neighbors, so good food gets eaten instead of thrown away.</p>
     <div class="btn-row">
       {% if g.user %}
         <a class="btn" href="{{ url_for('main.dashboard') }}">Go to your dashboard</a>
       {% else %}
-        <a class="btn" href="{{ url_for('auth.register') }}">Join FoodRelay</a>
+        <a class="btn" href="{{ url_for('auth.register') }}">Join EcoServing</a>
       {% endif %}
       <a class="btn secondary" href="{{ url_for('main.learn') }}">Find your role</a>
     </div>
@@ -49,7 +49,7 @@
 
 <section class="section">
   <div class="card">
-    <h2>How FoodRelay works</h2>
+    <h2>How EcoServing works</h2>
     <p class="muted small">Hover over (or tap) any step or arrow to see what happens there.</p>
     {# Flowchart: both lanes share one 7-column grid (step, arrow, step, arrow, step, arrow, step), so
        "Pickup & delivery" lines up in column 5. Steps and arrows both show a tooltip on hover/focus. #}
@@ -113,8 +113,20 @@
 <script>
   // Mirror the hovered/focused step into the description line (helpful on touch screens).
   const desc = document.getElementById('fc-desc');
+  // Keep an open tooltip fully on screen: shift it sideways by --dx when it would cross an edge.
+  function fitTip(tip) {
+    tip.style.setProperty('--dx', '0px');
+    const r = tip.getBoundingClientRect(), edge = 12, w = document.documentElement.clientWidth;
+    if (!r.width) return;   // already hidden again (pointer left before the frame)
+    const dx = r.left < edge ? edge - r.left : r.right > w - edge ? (w - edge) - r.right : 0;
+    tip.style.setProperty('--dx', dx + 'px');
+  }
   document.querySelectorAll('.flowchart [data-desc]').forEach(n => {
-    const show = () => { desc.textContent = n.dataset.title + ': ' + n.dataset.desc; };
+    const show = () => {
+      desc.textContent = n.dataset.title + ': ' + n.dataset.desc;
+      const tip = n.querySelector('.fc-tip');
+      if (tip) requestAnimationFrame(() => fitTip(tip));   // after :hover/:focus has shown it
+    };
     n.addEventListener('mouseenter', show);
     n.addEventListener('focus', show);
   });

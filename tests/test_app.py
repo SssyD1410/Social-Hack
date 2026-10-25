@@ -16,7 +16,7 @@ def future(hours):
     return (datetime.now() + timedelta(hours=hours)).strftime("%Y-%m-%dT%H:%M")
 
 
-class FoodRelayTest(unittest.TestCase):
+class EcoServingTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
         self.app = create_app({
@@ -70,7 +70,7 @@ class FoodRelayTest(unittest.TestCase):
             self.assertEqual(r.status_code, 200)
         self.assertEqual(c.get("/learn/nobody").status_code, 404)
         page = c.get("/learn").get_data(as_text=True)
-        self.assertIn("FoodRelay separates users into four roles", page)
+        self.assertIn("EcoServing separates users into four roles", page)
         for role in ("supplier", "distributor", "volunteer", "consumer"):
             self.assertIn(f'id="panel-{role}"', page)
         self.assertNotIn("Other roles", page)

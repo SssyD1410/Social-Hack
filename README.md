@@ -1,6 +1,6 @@
-# FoodRelay
+# EcoServing
 
-FoodRelay helps surplus food reach people who need it. Shops and restaurants post food they'd otherwise throw
+EcoServing helps surplus food reach people who need it. Shops and restaurants post food they'd otherwise throw
 away; verified organizations and consumers claim it, volunteers help move it, and everyone coordinates in built-in chat.
 
 ## Roles
@@ -11,7 +11,7 @@ away; verified organizations and consumers claim it, volunteers help move it, an
 | **Distributor** | Shelters, food banks, pantries | Upload certification and get verified by an admin. Once verified: claim offers (and take responsibility for pickup and delivery), post food requests (description, quantity, location, time), request volunteers. |
 | **Volunteer** | Individuals, not acting for an organization | Sign up for volunteer requests; "I can't make it" re-lists the spot. Volunteers don't see food offers. |
 | **Consumer** | Anyone who wants food | View and reserve **small** offers that suppliers have made visible to consumers. |
-| **Admin** | FoodRelay staff | Review distributor documents and verify or reject them. |
+| **Admin** | EcoServing staff | Review distributor documents and verify or reject them. |
 
 Anyone can message the person behind an offer or request they can see. All four roles are explained on one tabbed
 "Learn more" page at `/learn` (`/learn/<role>` opens a specific tab).
@@ -64,17 +64,17 @@ Then open http://127.0.0.1:5000.
 
 ### Demo accounts (after `seed`)
 
-All demo accounts use the password `foodrelay-demo`.
+All demo accounts use the password `ecoserving-demo`.
 
 | Email | Role |
 |-------|------|
-| `admin@foodrelay.test` | Admin |
-| `bakery@foodrelay.test` | Supplier (Sunrise Bakery) |
-| `bistro@foodrelay.test` | Supplier (Green Fork Bistro) |
-| `shelter@foodrelay.test` | Distributor, verified (Harbor Street Shelter) |
-| `pantry@foodrelay.test` | Distributor, pending verification |
-| `volunteer@foodrelay.test` | Volunteer |
-| `consumer@foodrelay.test` | Consumer |
+| `admin@ecoserving.test` | Admin |
+| `bakery@ecoserving.test` | Supplier (Sunrise Bakery) |
+| `bistro@ecoserving.test` | Supplier (Green Fork Bistro) |
+| `shelter@ecoserving.test` | Distributor, verified (Harbor Street Shelter) |
+| `pantry@ecoserving.test` | Distributor, pending verification |
+| `volunteer@ecoserving.test` | Volunteer |
+| `consumer@ecoserving.test` | Consumer |
 
 ### Tests
 

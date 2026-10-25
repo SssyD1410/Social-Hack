@@ -188,9 +188,11 @@ a.fc-node { cursor: pointer; }
 .fc-label { position: relative; top: -11px; font-size: .68rem; font-weight: 600; color: var(--muted); background: var(--surface); padding: 0 3px; white-space: nowrap; }
 .fc-arrow.back .fc-label { top: 11px; }
 .fc-arrow:hover .fc-label, .fc-arrow:focus .fc-label { color: var(--brand-dark); }
-.fc-tip { visibility: hidden; opacity: 0; position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); width: 230px; background: var(--text); color: #fff; font-size: .82rem; font-weight: 400; line-height: 1.4; text-align: left; padding: 10px 12px; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.18); transition: opacity .15s; pointer-events: none; z-index: 20; }
-.fc-tip::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -6px; border: 6px solid transparent; border-top-color: var(--text); }
-.fc-node:hover .fc-tip, .fc-node:focus .fc-tip, .fc-arrow:hover .fc-tip, .fc-arrow:focus .fc-tip { visibility: visible; opacity: 1; }
+/* Hidden tips use display:none so they never widen the page; --dx (set by the homepage script)
+   nudges an open tip back inside the screen near the edges. */
+.fc-tip { display: none; position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(calc(-50% + var(--dx, 0px))); width: min(230px, calc(100vw - 24px)); background: var(--text); color: #fff; font-size: .82rem; font-weight: 400; line-height: 1.4; text-align: left; padding: 10px 12px; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.18); pointer-events: none; z-index: 20; }
+.fc-tip::after { content: ""; position: absolute; top: 100%; left: calc(50% - var(--dx, 0px)); margin-left: -6px; border: 6px solid transparent; border-top-color: var(--text); }
+.fc-node:hover .fc-tip, .fc-node:focus .fc-tip, .fc-arrow:hover .fc-tip, .fc-arrow:focus .fc-tip { display: block; }
 .fc-arrow.back .fc-tip { bottom: auto; top: calc(100% + 10px); }
 .fc-arrow.back .fc-tip::after { top: auto; bottom: 100%; border-top-color: transparent; border-bottom-color: var(--text); }
 .fc-chat { border: 2px dashed var(--border); border-radius: 12px; padding: 10px 14px; text-align: center; font-size: .92rem; }

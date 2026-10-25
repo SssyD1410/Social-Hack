@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>{% block title %}FoodRelay{% endblock %} · FoodRelay</title>
+  <title>{% block title %}EcoServing{% endblock %} · EcoServing</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -14,7 +14,7 @@
 <body>
 <header class="site-header">
   <div class="container">
-    <a class="logo" href="{{ url_for('main.index') }}">🥖 Food<span>Relay</span></a>
+    <a class="logo" href="{{ url_for('main.index') }}">🥖 Eco<span>Serving</span></a>
     <nav class="nav">
       {% set ep = request.endpoint or '' %}
       {% if g.user %}
@@ -34,7 +34,7 @@
         <a href="{{ url_for('main.profile') }}" class="{{ 'active' if ep == 'main.profile' }}">Profile</a>
       {% else %}
         <a href="{{ url_for('auth.login') }}">Log in</a>
-        <a class="btn small" href="{{ url_for('auth.register') }}">Join FoodRelay</a>
+        <a class="btn small" href="{{ url_for('auth.register') }}">Join EcoServing</a>
       {% endif %}
     </nav>
   </div>
@@ -53,7 +53,7 @@
 
 <footer class="site-footer">
   <div class="container">
-    <span>FoodRelay: good food belongs on plates, not in bins.</span>
+    <span>EcoServing: good food belongs on plates, not in bins.</span>
     <span>
       Learn more:
       {% for key, r in ROLES.items() %}<a href="{{ url_for('main.learn', role=key) }}">{{ r.label }}s</a>{{ ' · ' if not loop.last }}{% endfor %}

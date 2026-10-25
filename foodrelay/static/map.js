@@ -1,4 +1,4 @@
-/* FoodRelay maps: Leaflet + OpenStreetMap tiles, driving routes from the public OSRM demo server.
+/* EcoServing maps: Leaflet + OpenStreetMap tiles, driving routes from the public OSRM demo server.
  * If routing is unavailable, a straight dashed line is drawn instead. */
 (function () {
   const DEFAULT_CENTER = [44.9778, -93.2650];   // Minneapolis, when nothing is known yet
