@@ -595,6 +595,14 @@ class EcoServingTest(unittest.TestCase):
                          "http://127.0.0.1:5002/demo?beat=6&pace=1&speed=2&admin=3&autostart=1")
         self.assertEqual(build_url(beat=2.5), "http://127.0.0.1:5001/demo?beat=2.5")
 
+    def test_demo_page_carries_the_command_line_timing(self):
+        app = self.demo_app()
+        plain = app.test_client().get("/demo").get_data(as_text=True)
+        self.assertIn("data-options='{}'", plain)
+        app.config["DEMO_OPTIONS"] = {"speed": 1.5, "beat": 2.0}
+        page = app.test_client().get("/demo").get_data(as_text=True)
+        self.assertIn('data-options=\'{"beat":2.0,"speed":1.5}\'', page.replace(", ", ",").replace(": ", ":"))
+
     def test_demo_refuses_a_port_that_is_taken(self):
         import socket
         from ecoserving.demo import main, port_in_use

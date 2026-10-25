@@ -10,12 +10,21 @@
   'use strict';
 
   window.__demo = {log: []};              // exposed for testing: step timestamps
-  const params = new URLSearchParams(location.search);
+  // Timing options come from `python run_demo.py --speed ...` (handed to the page by the server), and the address
+  // can override them (?speed=2). Either way, opening plain /demo uses what the command line set.
+  const query = new URLSearchParams(location.search);
+  let defaults = {};
+  try { defaults = JSON.parse(document.body.dataset.options || '{}'); } catch (e) { /* no server options */ }
+  const params = {
+    has: (k) => query.has(k) || k in defaults,
+    get: (k) => (query.has(k) ? query.get(k) : (k in defaults ? String(defaults[k]) : null)),
+  };
   const SPEED = Math.max(0.5, parseFloat(params.get('speed')) || 1);
   const PACE = Math.max(0.5, parseFloat(params.get('pace')) || 1.5);   // >1 slows every pause and keystroke down
   const BEAT = (params.has('beat') ? Math.max(0, parseFloat(params.get('beat')) || 0) : 4) * 1000;   // pause after each caption
   const GAP = 900;                         // a breath after each click or finished field
-  const FRAME_W = 1180;                    // each pane shows the site at this width, scaled to fit
+  window.__demo.settings = {SPEED, PACE, BEAT};   // for testing
+  const FRAME_W = 1180;                   // each pane shows the site at this width, scaled to fit
   const ROLES = ['supplier', 'distributor', 'volunteer', 'consumer'];
   const $ = (s, r = document) => r.querySelector(s);
   const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();

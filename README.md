@@ -44,7 +44,8 @@ in the middle of the screen to take the post down, suspend the account and resol
 cursor explain each step, and every caption is followed by a pause (4 seconds) so a presenter can talk about it.
 It takes roughly six to seven minutes. Press **P** (or the Pause button) to freeze everything while you talk.
 
-Adjust the speed from the command line (the program prints the address to open, or add `--open` to launch it):
+Adjust the speed from the command line. The settings are built into the page, so opening plain
+`http://127.0.0.1:5001/demo` uses them (restart `run_demo.py` after changing them); `--open` launches the browser:
 
 ```bash
 python run_demo.py --beat 2 --open          # shorter pauses after each caption (seconds, default 4)

@@ -54,7 +54,8 @@ class _PerRoleSessions(SecureCookieSessionInterface):
 
 @bp.route("/demo")
 def page():
-    return render_template("demo.html")
+    # Timing options chosen on the command line (python run_demo.py --speed 2 ...), applied to the page.
+    return render_template("demo.html", options=current_app.config.get("DEMO_OPTIONS", {}))
 
 
 @bp.route("/_demo_login")
@@ -153,8 +154,11 @@ def main(argv=None):
     db_path = os.path.join(instance, "demo.sqlite")
     if os.path.exists(db_path):
         os.remove(db_path)
+    options = {"beat": args.beat, "pace": args.pace, "speed": args.speed, "admin": args.admin,
+               "autostart": 1 if args.autostart else None}
     app = create_app({"DEMO_MODE": True, "DATABASE": db_path, "RATELIMIT_ENABLED": False,
-                      "SECRET_KEY": "demo-only-not-secret"})
+                      "SECRET_KEY": "demo-only-not-secret",
+                      "DEMO_OPTIONS": {k: v for k, v in options.items() if v is not None}})
     with app.app_context():
         seed()
     url = build_url(port, args.beat, args.pace, args.speed, args.admin, args.autostart)

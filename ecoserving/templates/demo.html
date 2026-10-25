@@ -8,7 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo.svg') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='demo.css') }}">
 </head>
-<body>
+<body data-options='{{ options|tojson }}'>
 <header class="demo-bar">
   <div class="demo-brand"><img src="{{ url_for('static', filename='logo.svg') }}" alt="" width="30" height="30">
     <span>Eco<b>Serving</b></span><em>live demo: four people, one food relay</em></div>
