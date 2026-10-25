@@ -27,20 +27,20 @@ uses OpenStreetMap Nominatim. Those public services are fine for demos; use your
 Every food offer, food request and volunteer request shows a photo: the one its poster uploaded (JPG, PNG or WebP,
 stored in `instance/uploads/photos/`), or otherwise a real stock photo matched to its food type (requests are matched
 by their words). The stock photos and the homepage clip are CC0, CC BY or public domain, from Wikimedia Commons; their
-sources and licences are in [`foodrelay/static/photos/credits.json`](foodrelay/static/photos/credits.json) and on the
+sources and licences are in [`ecoserving/static/photos/credits.json`](ecoserving/static/photos/credits.json) and on the
 `/credits` page, linked from every footer.
 
 ## Tech stack
 
 - **Backend:** Python 3.10+ / Flask, server-rendered Jinja templates
-- **Database:** SQLite (`instance/foodrelay.sqlite`); schema in [`foodrelay/schema.sql`](foodrelay/schema.sql)
+- **Database:** SQLite (`instance/ecoserving.sqlite`); schema in [`ecoserving/schema.sql`](ecoserving/schema.sql)
 - **Auth:** session cookies, Werkzeug password hashing (scrypt/pbkdf2), CSRF tokens on every POST
 - **Chat:** JSON API polled every 3 seconds from the conversation page
 - **Maps:** Leaflet + OpenStreetMap, OSRM routing (see above); demo accounts are located around Minneapolis-St. Paul
 - **Uploads:** distributor certification files stored in `instance/uploads/`, visible only to the owner and admins
 
 ```
-foodrelay/
+ecoserving/
   __init__.py     app factory, CSRF
   db.py           SQLite helpers + `init-db` / `seed` CLI commands
   schema.sql      tables: users, verification_documents, food_offers, food_requests,
@@ -63,8 +63,8 @@ tests/test_app.py end-to-end tests with Flask's test client
 python -m venv .venv
 .venv\Scripts\activate          # Windows  (macOS/Linux: source .venv/bin/activate)
 pip install -r requirements.txt
-flask --app foodrelay seed      # optional: reset DB and load demo data
-flask --app foodrelay run --debug
+flask --app ecoserving seed      # optional: reset DB and load demo data
+flask --app ecoserving run --debug
 ```
 
 Then open http://127.0.0.1:5000.
@@ -92,5 +92,5 @@ python -m unittest discover tests
 ### Publishing
 
 Step-by-step instructions for PythonAnywhere are in [DEPLOY.md](DEPLOY.md). Production entry point: `wsgi.py`
-(`application`). A random secret key is created in `instance/secret_key` on first run (or set `FOODRELAY_SECRET_KEY`),
-and `flask --app foodrelay create-admin` creates an administrator. Never run `seed` on a live site.
+(`application`). A random secret key is created in `instance/secret_key` on first run (or set `ECOSERVING_SECRET_KEY`),
+and `flask --app ecoserving create-admin` creates an administrator. Never run `seed` on a live site.

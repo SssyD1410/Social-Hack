@@ -5,6 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>{% block title %}EcoServing{% endblock %} · EcoServing</title>
+  {% set share_text = "EcoServing passes surplus food from Twin Cities bakeries and restaurants to shelters, volunteers and neighbors." %}
+  <meta name="description" content="{{ share_text }}">
+  <meta property="og:site_name" content="EcoServing">
+  <meta property="og:title" content="EcoServing: surplus food, served nearby">
+  <meta property="og:description" content="{{ share_text }}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ request.base_url }}">
+  <meta property="og:image" content="{{ url_for('static', filename='share/og-image.png', _external=True) }}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The EcoServing logo, a leaf growing from a bowl, with the words Surplus food, served nearby">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="{{ url_for('static', filename='share/twitter-image.png', _external=True) }}">
+  <meta name="theme-color" content="#1f7f3a">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -20,7 +34,7 @@
 <body>
 <header class="site-header">
   <div class="container">
-    <a class="logo" href="{{ url_for('main.index') }}"><span class="logo-mark">{{ icon('leaf') }}</span><span class="logo-word">Eco<span>Serving</span></span></a>
+    <a class="logo" href="{{ url_for('main.index') }}"><img class="logo-mark" src="{{ url_for('static', filename='logo.svg') }}" alt="" width="32" height="32"><span class="logo-word">Eco<span>Serving</span></span></a>
     <nav class="nav">
       {% set ep = request.endpoint or '' %}
       {% if g.user %}
@@ -72,7 +86,7 @@
      form posts that redirect back to the same page don't overwrite it, so "Back" still leads
      to where the user was before acting on this page. */
   (() => {
-    const key = 'fr-back:' + location.pathname;
+    const key = 'es-back:' + location.pathname;
     let from = null;
     try {
       const ref = document.referrer ? new URL(document.referrer) : null;

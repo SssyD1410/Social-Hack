@@ -35,7 +35,7 @@ pip install -r requirements.txt
    ```
 
    Save.
-4. Under **Static files**, add URL `/static/` with directory `/home/<username>/Social-Hack/foodrelay/static`
+4. Under **Static files**, add URL `/static/` with directory `/home/<username>/Social-Hack/ecoserving/static`
    (optional, makes photos load faster).
 5. Under **Security**, turn on **Force HTTPS**.
 6. Click the green **Reload** button and open `https://<username>.pythonanywhere.com`.
@@ -49,12 +49,12 @@ Admins verify distributors. Back in the Bash console:
 ```bash
 cd ~/Social-Hack
 source ~/.virtualenvs/ecoserving/bin/activate
-flask --app foodrelay create-admin
+flask --app ecoserving create-admin
 ```
 
 It asks for an email and a password. Everyone else signs up through the site.
 
-**Do not run `flask --app foodrelay seed` on the live site.** It wipes the database and creates demo accounts
+**Do not run `flask --app ecoserving seed` on the live site.** It wipes the database and creates demo accounts
 whose password is published in this repository.
 
 ## Updating the site later

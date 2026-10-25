@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- EcoServing mark: a leaf (eco) growing out of a serving bowl, on the brand green. -->
+  <rect width="512" height="512" rx="112" fill="#1f7f3a"/>
+  <path d="M252 292C206 228 232 136 366 92C380 208 336 276 252 292Z" fill="#fff"/>
+  <path d="M262 276Q288 206 340 142" fill="none" stroke="#1f7f3a" stroke-width="12" stroke-linecap="round"/>
+  <path d="M92 270H420A164 164 0 0 1 92 270Z" fill="#ff6d1f"/>
+</svg>

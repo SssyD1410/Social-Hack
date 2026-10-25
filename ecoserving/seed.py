@@ -1,4 +1,4 @@
-"""Demo data so every role has something to look at. Run: flask --app foodrelay seed
+"""Demo data so every role has something to look at. Run: flask --app ecoserving seed
 
 Accounts and posts are located around Minneapolis-St. Paul so the maps and routes work."""
 

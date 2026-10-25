@@ -29,7 +29,7 @@
     const inner = label === ME ? `<svg class="icon"><use href="${ICONS}#user"></use></svg>`
                 : label === DOT ? '<i class="pin-dot"></i>' : (label ?? '');
     return L.divIcon({
-      className: 'fr-pin',
+      className: 'es-pin',
       html: `<span style="background:${color}">${inner}</span>`,
       iconSize: [26, 26], iconAnchor: [13, 26], popupAnchor: [0, -24],
     });
@@ -179,6 +179,6 @@
     return map;
   }
 
-  window.FRMap = {dashboard, points, picker};
+  window.ESMap = {dashboard, points, picker};
   document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('[data-location-picker]').forEach(picker));
 })();

@@ -26,7 +26,7 @@
   </div>
   <script>
     document.addEventListener('DOMContentLoaded', () =>
-      FRMap.points(document.getElementById('requests-map'), {me: {{ me|tojson }}, points: {{ pts|tojson }}}));
+      ESMap.points(document.getElementById('requests-map'), {me: {{ me|tojson }}, points: {{ pts|tojson }}}));
   </script>
 {% endif %}
 {% if requests %}

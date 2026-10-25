@@ -38,7 +38,7 @@ main.container { padding-top: 28px; padding-bottom: 56px; min-height: 70vh; }
 .logo { font-weight: 800; font-size: 1.25rem; color: var(--brand-dark); text-decoration: none; display: flex; align-items: center; gap: 6px; }
 .logo .logo-word { color: var(--brand-dark); }
 .logo .logo-word span { color: var(--accent); }
-.logo .logo-mark { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--brand); color: #fff; font-size: 18px; margin-right: 4px; }
+.logo .logo-mark { display: block; width: 32px; height: 32px; margin-right: 4px; }
 .nav { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; margin-left: auto; }
 .nav a, .nav button.linklike { padding: 8px 10px; border-radius: 8px; text-decoration: none; color: var(--text); font-size: .95rem; }
 .nav a:hover, .nav button.linklike:hover { background: var(--brand-soft); }
@@ -211,8 +211,8 @@ a.fc-node { cursor: pointer; }
 .map-legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
 .route-caption { margin: 8px 0 0; min-height: 1.5em; }
 .section-tight { margin-bottom: 8px; }
-.leaflet-div-icon.fr-pin { background: none; border: 0; }
-.fr-pin span { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; color: #fff; font-size: .72rem; font-weight: 800; line-height: 1; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
+.leaflet-div-icon.es-pin { background: none; border: 0; }
+.es-pin span { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; color: #fff; font-size: .72rem; font-weight: 800; line-height: 1; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
 
 /* ---- your own posts stand out ---- */
 .post-card.own-post { border: 2px solid var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 4px rgba(255,109,31,.15), var(--shadow); }
@@ -322,7 +322,7 @@ button.armed { background: var(--danger) !important; color: #fff !important; bor
 .tag .icon { font-size: 13px; margin-right: 2px; }
 .own-badge { display: inline-flex; align-items: center; gap: 5px; }
 .fc-chat .icon { color: var(--brand); }
-.fr-pin span .icon { font-size: 14px; stroke-width: 2.5; }
+.es-pin span .icon { font-size: 14px; stroke-width: 2.5; }
 .pin-dot { display: block; width: 8px; height: 8px; border-radius: 50%; background: #fff; }
 
 /* ---- photos on offers & requests ---- */

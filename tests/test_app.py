@@ -8,8 +8,8 @@ import unittest
 from datetime import datetime, timedelta
 from io import BytesIO
 
-from foodrelay import create_app
-from foodrelay.db import init_db
+from ecoserving import create_app
+from ecoserving.db import init_db
 
 
 def future(hours):
@@ -49,7 +49,7 @@ class EcoServingTest(unittest.TestCase):
 
     def verify(self, distributor_email):
         with self.app.app_context():
-            from foodrelay.db import execute
+            from ecoserving.db import execute
             execute("UPDATE users SET verification_status = 'verified' WHERE email = ?", (distributor_email,))
 
     def make_offer(self, supplier, **overrides):
@@ -106,7 +106,7 @@ class EcoServingTest(unittest.TestCase):
         self.assertIn("verified", dist.get(f"/offers/{oid}").get_data(as_text=True))
         self.post(dist, f"/offers/{oid}/claim")
         with self.app.app_context():
-            from foodrelay.db import query
+            from ecoserving.db import query
             self.assertEqual(query("SELECT status FROM food_offers WHERE id=?", (oid,), one=True)["status"], "available")
 
         self.verify("distributor@example.test")
@@ -137,7 +137,7 @@ class EcoServingTest(unittest.TestCase):
         self.assertIn("Submitted", r.get_data(as_text=True))
 
         with self.app.app_context():
-            from foodrelay.db import execute
+            from ecoserving.db import execute
             from werkzeug.security import generate_password_hash
             execute("INSERT INTO users (email, password_hash, name, role) VALUES (?, ?, 'A', 'admin')",
                     ("admin@example.test", generate_password_hash("password123")))
@@ -246,8 +246,8 @@ class EcoServingTest(unittest.TestCase):
         self.post(supplier, "/profile", name="S", org_name="Org", lat="40.0", lng="-89.0")
         with self.app.test_request_context():
             from flask import g
-            from foodrelay.db import now_str, query
-            from foodrelay.main import _dashboard_map
+            from ecoserving.db import now_str, query
+            from ecoserving.main import _dashboard_map
             g.user = query("SELECT * FROM users WHERE email = 's2@example.test'", one=True)
             data = _dashboard_map(g.user, now_str())
         self.assertEqual(len(data["targets"]), 6)
@@ -285,7 +285,9 @@ class EcoServingTest(unittest.TestCase):
         for c, url in pages:
             html = c.get(url).get_data(as_text=True)
             self.assertIsNone(emoji.search(html), f"emoji on {url}: {emoji.findall(html)[:3]}")
-            self.assertIn("icons.svg#", html, url)
+            self.assertIn("/static/logo.svg", html, url)
+            if url in ("/", "/learn", "/dashboard"):
+                self.assertIn("icons.svg#", html, url)
         with anon.get("/favicon.ico") as r:
             self.assertEqual(r.status_code, 200)
 
@@ -352,8 +354,8 @@ class EcoServingTest(unittest.TestCase):
         self.assertIn("Wikimedia Commons", credits)
         self.assertIn("Photo credits", home)
         with self.app.app_context():
-            from foodrelay.photos import STOCK_BY_TYPE, stock_credits
-            from foodrelay.helpers import FOOD_TYPES
+            from ecoserving.photos import STOCK_BY_TYPE, stock_credits
+            from ecoserving.helpers import FOOD_TYPES
             self.assertEqual(set(STOCK_BY_TYPE), set(FOOD_TYPES))
             for names in STOCK_BY_TYPE.values():
                 for name in names:
@@ -375,9 +377,17 @@ class EcoServingTest(unittest.TestCase):
         page = self.post(c, "/login", email="boss@example.test", password="longpassword").get_data(as_text=True)
         self.assertIn('href="/admin', page)
 
+    def test_logo_and_share_tags(self):
+        home = self.app.test_client().get("/").get_data(as_text=True)
+        self.assertIn('class="logo-mark" src="/static/logo.svg"', home)
+        self.assertIn('property="og:image" content="http://localhost/static/share/og-image.png"', home)
+        self.assertIn('name="twitter:card" content="summary_large_image"', home)
+        for path in ("logo.svg", "share/og-image.png", "share/twitter-image.png", "favicon/favicon.ico"):
+            self.assertTrue(os.path.exists(os.path.join(self.app.static_folder, path)), path)
+
     def test_seed(self):
         with self.app.app_context():
-            from foodrelay.seed import seed
+            from ecoserving.seed import seed
             seed()
 
 

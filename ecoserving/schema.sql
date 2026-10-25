@@ -1,4 +1,4 @@
--- FoodRelay database schema (SQLite)
+-- EcoServing database schema (SQLite)
 
 PRAGMA foreign_keys = ON;
 

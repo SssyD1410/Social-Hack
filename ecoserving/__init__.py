@@ -19,8 +19,8 @@ def _instance_secret(instance_path):
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
-        SECRET_KEY=os.environ.get("FOODRELAY_SECRET_KEY"),
-        DATABASE=os.path.join(app.instance_path, "foodrelay.sqlite"),
+        SECRET_KEY=os.environ.get("ECOSERVING_SECRET_KEY"),
+        DATABASE=os.path.join(app.instance_path, "ecoserving.sqlite"),
         UPLOAD_FOLDER=os.path.join(app.instance_path, "uploads"),
         MAX_CONTENT_LENGTH=8 * 1024 * 1024,
     )
