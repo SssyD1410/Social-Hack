@@ -11,7 +11,7 @@ from .visibility import offer_visibility_clause
 
 bp = Blueprint("main", __name__)
 
-ALLOWED_DOC_EXT = {".pdf", ".png", ".jpg", ".jpeg"}
+ALLOWED_DOC_EXT = {".pdf": b"%PDF-", ".png": b"\x89PNG", ".jpg": b"\xff\xd8\xff", ".jpeg": b"\xff\xd8\xff"}
 DOC_TYPES = ["Charity / non-profit registration", "Food safety certificate",
              "Food handler training", "Insurance certificate", "Other proof of eligibility"]
 
@@ -172,7 +172,9 @@ def profile():
     u = g.user
     if request.method == "POST":
         f = request.form
-        name = f.get("name", "").strip()
+        name = f.get("name", "").strip()[:120]
+        org_name = f.get("org_name", "").strip()[:160] or None
+        reg_no = f.get("registration_number", "").strip()[:80] or None
         lat, lng = parse_latlng(f)
         if not name:
             flash("Name is required.", "error")
@@ -181,11 +183,17 @@ def profile():
                 """UPDATE users SET name = ?, org_name = ?, phone = ?, city = ?, address = ?, bio = ?, lat = ?, lng = ?,
                                     registration_number = COALESCE(?, registration_number)
                    WHERE id = ?""",
-                (name, f.get("org_name", "").strip() or None, f.get("phone", "").strip() or None,
-                 f.get("city", "").strip() or None, f.get("address", "").strip() or None,
-                 f.get("bio", "").strip() or None, lat, lng, f.get("registration_number", "").strip() or None,
-                 u["id"]))
+                (name, org_name, f.get("phone", "").strip()[:40] or None,
+                 f.get("city", "").strip()[:120] or None, f.get("address", "").strip()[:200] or None,
+                 f.get("bio", "").strip()[:2000] or None, lat, lng, reg_no, u["id"]))
             flash("Profile saved.", "success")
+            # The "verified" badge vouches for one specific organization: changing its name or registration
+            # number sends the distributor back through verification.
+            identity_changed = org_name != u["org_name"] or (reg_no and reg_no != u["registration_number"])
+            if u["role"] == "distributor" and u["verification_status"] in ("pending", "verified") and identity_changed:
+                execute("UPDATE users SET verification_status = 'unverified', verification_note = ? WHERE id = ?",
+                        ("Organization details changed; please submit for verification again.", u["id"]))
+                flash("You changed your organization's details, so it needs to be verified again.", "info")
         return redirect(url_for("main.profile"))
 
     docs = query("SELECT * FROM verification_documents WHERE user_id = ? ORDER BY uploaded_at DESC", (u["id"],))
@@ -207,8 +215,14 @@ def upload_document():
         flash("Choose a file to upload.", "error")
         return redirect(url_for("main.profile"))
     ext = os.path.splitext(file.filename)[1].lower()
-    if ext not in ALLOWED_DOC_EXT:
+    head = file.stream.read(8)
+    file.stream.seek(0)
+    # Check the file really is what its name says (a renamed .html or .exe is refused).
+    if ext not in ALLOWED_DOC_EXT or not head.startswith(ALLOWED_DOC_EXT[ext]):
         flash("Upload a PDF, PNG or JPG file.", "error")
+        return redirect(url_for("main.profile"))
+    if query("SELECT COUNT(*) AS n FROM verification_documents WHERE user_id = ?", (u["id"],), one=True)["n"] >= 20:
+        flash("You've uploaded the maximum of 20 documents.", "error")
         return redirect(url_for("main.profile"))
     stored = f"{uuid.uuid4().hex}{ext}"
     file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], stored))
@@ -243,8 +257,9 @@ def document(doc_id):
         abort(404)
     if doc["user_id"] != g.user["id"] and g.user["role"] != "admin":
         abort(403)
+    # Always a download, never rendered inside the site (a PDF can carry scripts).
     return send_from_directory(current_app.config["UPLOAD_FOLDER"], doc["stored_name"],
-                               download_name=doc["original_name"])
+                               download_name=doc["original_name"], as_attachment=True)
 
 
 @bp.route("/users/<int:user_id>")

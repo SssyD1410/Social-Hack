@@ -1,11 +1,13 @@
 import functools
 import math
+import secrets
+import time
 from datetime import datetime
 
-from flask import flash, g, redirect, request, url_for
+from flask import current_app, flash, g, redirect, request, url_for
 from markupsafe import Markup, escape
 
-from .db import query
+from .db import execute, query
 
 ROLES = {
     "supplier": {
@@ -73,6 +75,24 @@ def verified_required(view):
             return redirect(url_for("main.profile"))
         return view(**kwargs)
     return wrapped
+
+
+def client_ip():
+    return request.remote_addr or "unknown"
+
+
+def over_limit(key, limit, window):
+    """True when `key` already has `limit` recorded attempts in the last `window` seconds."""
+    if not current_app.config.get("RATELIMIT_ENABLED", True):
+        return False
+    row = query("SELECT COUNT(*) AS n FROM rate_events WHERE key = ? AND at > ?", (key, time.time() - window), one=True)
+    return row["n"] >= limit
+
+
+def record_attempt(key):
+    execute("INSERT INTO rate_events (key, at) VALUES (?, ?)", (key, time.time()))
+    if secrets.randbelow(50) == 0:   # now and then, forget attempts older than a day
+        execute("DELETE FROM rate_events WHERE at < ?", (time.time() - 86400,))
 
 
 def parse_latlng(form):

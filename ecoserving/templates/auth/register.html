@@ -49,7 +49,7 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce() }}">
   const radios = document.querySelectorAll('input[name=role]');
   function sync() {
     const role = document.querySelector('input[name=role]:checked')?.value;

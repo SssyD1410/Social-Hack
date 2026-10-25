@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros.html" import back_button %}
+{% from "macros.html" import back_button, report_link %}
 {% block title %}{{ person.org_name or person.name }}{% endblock %}
 {% block content %}
 <div class="medium">
@@ -22,6 +22,7 @@
       {% if person.role in ('supplier', 'distributor') and person.address %}<dt>Address</dt><dd>{{ person.address }}</dd>{% endif %}
       <dt>Member since</dt><dd>{{ person.created_at[:10] }}</dd>
     </dl>
+    {% if person.id != g.user.id %}{{ report_link('user:%d' % person.id, 'Report this account') }}{% endif %}
   </div>
 </div>
 {% endblock %}

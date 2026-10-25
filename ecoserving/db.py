@@ -40,13 +40,20 @@ def now_str():
     return datetime.now().strftime("%Y-%m-%dT%H:%M")
 
 
+def _run_script(name):
+    with current_app.open_resource(name) as f:
+        get_db().executescript(f.read().decode("utf8"))
+
+
 def init_db():
-    db = get_db()
-    with current_app.open_resource("schema.sql") as f:
-        db.executescript(f.read().decode("utf8"))
+    _run_script("schema.sql")
+    _run_script("schema_additions.sql")
 
 
+# Both commands wipe every account and post, so they ask first (skip with --yes).
 @click.command("init-db")
+@click.confirmation_option(prompt="This deletes ALL data in the database. Continue?")
+@with_appcontext
 def init_db_command():
     """Drop and recreate all tables."""
     init_db()
@@ -54,6 +61,9 @@ def init_db_command():
 
 
 @click.command("seed")
+@click.confirmation_option(prompt="This deletes ALL data and adds demo accounts with a public password. "
+                                  "Never do this on a live site. Continue?")
+@with_appcontext
 def seed_command():
     """Reset the database and fill it with demo data."""
     from .seed import seed
@@ -70,8 +80,8 @@ def seed_command():
 def create_admin_command(email, name, password):
     """Create an administrator account (admins verify distributors)."""
     from werkzeug.security import generate_password_hash
-    if len(password) < 8:
-        raise click.BadParameter("use at least 8 characters", param_hint="password")
+    if not 8 <= len(password) <= 256:
+        raise click.BadParameter("use 8 to 256 characters", param_hint="password")
     if query("SELECT 1 FROM users WHERE email = ?", (email,), one=True):
         raise click.ClickException(f"An account for {email} already exists.")
     execute("INSERT INTO users (email, password_hash, name, role) VALUES (?, ?, ?, 'admin')",
@@ -80,14 +90,18 @@ def create_admin_command(email, name, password):
 
 
 def migrate():
-    """Add columns introduced after a database was created."""
+    """Add columns and tables introduced after a database was created."""
     db = get_db()
-    for table in ("users", "food_offers", "food_requests", "volunteer_requests"):
+    added = {"users": [("lat", "REAL"), ("lng", "REAL"), ("suspended_at", "TEXT"), ("suspended_reason", "TEXT")]}
+    for table in ("food_offers", "food_requests", "volunteer_requests"):
+        added[table] = [("lat", "REAL"), ("lng", "REAL"), ("photo", "TEXT")]
+    for table, columns in added.items():
         cols = {r["name"] for r in db.execute(f"PRAGMA table_info({table})")}
-        for col, kind in (("lat", "REAL"), ("lng", "REAL"), ("photo", "TEXT")):
-            if col not in cols and not (table == "users" and col == "photo"):
+        for col, kind in columns:
+            if col not in cols:
                 db.execute(f"ALTER TABLE {table} ADD COLUMN {col} {kind}")
     db.commit()
+    _run_script("schema_additions.sql")
 
 
 def init_app(app):

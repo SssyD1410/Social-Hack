@@ -451,3 +451,18 @@ body { overflow-x: clip; }           /* lets full-bleed sections use 100vw witho
 .credit-list { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 14px; }
 .credit-list li { display: flex; gap: 14px; align-items: center; }
 .credit-list img { width: 96px; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; flex: none; }
+
+/* ---- reports ---- */
+.report-line { margin: 16px 0 0; }
+.report-link { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: .88rem; text-decoration: none; }
+.report-link:hover { color: var(--danger); text-decoration: underline; }
+.report-tip { display: flex; gap: 12px; align-items: flex-start; background: var(--accent-soft); border-radius: 10px; padding: 12px 14px; margin: 4px 0 18px; }
+.report-tip .icon { color: #b2470c; font-size: 20px; flex: none; margin-top: 2px; }
+.report-tip p { margin: 0; }
+.stack-tight { display: grid; gap: 8px; }
+.chat-safety { margin: 0; padding: 8px 18px; background: var(--accent-soft); color: #7a3208; display: flex; gap: 8px; align-items: center; }
+.chat-safety .icon { flex: none; }
+.admin-tabs { display: flex; gap: 6px; margin: 4px 0 18px; flex-wrap: wrap; }
+.admin-tabs a { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 10px; text-decoration: none; color: var(--text); font-weight: 600; background: var(--surface); }
+.admin-tabs a.active { background: var(--brand); color: #fff; }
+.report-card + .report-card { margin-top: 16px; }

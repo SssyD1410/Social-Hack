@@ -3,6 +3,7 @@
 {% block title %}Admin{% endblock %}
 {% block content %}
 <div class="page-head"><div><h1>Admin</h1><p>Review distributor verification requests.</p></div></div>
+{% include "admin/_tabs.html" %}
 
 <div class="stats">
   {% for key, r in ROLES.items() %}<div class="stat"><b>{{ counts.get(key, 0) }}</b>{{ r.label }}s</div>{% endfor %}

@@ -1,0 +1,7 @@
+{# Admin sections: distributor verification and scam/fraud reports. #}
+{% set open_reports = open_report_count() %}
+<nav class="admin-tabs" aria-label="Admin sections">
+  <a href="{{ url_for('admin.index') }}" class="{{ 'active' if request.endpoint == 'admin.index' }}">{{ icon('badge-check') }} Verification</a>
+  <a href="{{ url_for('reports.admin_reports') }}" class="{{ 'active' if request.endpoint == 'reports.admin_reports' }}">{{ icon('flag') }} Reports
+    {% if open_reports %}<span class="badge-count">{{ open_reports }}</span>{% endif %}</a>
+</nav>

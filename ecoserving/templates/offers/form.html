@@ -61,7 +61,7 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce() }}">
   const size = document.getElementById('size'), cons = document.getElementById('vis-consumers');
   function sync() {
     const small = size.value === 'small';

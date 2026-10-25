@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros.html" import post_photo, csrf, status_tag, post_button, message_button, back_button %}
+{% from "macros.html" import report_link, post_photo, csrf, status_tag, post_button, message_button, back_button %}
 {% block title %}{{ v.title }}{% endblock %}
 {% block content %}
 {% set mine = v.poster_id == g.user.id %}
@@ -89,6 +89,7 @@
       <p class="small muted">Only volunteer accounts can sign up for shifts.</p>
       {{ message_button(v.poster_id, 'volunteer_request:%d' % v.id, 'Message organizer') }}
     {% endif %}
+    {% if not mine %}{{ report_link('volunteer_request:%d' % v.id) }}{% endif %}
   </aside>
 </div>
 {% endblock %}

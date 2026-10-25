@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf %}
+{% block title %}Reports · Admin{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Scam &amp; fraud reports</h1>
+  <p>Reports users sent about posts and accounts. Take a post down or suspend an account when a report is confirmed.</p></div></div>
+{% include "admin/_tabs.html" %}
+
+<div class="role-tabs">
+  {% for s in statuses + ('all',) %}
+    <a class="btn small {{ '' if s == status else 'secondary' }}" href="{{ url_for('reports.admin_reports', status=s) }}">
+      {{ s|capitalize }}{% if s in counts %} ({{ counts[s] }}){% endif %}</a>
+  {% endfor %}
+</div>
+
+{% for item in items %}{% set r = item.r %}
+<div class="card report-card">
+  <div class="section-head">
+    <h3 style="margin:0">#{{ r.id }} · {{ categories.get(r.category, r.category) }}</h3>
+    <span class="tag {{ {'open': 'red', 'reviewing': 'orange', 'resolved': 'blue'}.get(r.status, '') }}">{{ r.status|capitalize }}</span>
+  </div>
+  <dl class="details">
+    <dt>Reported</dt>
+    <dd>{{ r.target_type.replace('_', ' ')|capitalize }}:
+      {% if item.target[1] %}<a href="{{ item.target[1] }}">{{ item.target[0] }}</a>{% else %}{{ item.target[0] }}{% endif %}</dd>
+    {% if r.reported_user_id %}
+    <dt>Account</dt>
+    <dd><a href="{{ url_for('main.user_profile', user_id=r.reported_user_id) }}">{{ r.reported_org or r.reported_name }}</a>
+      · {{ r.reported_email }} · {{ ROLES[r.reported_role].label if r.reported_role in ROLES else r.reported_role }}
+      {% if r.reports_against > 1 %}<span class="tag red">{{ r.reports_against }} reports</span>{% endif %}
+      {% if r.reported_suspended %}<span class="tag red">Suspended</span>{% endif %}</dd>
+    {% endif %}
+    <dt>From</dt><dd>{{ r.reporter_name }} · {{ r.reporter_email }}</dd>
+    <dt>Sent</dt><dd>{{ r.created_at|dt }}</dd>
+    <dt>Details</dt><dd style="white-space:pre-wrap">{{ r.details }}</dd>
+    {% if r.admin_note %}<dt>Admin note</dt><dd style="white-space:pre-wrap">{{ r.admin_note }}</dd>{% endif %}
+  </dl>
+  <form method="post" class="stack" action="{{ url_for('reports.update_report', report_id=r.id, back=status) }}" style="margin-top:14px">
+    {{ csrf() }}
+    <div class="grid-2">
+      <div><label for="status-{{ r.id }}">Status</label>
+        <select id="status-{{ r.id }}" name="status">
+          {% for s in statuses %}<option value="{{ s }}" {{ 'selected' if s == r.status }}>{{ s|capitalize }}</option>{% endfor %}
+        </select></div>
+      <div><label for="note-{{ r.id }}">Admin note <span class="hint">(only admins see it)</span></label>
+        <input id="note-{{ r.id }}" type="text" name="admin_note" maxlength="2000" value="{{ r.admin_note or '' }}"></div>
+    </div>
+    <div class="btn-row"><button class="btn" type="submit">Save</button></div>
+  </form>
+  <div class="btn-row" style="margin-top:10px">
+    {% if r.target_type != 'user' and item.target[1] %}
+      <form method="post" action="{{ url_for('reports.takedown', report_id=r.id, back=status) }}">{{ csrf() }}
+        <button class="btn danger small" type="submit" data-confirm="Click again to take it down">Take down post</button></form>
+    {% endif %}
+    {% if r.reported_user_id %}
+      {% if r.reported_suspended %}
+        <form method="post" action="{{ url_for('reports.suspend', user_id=r.reported_user_id, action='unsuspend') }}">{{ csrf() }}
+          <button class="btn secondary small" type="submit">Lift suspension</button></form>
+      {% else %}
+        <form method="post" action="{{ url_for('reports.suspend', user_id=r.reported_user_id, action='suspend') }}">{{ csrf() }}
+          <input type="hidden" name="reason" value="Report #{{ r.id }}: {{ categories.get(r.category, r.category) }}">
+          <button class="btn danger small" type="submit" data-confirm="Click again: suspend and remove their posts">Suspend account</button></form>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% else %}
+  <div class="empty">No {{ '' if status == 'all' else status }} reports.</div>
+{% endfor %}
+{% endblock %}

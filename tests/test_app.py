@@ -384,6 +384,156 @@ class EcoServingTest(unittest.TestCase):
         for path in ("logo.svg", "share/og-image.png", "share/twitter-image.png", "favicon/favicon.ico"):
             self.assertTrue(os.path.exists(os.path.join(self.app.static_folder, path)), path)
 
+    # -- security --------------------------------------------------------------
+    def admin_client(self):
+        with self.app.app_context():
+            from ecoserving.db import execute
+            from werkzeug.security import generate_password_hash
+            execute("INSERT INTO users (email, password_hash, name, role) VALUES (?, ?, 'Admin', 'admin')",
+                    ("root@example.test", generate_password_hash("password123")))
+        admin = self.app.test_client()
+        self.post(admin, "/login", email="root@example.test", password="password123")
+        return admin
+
+    def test_login_redirect_stays_on_site(self):
+        self.client_for("consumer")
+        for bad in ("//evil.example", "/\\evil.example", "https://evil.example", "/\t/evil.example"):
+            c = self.app.test_client()
+            r = self.post(c, "/login?next=" + bad, follow=False, email="consumer@example.test", password="password123")
+            self.assertEqual(r.headers["Location"], "/dashboard", bad)
+        c = self.app.test_client()
+        r = self.post(c, "/login?next=/offers", follow=False, email="consumer@example.test", password="password123")
+        self.assertEqual(r.headers["Location"], "/offers")
+
+    def test_login_is_rate_limited(self):
+        self.client_for("consumer")
+        c = self.app.test_client()
+        for _ in range(5):
+            self.post(c, "/login", email="consumer@example.test", password="wrong-password")
+        r = self.post(c, "/login", email="consumer@example.test", password="password123")
+        self.assertEqual(r.status_code, 429)
+        self.assertIn("Too many failed attempts", r.get_data(as_text=True))
+
+    def test_security_headers_and_script_nonce(self):
+        r = self.app.test_client().get("/")
+        csp = r.headers["Content-Security-Policy"]
+        nonce = re.search(r"'nonce-([^']+)'", csp).group(1)
+        self.assertIn("frame-ancestors 'none'", csp)
+        self.assertEqual(r.headers["X-Content-Type-Options"], "nosniff")
+        self.assertEqual(r.headers["X-Frame-Options"], "DENY")
+        html = r.get_data(as_text=True)
+        inline = re.findall(r"<script(?![^>]*\bsrc=)([^>]*)>", html)
+        self.assertTrue(inline)
+        for attrs in inline:   # every inline script carries this response's nonce
+            self.assertIn(f'nonce="{nonce}"', attrs)
+        self.assertIn("SameSite=Lax", r.headers.get("Set-Cookie", "SameSite=Lax"))
+
+    def test_chat_cannot_reveal_hidden_posts(self):
+        supplier = self.client_for("supplier")
+        consumer = self.client_for("consumer")
+        small = self.make_offer(supplier, title="Muffins", visible_consumers="1")
+        hidden = self.make_offer(supplier, title="Secret pallet", size="large")   # distributors only
+        r = consumer.get(f"/messages/with/1?ref=offer:{small}")
+        cid = int(re.search(r"/messages/(\d+)", r.headers["Location"]).group(1))
+        token = self.csrf(consumer)
+        consumer.post(f"/api/messages/{cid}", json={"body": "hello", "ref": f"offer:{hidden}"},
+                      headers={"X-CSRF-Token": token})
+        data = consumer.get(f"/api/messages/{cid}?after=0").get_json()
+        self.assertIsNone(data["messages"][0]["ref_type"])
+        self.assertNotIn("Secret pallet", consumer.get(f"/messages/{cid}").get_data(as_text=True))
+
+    def test_verification_documents_checked_and_downloaded(self):
+        dist = self.client_for("distributor")
+        for content, name in ((b"<html><script>alert(1)</script>", "cert.pdf"), (b"%PDF-1.4", "cert.html")):
+            data = {"doc_type": "Food safety certificate", "document": (BytesIO(content), name), "_csrf": self.csrf(dist)}
+            r = dist.post("/profile/documents", data=data, content_type="multipart/form-data", follow_redirects=True)
+            self.assertIn("Upload a PDF, PNG or JPG file.", r.get_data(as_text=True))
+        data = {"doc_type": "Food safety certificate", "document": (BytesIO(b"%PDF-1.4 ok"), "cert.pdf"),
+                "_csrf": self.csrf(dist)}
+        dist.post("/profile/documents", data=data, content_type="multipart/form-data")
+        with dist.get("/documents/1") as r:
+            self.assertEqual(r.status_code, 200)
+            self.assertIn("attachment", r.headers["Content-Disposition"])
+
+    def test_verified_badge_reset_when_org_changes(self):
+        dist = self.client_for("distributor", org="Real Shelter")
+        self.verify("distributor@example.test")
+        self.post(dist, "/profile", name="Distributor", org_name="Totally Different Org")
+        with self.app.app_context():
+            from ecoserving.db import query
+            row = query("SELECT verification_status FROM users WHERE email = 'distributor@example.test'", one=True)
+        self.assertEqual(row["verification_status"], "unverified")
+
+    def test_organizer_cannot_reaccept_withdrawn_volunteer(self):
+        supplier = self.client_for("supplier")
+        vol = self.client_for("volunteer")
+        self.post(supplier, "/volunteer/new", title="Sort", tasks="Sort food", location="1 Main St",
+                  start_time=future(2), end_time=future(4), slots="2")
+        self.post(vol, "/volunteer/1/apply")
+        self.post(vol, "/volunteer/1/withdraw")
+        r = self.post(supplier, "/volunteer/signups/1/accept")
+        self.assertIn("be changed any more", r.get_data(as_text=True))
+        with self.app.app_context():
+            from ecoserving.db import query
+            self.assertEqual(query("SELECT status FROM volunteer_signups WHERE id = 1", one=True)["status"], "withdrawn")
+
+    def test_seed_and_init_db_ask_first(self):
+        r = self.app.test_cli_runner().invoke(args=["init-db"], input="n\n")
+        self.assertNotEqual(r.exit_code, 0)
+        self.assertIn("deletes ALL data", r.output)
+
+    # -- reports ---------------------------------------------------------------
+    def test_report_scam_and_admin_review(self):
+        supplier = self.client_for("supplier", org="Shady Deli")
+        consumer = self.client_for("consumer")
+        oid = self.make_offer(supplier, title="Free pizza", visible_consumers="1")
+        page = consumer.get(f"/offers/{oid}").get_data(as_text=True)
+        self.assertIn(f"/report?target=offer:{oid}", page)
+        self.assertNotIn("/report?target=", supplier.get(f"/offers/{oid}").get_data(as_text=True))  # not on own post
+        self.assertEqual(supplier.get(f"/report?target=offer:{oid}").status_code, 404)
+        r = self.post(consumer, "/report", target=f"offer:{oid}", category="scam", details="short")
+        self.assertIn("10 to 2000 characters", r.get_data(as_text=True))
+        r = self.post(consumer, "/report", target=f"offer:{oid}", category="scam",
+                      details="They asked me for a $20 delivery fee by gift card.")
+        self.assertIn("Your report was sent", r.get_data(as_text=True))
+        r = self.post(consumer, "/report", target=f"offer:{oid}", category="scam", details="Again, same problem here.")
+        self.assertIn("already reported", r.get_data(as_text=True))
+        # Only admins can see reports.
+        self.assertEqual(consumer.get("/admin/reports").status_code, 302)
+        admin = self.admin_client()
+        page = admin.get("/admin/reports").get_data(as_text=True)
+        self.assertIn("$20 delivery fee by gift card", page)
+        self.assertIn("Shady Deli", page)
+        self.assertIn('<span class="badge-count" title="Open reports">1</span>', page)
+        # Suspending the account logs them out, blocks login and takes down their open posts.
+        self.post(admin, "/admin/users/1/suspend", reason="Scam")
+        self.assertEqual(supplier.get("/dashboard").status_code, 302)
+        r = self.post(self.app.test_client(), "/login", email="supplier@example.test", password="password123")
+        self.assertIn("suspended", r.get_data(as_text=True))
+        with self.app.app_context():
+            from ecoserving.db import query
+            self.assertEqual(query("SELECT status FROM food_offers WHERE id = ?", (oid,), one=True)["status"], "cancelled")
+        self.post(admin, "/admin/reports/1", status="resolved", admin_note="Account suspended")
+        self.assertIn("Account suspended", admin.get("/admin/reports?status=resolved").get_data(as_text=True))
+
+    def test_report_user_from_chat_and_takedown(self):
+        dist = self.client_for("distributor")
+        self.verify("distributor@example.test")
+        supplier = self.client_for("supplier")
+        r = self.post(dist, "/food-requests/new", follow=False, title="Bread", description="Loaves",
+                      quantity="5", location="1 Main St", needed_by=future(5))
+        rid = int(r.headers["Location"].rsplit("/", 1)[1])
+        self.post(supplier, "/report", target=f"food_request:{rid}", category="fraud",
+                  details="This shelter does not exist at that address.")
+        self.post(supplier, "/report", target="user:1", category="harassment", details="Rude and threatening messages.")
+        self.assertEqual(supplier.get("/report?target=user:2").status_code, 404)   # yourself
+        admin = self.admin_client()
+        self.post(admin, "/admin/reports/1/takedown")
+        with self.app.app_context():
+            from ecoserving.db import query
+            self.assertEqual(query("SELECT status FROM food_requests WHERE id = ?", (rid,), one=True)["status"], "closed")
+            self.assertEqual(query("SELECT COUNT(*) AS n FROM reports", one=True)["n"], 2)
+
     def test_seed(self):
         with self.app.app_context():
             from ecoserving.seed import seed

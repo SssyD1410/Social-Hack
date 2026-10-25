@@ -24,7 +24,7 @@
     <div class="map map-list" id="requests-map"></div>
     <p class="small muted" style="margin:8px 0 0">Numbers match the order of the list below.</p>
   </div>
-  <script>
+  <script nonce="{{ csp_nonce() }}">
     document.addEventListener('DOMContentLoaded', () =>
       ESMap.points(document.getElementById('requests-map'), {me: {{ me|tojson }}, points: {{ pts|tojson }}}));
   </script>

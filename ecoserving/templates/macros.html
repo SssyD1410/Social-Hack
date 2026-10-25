@@ -104,6 +104,11 @@
 </div>
 {% endmacro %}
 
+{# "Report" link for a post or account, e.g. report_link('offer:12'). Admins handle reports, so they don't see it. #}
+{% macro report_link(target, label='Report a scam or problem') -%}
+{% if g.user and g.user.role != 'admin' %}<p class="report-line"><a class="report-link" href="{{ url_for('reports.new_report', target=target) }}">{{ icon('flag') }} {{ label }}</a></p>{% endif %}
+{%- endmacro %}
+
 {# "← Back" to the page the user came from on this site; `fallback` is used when there's no such page. #}
 {% macro back_button(fallback) -%}
 <a class="back-link" href="{{ fallback }}" data-back>← Back</a>

@@ -30,6 +30,21 @@ by their words). The stock photos are CC0, CC BY or public domain, from Wikimedi
 sources and licences are in [`ecoserving/static/photos/credits.json`](ecoserving/static/photos/credits.json) and on the
 `/credits` page, linked from every footer.
 
+## Safety and security
+
+- **Reporting scams and fraud:** every offer, food request, volunteer request, user profile and chat has a *Report*
+  link. Reports go to **Admin → Reports**, where admins add notes, mark them resolved or dismissed, take a post down,
+  or suspend an account (a suspended account is logged out, can't log in, and its open posts are taken down). Chats
+  and the report form remind users that food on EcoServing is always free.
+- **Accounts:** passwords hashed with scrypt; failed logins are limited per email and per IP address (15-minute
+  lockout); new sign-ups, messages and reports are rate limited; logins only redirect within the site.
+- **Pages:** CSRF tokens on every POST; a strict Content Security Policy (every inline script needs a per-request
+  nonce), clickjacking protection, `nosniff`, a strict referrer policy and HSTS over HTTPS; Leaflet is loaded with
+  integrity hashes; session cookies are `HttpOnly`, `SameSite=Lax`, and `Secure` in production (`wsgi.py`).
+- **Data:** users only see (and can only reference in chat) posts their role allows; uploads are checked by content,
+  not just their name; verification documents are only ever downloaded, never shown inside the site; changing a
+  verified distributor's name or registration number sends it back for verification.
+
 ## Tech stack
 
 - **Backend:** Python 3.10+ / Flask, server-rendered Jinja templates
@@ -50,6 +65,7 @@ ecoserving/
   posts.py        food offers, food requests, volunteer requests
   chat.py         conversations and messages
   admin.py        distributor verification
+  reports.py      scam / fraud reports, admin review, takedowns and suspensions
   visibility.py   who can see / claim which offers
   photos.py       photo uploads and the stock photo for each offer / request
   templates/      Jinja templates (one dashboard per role, learn/<role>.html, ...)
@@ -63,7 +79,7 @@ tests/test_app.py end-to-end tests with Flask's test client
 python -m venv .venv
 .venv\Scripts\activate          # Windows  (macOS/Linux: source .venv/bin/activate)
 pip install -r requirements.txt
-flask --app ecoserving seed      # optional: reset DB and load demo data
+flask --app ecoserving seed      # optional: reset DB and load demo data (asks first; --yes to skip)
 flask --app ecoserving run --debug
 ```
 

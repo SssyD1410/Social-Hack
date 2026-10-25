@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros.html" import post_photo, status_tag, post_button, message_button, back_button %}
+{% from "macros.html" import report_link, post_photo, status_tag, post_button, message_button, back_button %}
 {% block title %}{{ offer.title }}{% endblock %}
 {% block content %}
 {% set mine = offer.supplier_id == g.user.id %}
@@ -83,6 +83,7 @@
         <p class="small muted">This offer is no longer available.</p>
       {% endif %}
     {% endif %}
+    {% if not mine %}{{ report_link('offer:%d' % offer.id) }}{% endif %}
   </aside>
 </div>
 {% endblock %}

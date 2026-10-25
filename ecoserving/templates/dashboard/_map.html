@@ -25,7 +25,7 @@
     </p>
   </div>
 </section>
-<script>
+<script nonce="{{ csp_nonce() }}">
   document.addEventListener('DOMContentLoaded', () =>
     ESMap.dashboard(document.getElementById('dashboard-map'), {{ map_data|tojson }}, document.getElementById('route-caption')));
 </script>

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf, back_button %}
+{% block title %}Report a problem{% endblock %}
+{% block content %}
+<div class="narrow">
+  <p class="small">{{ back_button(url) }}</p>
+  <div class="card">
+    <h1>{{ icon('flag') }} Report a problem</h1>
+    <p class="muted">You're reporting {{ 'the account' if kind == 'user' else 'the post' }}
+      <a href="{{ url }}"><b>{{ title }}</b></a>. Only EcoServing admins see reports; the person you report is not told who sent it.</p>
+    <div class="report-tip">
+      {{ icon('shield-alert') }}
+      <p>Food on EcoServing is always free. Nobody should ask you for money, a deposit, a delivery fee,
+        gift cards, bank details or ID photos. If someone does, stop replying and report them here.</p>
+    </div>
+    <form method="post" class="stack" action="{{ url_for('reports.new_report') }}">
+      {{ csrf() }}
+      <input type="hidden" name="target" value="{{ target }}">
+      <fieldset>
+        <legend>What's wrong?</legend>
+        <div class="stack-tight">
+          {% for key, label in categories.items() %}
+            <label class="inline"><input type="radio" name="category" value="{{ key }}" required
+              {{ 'checked' if values.category == key }}> {{ label }}</label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      <div><label for="details">What happened?</label>
+        <textarea id="details" name="details" required minlength="10" maxlength="2000"
+          aria-describedby="details-hint" placeholder="For example: they asked me to pay $20 by gift card before pickup.">{{ values.details }}</textarea>
+        <p class="hint" id="details-hint">10 to 2000 characters. Include dates, amounts and what was said in chat.</p></div>
+      <div class="btn-row">
+        <button class="btn danger" type="submit">{{ icon('flag') }} Send report</button>
+        <a class="btn secondary" href="{{ url }}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

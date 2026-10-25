@@ -3,12 +3,13 @@
 from flask import Blueprint, abort, flash, g, jsonify, redirect, render_template, request, url_for
 
 from .db import execute, now_str, query
-from .helpers import login_required
+from .helpers import login_required, over_limit, record_attempt
 from .visibility import can_view_offer
 
 bp = Blueprint("chat", __name__)
 
 REF_TYPES = {"offer", "food_request", "volunteer_request"}
+MESSAGE_LIMIT = (30, 60)   # messages per user per minute
 
 
 def _parse_ref(raw):
@@ -42,12 +43,23 @@ def _ref_info(kind, rid):
 
 
 def _can_view_ref(kind, row):
+    """Same rules as the post's own page, so chat never reveals a post the user couldn't open."""
     u = g.user
     if kind == "offer":
         return can_view_offer(u, row)
     if kind == "food_request":
-        return u["role"] in ("supplier", "distributor", "volunteer", "admin")
+        if u["role"] == "distributor":
+            return row["distributor_id"] == u["id"]
+        return u["role"] in ("supplier", "volunteer", "admin")
     return True
+
+
+def _visible_ref(kind, rid):
+    """(title, url) of a referenced post if the current user may see it, else None."""
+    info = _ref_info(kind, rid)
+    if info and _can_view_ref(kind, info[0]):
+        return info[1], info[2]
+    return None
 
 
 def _get_conversation(cid):
@@ -116,7 +128,8 @@ def conversation(cid):
     c = _get_conversation(cid)
     me = g.user["id"]
     if request.method == "POST":
-        _send(c, request.form.get("body", ""), request.form.get("ref", ""))
+        if _send(c, request.form.get("body", ""), request.form.get("ref", "")) == "limited":
+            flash("You're sending messages too quickly. Please wait a minute.", "error")
         return redirect(url_for("chat.conversation", cid=cid))
 
     other_id = c["user_high"] if c["user_low"] == me else c["user_low"]
@@ -130,8 +143,7 @@ def conversation(cid):
     for m in msgs:
         key = (m["ref_type"], m["ref_id"])
         if m["ref_type"] and key not in refs:
-            info = _ref_info(*key)
-            refs[key] = (info[1], info[2]) if info else ("(removed)", None)
+            refs[key] = _visible_ref(*key) or ("(not available)", None)
     ref = request.args.get("ref", "")
     kind, rid = _parse_ref(ref)
     pending_ref = None
@@ -148,8 +160,14 @@ def _send(c, body, ref):
     if len(body) > 4000:
         body = body[:4000]
     kind, rid = _parse_ref(ref)
-    if kind and not _ref_info(kind, rid):
-        kind = rid = None
+    if kind:
+        info = _ref_info(kind, rid)
+        if not info or not _can_view_ref(kind, info[0]):
+            kind = rid = None   # can't attach a post you aren't allowed to see
+    key = f"msg:user:{g.user['id']}"
+    if over_limit(key, *MESSAGE_LIMIT):
+        return "limited"
+    record_attempt(key)
     ts = now_str()
     mid = execute("INSERT INTO messages (conversation_id, sender_id, body, ref_type, ref_id, created_at) "
                   "VALUES (?, ?, ?, ?, ?, ?)", (c["id"], g.user["id"], body, kind, rid, ts))
@@ -166,6 +184,8 @@ def api_messages(cid):
         m = _send(c, str(data.get("body", "")), str(data.get("ref", "")))
         if m is None:
             return jsonify(error="Message is empty."), 400
+        if m == "limited":
+            return jsonify(error="You're sending messages too quickly. Please wait a minute."), 429
         return jsonify(message=_message_dict(m))
     after = request.args.get("after", 0, type=int)
     msgs = query("SELECT * FROM messages WHERE conversation_id = ? AND id > ? ORDER BY id", (cid, after))
@@ -173,6 +193,6 @@ def api_messages(cid):
             (now_str(), cid, g.user["id"]))
     refs = {}
     for m in msgs:
-        if m["ref_type"] and (info := _ref_info(m["ref_type"], m["ref_id"])):
-            refs[f"{m['ref_type']}:{m['ref_id']}"] = {"title": info[1], "url": info[2]}
+        if m["ref_type"] and (ref := _visible_ref(m["ref_type"], m["ref_id"])):
+            refs[f"{m['ref_type']}:{m['ref_id']}"] = {"title": ref[0], "url": ref[1]}
     return jsonify(messages=[_message_dict(m) for m in msgs], refs=refs)

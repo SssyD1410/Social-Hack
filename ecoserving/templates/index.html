@@ -7,7 +7,7 @@
   ('vegetables', 'Produce that won’t keep till Monday'),
   ('apple-crates', 'Apples by the crate'),
 ] %}
-<script>document.documentElement.classList.add('js');</script>
+<script nonce="{{ csp_nonce() }}">document.documentElement.classList.add('js');</script>
 <section class="home-hero" aria-labelledby="hero-title">
   <div class="hero-slides" aria-hidden="true">
     {% for name, caption in slides %}
@@ -153,7 +153,7 @@
 </section>
 {% endblock %}
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce() }}">
   (() => {
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 

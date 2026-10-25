@@ -19,9 +19,12 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="{{ url_for('static', filename='share/twitter-image.png', _external=True) }}">
   <meta name="theme-color" content="#1f7f3a">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  {# Integrity hashes: the browser refuses these files if the CDN ever serves anything different. #}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+        integrity="sha384-c6Rcwz4e4CITMbu/NBmnNS8yN2sC3cUElMEMfP3vqqKFp7GOYaaBBCqmaWBjmkjb" crossorigin="anonymous" referrerpolicy="no-referrer">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"
+          integrity="sha384-NElt3Op+9NBMCYaef5HxeJmU4Xeard/Lku8ek6hoPTvYkQPh3zLIrJP7KiRocsxO" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="{{ url_for('static', filename='map.js') }}"></script>
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo.svg') }}">
   <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon/favicon-32x32.png') }}">
@@ -50,7 +53,7 @@
           <a href="{{ url_for('posts.volunteer_requests') }}" class="{{ 'active' if 'volunteer' in ep }}">Volunteering</a>
         {% endif %}
         <a href="{{ url_for('chat.inbox') }}" class="{{ 'active' if ep.startswith('chat.') }}">Messages{% if unread %}<span class="badge-count">{{ unread }}</span>{% endif %}</a>
-        {% if g.user.role == 'admin' %}<a href="{{ url_for('admin.index') }}" class="{{ 'active' if ep.startswith('admin.') }}">Admin</a>{% endif %}
+        {% if g.user.role == 'admin' %}{% set open_reports = open_report_count() %}<a href="{{ url_for('admin.index') }}" class="{{ 'active' if ep.startswith('admin.') or ep.startswith('reports.admin') }}">Admin{% if open_reports %}<span class="badge-count" title="Open reports">{{ open_reports }}</span>{% endif %}</a>{% endif %}
         <a href="{{ url_for('main.profile') }}" class="{{ 'active' if ep == 'main.profile' }}">Profile</a>
       {% else %}
         <a href="{{ url_for('auth.login') }}">Log in</a>
@@ -81,7 +84,7 @@
     </span>
   </div>
 </footer>
-<script>
+<script nonce="{{ csp_nonce() }}">
   /* Back buttons: remember, per page, the page on this site the user arrived from. Reloads and
      form posts that redirect back to the same page don't overwrite it, so "Back" still leads
      to where the user was before acting on this page. */

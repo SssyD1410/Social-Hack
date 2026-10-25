@@ -2,6 +2,8 @@
 
 PRAGMA foreign_keys = ON;
 
+DROP TABLE IF EXISTS rate_events;
+DROP TABLE IF EXISTS reports;
 DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS conversations;
 DROP TABLE IF EXISTS volunteer_signups;
@@ -29,6 +31,9 @@ CREATE TABLE users (
     verification_status TEXT    NOT NULL DEFAULT 'not_required'
                         CHECK (verification_status IN ('not_required', 'unverified', 'pending', 'verified', 'rejected')),
     verification_note   TEXT,
+    -- Set by an admin (e.g. after a confirmed scam report); suspended accounts can't log in.
+    suspended_at        TEXT,
+    suspended_reason    TEXT,
     created_at          TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
 );
 

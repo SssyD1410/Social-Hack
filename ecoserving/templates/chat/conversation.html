@@ -11,7 +11,12 @@
         <span class="tag">{{ ROLES[other.role].label if other.role in ROLES else 'Admin' }}</span>
         {% if other.org_name %}<div class="small muted">{{ other.name }}</div>{% endif %}
       </div>
+      {% if other.role != 'admin' and g.user.role != 'admin' %}
+        <a class="report-link small" href="{{ url_for('reports.new_report', target='user:%d' % other.id) }}">{{ icon('flag') }} Report</a>
+      {% endif %}
     </div>
+    <p class="chat-safety small">{{ icon('shield-alert') }} Food on EcoServing is always free. Never send money, gift cards,
+      bank details or ID photos to anyone here.</p>
     {% if pending_ref %}
       <div class="ref-banner" id="ref-banner">
         <span>About: <a href="{{ pending_ref.url }}">{{ pending_ref.title }}</a></span>
@@ -38,7 +43,7 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce() }}">
 (() => {
   const cid = {{ c.id }};
   const me = {{ g.user.id }};

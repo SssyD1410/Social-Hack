@@ -27,7 +27,7 @@
 {% include "learn/_consumer.html" %}
 {% endblock %}
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce() }}">
   // Switch tabs in place; links still work without JavaScript.
   const tabs = document.querySelectorAll('.role-tab');
   tabs.forEach(tab => tab.addEventListener('click', (e) => {

@@ -468,6 +468,11 @@ def decide_signup(signup_id, decision):
               "WHERE s.id = ?", (signup_id,), one=True)
     if s is None or s["poster_id"] != g.user["id"] or decision not in ("accept", "decline"):
         abort(403)
+    # A volunteer who withdrew can't be signed back up by the organizer (only they can re-apply).
+    allowed_from = ("pending", "declined") if decision == "accept" else ("pending", "accepted")
+    if s["status"] not in allowed_from:
+        flash("That sign-up can't be changed any more.", "error")
+        return redirect(url_for("posts.volunteer_request", req_id=s["request_id"]))
     execute("UPDATE volunteer_signups SET status = ? WHERE id = ?",
             ("accepted" if decision == "accept" else "declined", signup_id))
     _refresh_vol_status(s["request_id"])
