@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Share surplus food{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>Surplus food, relayed to the people who need it.</h1>
+    <p class="lead">FoodRelay connects shops and restaurants that have food left over with shelters, community
+      organizations, volunteers and neighbors, so good food gets eaten instead of thrown away.</p>
+    <div class="btn-row">
+      {% if g.user %}
+        <a class="btn" href="{{ url_for('main.dashboard') }}">Go to your dashboard</a>
+      {% else %}
+        <a class="btn" href="{{ url_for('auth.register') }}">Join FoodRelay</a>
+        <a class="btn secondary" href="#roles">Find your role</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <div class="flow-step"><span class="emoji">🏪</span><div><b>A bakery posts</b><br><span class="muted small">"25 loaves, pick up by 8pm"</span></div></div>
+    <div class="flow-step"><span class="emoji">🚚</span><div><b>A shelter claims it</b><br><span class="muted small">and arranges pickup in chat</span></div></div>
+    <div class="flow-step"><span class="emoji">🙋</span><div><b>A volunteer drives it over</b><br><span class="muted small">after signing up for a shift</span></div></div>
+    <div class="flow-step"><span class="emoji">🍽️</span><div><b>Dinner is served</b><br><span class="muted small">instead of a full bin</span></div></div>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat"><b>{{ stats.rescued }}</b>offers rescued</div>
+  <div class="stat"><b>{{ stats.suppliers }}</b>suppliers</div>
+  <div class="stat"><b>{{ stats.distributors }}</b>verified distributors</div>
+  <div class="stat"><b>{{ stats.volunteers }}</b>volunteers</div>
+</div>
+
+<section class="section" id="roles">
+  <div class="section-head"><h2>Four ways to take part</h2></div>
+  <div class="cards">
+    {% for key, r in ROLES.items() %}
+    <div class="card role-card">
+      <span class="emoji">{{ r.icon }}</span>
+      <h3>{{ r.label }}</h3>
+      <p class="muted">{{ r.tagline }}</p>
+      <div class="btn-row">
+        <a class="btn secondary small" href="{{ url_for('main.learn', role=key) }}">Learn more</a>
+        {% if not g.user %}<a class="btn small" href="{{ url_for('auth.register', role=key) }}">Join as {{ r.label|lower }}</a>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="card">
+    <h2>How FoodRelay works</h2>
+    <ol class="steps">
+      <li><b>Suppliers post offers</b> with what's left, where it is and the pickup deadline, and choose who can see each offer.</li>
+      <li><b>Verified distributors, volunteers and consumers claim</b> the offers that are visible to them.</li>
+      <li><b>Distributors post requests</b> for food they need, and suppliers pledge to help.</li>
+      <li><b>Anyone can ask for volunteers</b> for pickups, sorting or delivery shifts, and volunteers sign up.</li>
+      <li><b>Everyone chats directly</b> from any offer or request to sort out the details.</li>
+    </ol>
+  </div>
+</section>
+{% endblock %}

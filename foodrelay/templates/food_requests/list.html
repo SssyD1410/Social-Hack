@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "macros.html" import food_request_card %}
+{% block title %}Food requests{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>{{ 'Your food requests' if mine else 'Food requests' }}</h1>
+    <p>What distributors in the community need right now.</p></div>
+  {% if g.user.role == 'distributor' %}
+    <div class="btn-row">
+      <a class="btn secondary" href="{{ url_for('posts.food_requests', mine=None if mine else 1) }}">{{ 'All open requests' if mine else 'Only mine' }}</a>
+      {% if is_verified(g.user) %}<a class="btn" href="{{ url_for('posts.new_food_request') }}">+ Request food</a>{% endif %}
+    </div>
+  {% endif %}
+</div>
+<form class="filters" method="get">
+  {% if mine %}<input type="hidden" name="mine" value="1">{% endif %}
+  <input type="search" name="q" placeholder="Search" value="{{ request.args.q }}">
+  <input type="text" name="city" placeholder="City" value="{{ request.args.city }}">
+  <button class="btn secondary" type="submit">Filter</button>
+</form>
+{% if requests %}
+  <div class="cards">{% for r in requests %}{{ food_request_card(r) }}{% endfor %}</div>
+{% else %}
+  <div class="empty">No food requests found.</div>
+{% endif %}
+{% endblock %}

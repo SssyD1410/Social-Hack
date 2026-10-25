@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% from "macros.html" import offer_card, food_request_card, status_tag %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>{{ g.user.org_name or g.user.name }}</h1><p>🏪 Supplier dashboard</p></div>
+  <div class="btn-row">
+    <a class="btn" href="{{ url_for('posts.new_offer') }}">+ Post food offer</a>
+    <a class="btn secondary" href="{{ url_for('posts.new_volunteer_request') }}">+ Request volunteers</a>
+  </div>
+</div>
+
+<section>
+  <div class="section-head"><h2>Your food offers</h2><a href="{{ url_for('posts.offers') }}">See all</a></div>
+  {% if my_offers %}
+    <div class="cards">{% for o in my_offers %}{{ offer_card(o, now) }}{% endfor %}</div>
+  {% else %}
+    <div class="empty">You haven't posted any food yet. <a href="{{ url_for('posts.new_offer') }}">Post your first offer</a>.</div>
+  {% endif %}
+</section>
+
+<section class="section">
+  <div class="section-head"><h2>Your volunteer requests</h2><a href="{{ url_for('posts.volunteer_requests', mine=1) }}">See all</a></div>
+  {% if my_vol_requests %}
+    <div class="card table-wrap">
+      <table class="list">
+        <tr><th>Request</th><th>When</th><th>Volunteers</th><th>Status</th></tr>
+        {% for v in my_vol_requests %}
+        <tr>
+          <td><a href="{{ url_for('posts.volunteer_request', req_id=v.id) }}">{{ v.title }}</a></td>
+          <td class="small">{{ v.start_time|dt }}</td>
+          <td class="small">{{ v.accepted }}/{{ v.slots }} confirmed{% if v.pending %} · <b>{{ v.pending }} waiting</b>{% endif %}</td>
+          <td>{{ status_tag(v.status) }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  {% else %}
+    <div class="empty">Need help sorting, packing or delivering? <a href="{{ url_for('posts.new_volunteer_request') }}">Request volunteers</a>.</div>
+  {% endif %}
+</section>
+
+<section class="section">
+  <div class="section-head"><h2>Distributors need food</h2><a href="{{ url_for('posts.food_requests') }}">All requests</a></div>
+  {% if food_requests %}
+    <div class="cards">{% for r in food_requests %}{{ food_request_card(r) }}{% endfor %}</div>
+  {% else %}
+    <div class="empty">No open food requests right now.</div>
+  {% endif %}
+</section>
+{% endblock %}

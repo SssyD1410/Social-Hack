@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "macros.html" import offer_card %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Hi, {{ g.user.name }}</h1><p>🍽️ Free food near you</p></div>
+  <div class="btn-row"><a class="btn" href="{{ url_for('posts.offers') }}">Browse all offers</a></div>
+</div>
+
+{% if my_claims %}
+<section>
+  <div class="section-head"><h2>Your reservations</h2></div>
+  <div class="cards">{% for o in my_claims %}{{ offer_card(o, now) }}{% endfor %}</div>
+</section>
+{% endif %}
+
+<section class="{{ 'section' if my_claims }}">
+  <div class="section-head"><h2>Available to pick up</h2></div>
+  {% if available_offers %}
+    <div class="cards">{% for o in available_offers %}{{ offer_card(o, now) }}{% endfor %}</div>
+  {% else %}
+    <div class="empty">Nothing available right now. New offers are usually posted around closing time, so check back later.</div>
+  {% endif %}
+</section>
+{% endblock %}

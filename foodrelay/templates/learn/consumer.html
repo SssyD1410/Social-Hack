@@ -1,0 +1,34 @@
+{% extends "learn/_layout.html" %}
+{% block headline %}Free food near you, no strings attached{% endblock %}
+{% block intro %}Consumers are anyone who could use some food: students, families stretching a budget, people between
+paychecks, or anyone who'd rather eat good food than see it wasted. Local shops share small surplus offers you can pick up yourself.{% endblock %}
+
+{% block steps %}
+<ol class="steps">
+  <li><b>Create a free consumer account.</b> All you need is a name and email; you can add your city to see nearby food.</li>
+  <li><b>Browse small offers</b> that suppliers have made visible to consumers, like a box of pastries or a few meals.</li>
+  <li><b>Claim an offer</b> to reserve it so nobody else takes it.</li>
+  <li><b>Pick it up</b> at the listed location before the deadline. Message the supplier if you have questions.</li>
+</ol>
+{% endblock %}
+
+{% block features %}
+<ul class="check-list">
+  <li><b>Small, pick-up-ready offers</b> sized for individuals and households.</li>
+  <li><b>Filters</b> by food type, dietary notes and city.</li>
+  <li><b>Reservations</b> so the food is held for you.</li>
+  <li><b>Chat</b> with the supplier about pickup or ingredients.</li>
+</ul>
+{% endblock %}
+
+{% block faq %}
+<details><summary>Is it really free?</summary><p>Yes. Everything on FoodRelay is donated, and nobody will ask you to pay or prove anything.</p></details>
+<details><summary>Why can't I see big offers?</summary><p>Large donations (trays of food, crates of produce) go to distributors, who can store and share them with many people. Consumers see the smaller offers suppliers have chosen to share directly.</p></details>
+<details><summary>What if I reserve something and can't go?</summary><p>Release it from the offer page so someone else can have it.</p></details>
+<details><summary>Is the food safe?</summary><p>Suppliers share food they'd be happy to serve, but always check the description and dietary notes, and ask in chat if you have an allergy.</p></details>
+{% endblock %}
+
+{% block aside_title %}Need more help?{% endblock %}
+{% block aside %}
+<p class="small">Local shelters and food pantries on FoodRelay (our <a href="{{ url_for('main.learn', role='distributor') }}">distributors</a>) can also help with regular meals and groceries.</p>
+{% endblock %}

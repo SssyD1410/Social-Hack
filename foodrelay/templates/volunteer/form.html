@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf %}
+{% block title %}Request volunteers{% endblock %}
+{% block content %}
+<div class="medium">
+  <div class="card">
+    <h1>Request volunteers</h1>
+    <p class="muted">Describe the time period, what needs doing and anything volunteers should bring or have.</p>
+    <form method="post" class="stack">
+      {{ csrf() }}
+      <div><label for="title">Title</label>
+        <input id="title" name="title" type="text" required maxlength="120" placeholder="e.g. Evening food run" value="{{ values.title }}"></div>
+      <div><label for="tasks">Tasks</label>
+        <textarea id="tasks" name="tasks" required placeholder="What will volunteers do?">{{ values.tasks }}</textarea></div>
+      <div><label for="requirements">Requirements <span class="hint">(optional, e.g. own car, can lift 15 kg)</span></label>
+        <textarea id="requirements" name="requirements">{{ values.requirements }}</textarea></div>
+      <div class="grid-3">
+        <div><label for="start_time">Start</label>
+          <input id="start_time" name="start_time" type="datetime-local" required value="{{ values.start_time }}"></div>
+        <div><label for="end_time">End</label>
+          <input id="end_time" name="end_time" type="datetime-local" required value="{{ values.end_time }}"></div>
+        <div><label for="slots">Volunteers needed</label>
+          <input id="slots" name="slots" type="number" min="1" max="100" required value="{{ values.slots }}"></div>
+      </div>
+      <div class="grid-2">
+        <div><label for="location">Location</label>
+          <input id="location" name="location" type="text" required value="{{ values.location }}"></div>
+        <div><label for="city">City / area</label>
+          <input id="city" name="city" type="text" value="{{ values.city }}"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" type="submit">Post request</button>
+        <a class="btn secondary" href="{{ url_for('main.dashboard') }}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

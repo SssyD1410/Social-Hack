@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Learn more: {{ ROLES[role].label }}s{% endblock %}
+{% block content %}
+<div class="role-tabs">
+  {% for key, r in ROLES.items() %}
+    <a class="btn small {{ '' if key == role else 'secondary' }}" href="{{ url_for('main.learn', role=key) }}">{{ r.icon }} {{ r.label }}s</a>
+  {% endfor %}
+</div>
+
+<section class="learn-hero">
+  <span class="emoji">{{ ROLES[role].icon }}</span>
+  <h1>{% block headline %}{% endblock %}</h1>
+  <p class="lead muted" style="font-size:1.1rem">{% block intro %}{% endblock %}</p>
+  <div class="btn-row">
+    {% if g.user %}
+      <a class="btn" href="{{ url_for('main.dashboard') }}">Go to your dashboard</a>
+    {% else %}
+      <a class="btn" href="{{ url_for('auth.register', role=role) }}">Join as {{ ROLES[role].label|lower }}</a>
+      <a class="btn secondary" href="{{ url_for('auth.login') }}">Log in</a>
+    {% endif %}
+  </div>
+</section>
+
+<div class="two-col">
+  <div>
+    <div class="card">
+      <h2>How it works</h2>
+      {% block steps %}{% endblock %}
+    </div>
+    <div class="card">
+      <h2>What you can do on FoodRelay</h2>
+      {% block features %}{% endblock %}
+    </div>
+    <div class="section faq">
+      <h2>Common questions</h2>
+      {% block faq %}{% endblock %}
+    </div>
+  </div>
+  <aside>
+    <div class="card">
+      <h3>{% block aside_title %}Who this is for{% endblock %}</h3>
+      {% block aside %}{% endblock %}
+    </div>
+    <div class="card">
+      <h3>Other roles</h3>
+      <ul class="check-list small">
+        {% for key, r in ROLES.items() if key != role %}
+          <li><a href="{{ url_for('main.learn', role=key) }}">{{ r.label }}s</a>: {{ r.tagline }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </aside>
+</div>
+{% endblock %}

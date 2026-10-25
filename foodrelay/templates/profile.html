@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf, status_tag %}
+{% block title %}Your profile{% endblock %}
+{% block content %}
+{% set u = g.user %}
+<div class="page-head">
+  <div><h1>Your profile</h1><p>{{ ROLES[u.role].icon if u.role in ROLES }} {{ ROLES[u.role].label if u.role in ROLES else 'Administrator' }} · {{ u.email }}</p></div>
+  {% if u.role != 'admin' %}<a class="btn secondary" href="{{ url_for('main.user_profile', user_id=u.id) }}">View public profile</a>{% endif %}
+</div>
+
+<div class="two-col">
+  <div class="card">
+    <h2>Details</h2>
+    <form method="post" class="stack">
+      {{ csrf() }}
+      <div class="grid-2">
+        <div><label for="name">Your name</label><input id="name" name="name" type="text" required value="{{ u.name }}"></div>
+        <div><label for="org_name">Organization / business</label><input id="org_name" name="org_name" type="text" value="{{ u.org_name or '' }}"></div>
+      </div>
+      <div class="grid-2">
+        <div><label for="phone">Phone</label><input id="phone" name="phone" type="tel" value="{{ u.phone or '' }}"></div>
+        <div><label for="city">City / area</label><input id="city" name="city" type="text" value="{{ u.city or '' }}"></div>
+      </div>
+      <div><label for="address">Address <span class="hint">(default pickup / meeting point)</span></label><input id="address" name="address" type="text" value="{{ u.address or '' }}"></div>
+      <div><label for="bio">About {{ 'your organization' if u.org_name else 'you' }}</label><textarea id="bio" name="bio">{{ u.bio or '' }}</textarea></div>
+      {% if u.role == 'distributor' %}
+        <div><label for="registration_number">Organization registration number <span class="hint">(charity / non-profit number)</span></label>
+          <input id="registration_number" name="registration_number" type="text" value="{{ u.registration_number or '' }}"></div>
+      {% endif %}
+      <div><button class="btn" type="submit">Save profile</button></div>
+    </form>
+  </div>
+
+  {% if u.role == 'distributor' %}
+  <aside class="card">
+    <h2>Verification</h2>
+    <p>Status: {{ status_tag(u.verification_status) }}</p>
+    {% if u.verification_status == 'rejected' and u.verification_note %}
+      <div class="notice bad small">Reviewer note: {{ u.verification_note }}</div>
+    {% endif %}
+    <p class="small muted">Upload proof that your organization is eligible to distribute food, e.g. charity registration,
+      food-safety certificate or food-handler training. PDF, PNG or JPG, up to 8 MB.</p>
+
+    {% if docs %}
+      <ul class="check-list small">
+        {% for d in docs %}<li><a href="{{ url_for('main.document', doc_id=d.id) }}">{{ d.original_name }}</a><br><span class="muted">{{ d.doc_type }} · {{ d.uploaded_at|dt }}</span></li>{% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if u.verification_status != 'verified' %}
+    <form method="post" action="{{ url_for('main.upload_document') }}" enctype="multipart/form-data" class="stack">
+      {{ csrf() }}
+      <div><label for="doc_type">Document type</label>
+        <select id="doc_type" name="doc_type" required>
+          {% for t in doc_types %}<option>{{ t }}</option>{% endfor %}
+        </select></div>
+      <div><label for="document">File</label><input id="document" name="document" type="file" accept=".pdf,.png,.jpg,.jpeg" required></div>
+      <button class="btn secondary" type="submit">Upload document</button>
+    </form>
+    {% if u.verification_status in ('unverified', 'rejected') %}
+      <form method="post" action="{{ url_for('main.submit_verification') }}" style="margin-top:14px">
+        {{ csrf() }}
+        <button class="btn block" type="submit">Submit for verification</button>
+      </form>
+    {% endif %}
+    {% endif %}
+  </aside>
+  {% endif %}
+</div>
+{% endblock %}

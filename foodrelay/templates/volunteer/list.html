@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "macros.html" import volunteer_card %}
+{% block title %}Volunteering{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>{{ 'Your volunteer requests' if request.args.mine else 'Volunteer requests' }}</h1>
+    <p>Shifts and tasks posted by suppliers and distributors.</p></div>
+  {% if g.user.role in ('supplier', 'distributor') %}
+    <div class="btn-row">
+      <a class="btn secondary" href="{{ url_for('posts.volunteer_requests', mine=None if request.args.mine else 1) }}">{{ 'All open requests' if request.args.mine else 'Only mine' }}</a>
+      {% if is_verified(g.user) %}<a class="btn" href="{{ url_for('posts.new_volunteer_request') }}">+ Request volunteers</a>{% endif %}
+    </div>
+  {% endif %}
+</div>
+<form class="filters" method="get">
+  {% if request.args.mine %}<input type="hidden" name="mine" value="1">{% endif %}
+  <input type="search" name="q" placeholder="Search tasks (e.g. driving)" value="{{ request.args.q }}">
+  <input type="text" name="city" placeholder="City" value="{{ request.args.city }}">
+  <button class="btn secondary" type="submit">Filter</button>
+</form>
+{% if requests %}
+  <div class="cards">{% for v in requests %}{{ volunteer_card(v) }}{% endfor %}</div>
+{% else %}
+  <div class="empty">No volunteer requests found.</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf, status_tag, post_button, message_button %}
+{% block title %}{{ v.title }}{% endblock %}
+{% block content %}
+{% set mine = v.poster_id == g.user.id %}
+<div class="page-head">
+  <div>
+    <p class="small"><a href="{{ url_for('posts.volunteer_requests') }}">← Volunteer requests</a></p>
+    <h1>{{ v.title }}</h1>
+    <div class="tags" style="margin-top:8px">{{ status_tag(v.status) }}<span class="tag">{{ v.accepted }} / {{ v.slots }} confirmed</span></div>
+  </div>
+</div>
+<div class="two-col">
+  <div>
+    <div class="card">
+      <h3>Tasks</h3>
+      <p style="white-space:pre-wrap">{{ v.tasks }}</p>
+      {% if v.requirements %}<h3>Requirements</h3><p style="white-space:pre-wrap">{{ v.requirements }}</p>{% endif %}
+      <dl class="details">
+        <dt>When</dt><dd>{{ v.start_time|dt }} to {{ v.end_time|dt }}</dd>
+        <dt>Where</dt><dd>{{ v.location }}{% if v.city %}, {{ v.city }}{% endif %}</dd>
+        <dt>Posted by</dt><dd><a href="{{ url_for('main.user_profile', user_id=v.poster_id) }}">{{ v.poster_org or v.poster_name }}</a> <span class="tag">{{ ROLES[v.poster_role].label }}</span></dd>
+      </dl>
+    </div>
+
+    {% if mine %}
+    <div class="card">
+      <h2>Sign-ups</h2>
+      {% if signups %}
+        <div class="table-wrap"><table class="list">
+          <tr><th>Volunteer</th><th>Note</th><th>Status</th><th></th></tr>
+          {% for s in signups %}
+          <tr>
+            <td><a href="{{ url_for('main.user_profile', user_id=s.volunteer_id) }}">{{ s.name }}</a>{% if s.city %}<div class="small muted">{{ s.city }}</div>{% endif %}</td>
+            <td class="small">{{ s.message or '—' }}</td>
+            <td>{{ status_tag(s.status) }}</td>
+            <td><div class="btn-row">
+              {% if s.status in ('pending', 'declined') %}{{ post_button(url_for('posts.decide_signup', signup_id=s.id, decision='accept'), 'Accept', 'btn small') }}{% endif %}
+              {% if s.status in ('pending', 'accepted') %}{{ post_button(url_for('posts.decide_signup', signup_id=s.id, decision='decline'), 'Decline', 'btn small danger') }}{% endif %}
+              <a class="btn small secondary" href="{{ url_for('chat.start', user_id=s.volunteer_id, ref='volunteer_request:%d' % v.id) }}">💬</a>
+            </div></td>
+          </tr>
+          {% endfor %}
+        </table></div>
+      {% else %}
+        <p class="muted">No sign-ups yet.</p>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <aside class="card">
+    {% if mine %}
+      <h3>Manage request</h3>
+      <div class="btn-row">
+        {% if v.status == 'closed' %}
+          {{ post_button(url_for('posts.volunteer_request_action', req_id=v.id, action='reopen'), 'Reopen') }}
+        {% else %}
+          {{ post_button(url_for('posts.volunteer_request_action', req_id=v.id, action='close'), 'Close request', 'btn danger', 'Stop accepting volunteers?') }}
+        {% endif %}
+      </div>
+    {% elif g.user.role == 'volunteer' %}
+      {% if my_signup and my_signup.status in ('pending', 'accepted') %}
+        <h3>You're signed up</h3>
+        <p>Status: {{ status_tag(my_signup.status) }}</p>
+        <div class="btn-row">
+          {{ message_button(v.poster_id, 'volunteer_request:%d' % v.id, 'Message organizer') }}
+          {{ post_button(url_for('posts.withdraw_volunteer', req_id=v.id), 'Withdraw', 'btn danger', 'Withdraw from this request?') }}
+        </div>
+      {% elif my_signup and my_signup.status == 'declined' %}
+        <h3>Not this time</h3>
+        <p class="small muted">The organizer declined this sign-up. Thanks for offering!</p>
+      {% elif v.status == 'open' and v.end_time >= now %}
+        <h3>Sign up</h3>
+        <form method="post" action="{{ url_for('posts.apply_volunteer', req_id=v.id) }}" class="stack">
+          {{ csrf() }}
+          <div><label for="message">Note to organizer <span class="hint">(optional)</span></label>
+            <textarea id="message" name="message" placeholder="e.g. I have a car and can stay until 9pm"></textarea></div>
+          <button class="btn accent" type="submit">Sign up</button>
+        </form>
+        <div style="margin-top:10px">{{ message_button(v.poster_id, 'volunteer_request:%d' % v.id, 'Ask a question') }}</div>
+      {% else %}
+        <h3>Closed</h3><p class="small muted">This request isn't accepting volunteers.</p>
+      {% endif %}
+    {% else %}
+      <h3>Get in touch</h3>
+      <p class="small muted">Only volunteer accounts can sign up for shifts.</p>
+      {{ message_button(v.poster_id, 'volunteer_request:%d' % v.id, 'Message organizer') }}
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

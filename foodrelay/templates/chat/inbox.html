@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Messages{% endblock %}
+{% block content %}
+<div class="medium">
+  <div class="page-head"><div><h1>Messages</h1><p>Start a conversation from any offer or request.</p></div></div>
+  {% if convs %}
+    <div class="card conv-list" style="padding:0">
+      {% for c in convs %}
+      <a href="{{ url_for('chat.conversation', cid=c.id) }}">
+        <span class="avatar">{{ (c.other_org or c.other_name)[:1]|upper }}</span>
+        <span class="grow">
+          <b>{{ c.other_org or c.other_name }}</b> <span class="tag">{{ ROLES[c.other_role].label if c.other_role in ROLES else 'Admin' }}</span>
+          <div class="preview">{{ c.last_body or 'No messages yet' }}</div>
+        </span>
+        <span class="small muted" style="text-align:right">{{ c.updated_at|dt }}{% if c.unread_n %}<br><span class="badge-count">{{ c.unread_n }}</span>{% endif %}</span>
+      </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty">No conversations yet. Open an offer or request and press <b>💬 Message</b>.</div>
+  {% endif %}
+</div>
+{% endblock %}

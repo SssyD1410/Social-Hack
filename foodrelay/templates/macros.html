@@ -1,0 +1,67 @@
+{% macro csrf() %}<input type="hidden" name="_csrf" value="{{ csrf_token() }}">{% endmacro %}
+
+{% macro post_button(action, label, cls='btn', confirm=None) -%}
+<form method="post" action="{{ action }}">
+  {{ csrf() }}
+  <button class="{{ cls }}" type="submit"{% if confirm %} onclick="return confirm('{{ confirm }}')"{% endif %}>{{ label }}</button>
+</form>
+{%- endmacro %}
+
+{% macro org(name, org_name) %}{{ org_name or name }}{% endmacro %}
+
+{% macro status_tag(status, expired=False) -%}
+  {%- if expired -%}<span class="tag red">Expired</span>
+  {%- elif status in ('available', 'open') -%}<span class="tag green">{{ status|capitalize }}</span>
+  {%- elif status in ('claimed', 'pledged', 'pending') -%}<span class="tag orange">{{ status|capitalize }}</span>
+  {%- elif status in ('completed', 'fulfilled', 'filled', 'accepted', 'verified') -%}<span class="tag blue">{{ status|capitalize }}</span>
+  {%- else -%}<span class="tag red">{{ status|capitalize }}</span>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro offer_card(o, now) %}
+<a class="card post-card" href="{{ url_for('posts.offer', offer_id=o.id) }}">
+  <div class="top">
+    <h3>{{ o.title }}</h3>
+    {{ status_tag(o.status, o.status == 'available' and o.pickup_deadline < now) }}
+  </div>
+  <div class="tags">
+    <span class="tag">{{ o.food_type }}</span>
+    <span class="tag">{{ o.size|capitalize }}</span>
+    {% if o.dietary_tags %}<span class="tag green">{{ o.dietary_tags }}</span>{% endif %}
+  </div>
+  <div class="meta">
+    <span>🏪 {{ o.supplier_org or o.org_name or o.supplier_name or o.name }}</span>
+    <span>📦 {{ o.quantity }}</span>
+    <span>📍 {{ o.location }}{% if o.city %}, {{ o.city }}{% endif %}</span>
+    <span>⏰ Pick up by {{ o.pickup_deadline|dt }}</span>
+  </div>
+</a>
+{% endmacro %}
+
+{% macro food_request_card(r) %}
+<a class="card post-card" href="{{ url_for('posts.food_request', req_id=r.id) }}">
+  <div class="top"><h3>{{ r.title }}</h3>{{ status_tag(r.status) }}</div>
+  <div class="meta">
+    <span>🚚 {{ r.distributor_org or r.org_name or r.distributor_name or r.name }}</span>
+    <span>📦 {{ r.quantity }}</span>
+    <span>📍 {{ r.location }}{% if r.city %}, {{ r.city }}{% endif %}</span>
+    <span>⏰ Needed by {{ r.needed_by|dt }}</span>
+  </div>
+</a>
+{% endmacro %}
+
+{% macro volunteer_card(v) %}
+<a class="card post-card" href="{{ url_for('posts.volunteer_request', req_id=v.id) }}">
+  <div class="top"><h3>{{ v.title }}</h3>{{ status_tag(v.status) }}</div>
+  <div class="meta">
+    <span>👤 {{ v.poster_org or v.org_name or v.poster_name or v.name }}</span>
+    <span>🗓️ {{ v.start_time|dt }} to {{ v.end_time|dt }}</span>
+    <span>📍 {{ v.location }}{% if v.city %}, {{ v.city }}{% endif %}</span>
+    {% if v.accepted is defined %}<span>🙋 {{ v.accepted }} / {{ v.slots }} volunteers confirmed</span>{% endif %}
+  </div>
+</a>
+{% endmacro %}
+
+{% macro message_button(user_id, ref, label='Message') -%}
+<a class="btn secondary" href="{{ url_for('chat.start', user_id=user_id, ref=ref) }}">💬 {{ label }}</a>
+{%- endmacro %}

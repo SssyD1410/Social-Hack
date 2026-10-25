@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf %}
+{% block title %}Chat with {{ other.org_name or other.name }}{% endblock %}
+{% block content %}
+<div class="medium">
+  <p class="small"><a href="{{ url_for('chat.inbox') }}">← All messages</a></p>
+  <div class="card chat">
+    <div class="chat-head">
+      <div>
+        <b><a href="{{ url_for('main.user_profile', user_id=other.id) }}">{{ other.org_name or other.name }}</a></b>
+        <span class="tag">{{ ROLES[other.role].label if other.role in ROLES else 'Admin' }}</span>
+        {% if other.org_name %}<div class="small muted">{{ other.name }}</div>{% endif %}
+      </div>
+    </div>
+    {% if pending_ref %}
+      <div class="ref-banner" id="ref-banner">
+        <span>About: <a href="{{ pending_ref.url }}">{{ pending_ref.title }}</a></span>
+        <button class="linklike small" type="button" id="clear-ref" aria-label="Remove reference">✕</button>
+      </div>
+    {% endif %}
+    <div class="chat-body" id="chat-body">
+      {% for m in msgs %}
+        <div class="msg {{ 'mine' if m.sender_id == g.user.id }}" data-id="{{ m.id }}">
+          {%- if m.ref_type %}{% set r = refs[(m.ref_type, m.ref_id)] %}<span class="ref">re: {% if r[1] %}<a href="{{ r[1] }}">{{ r[0] }}</a>{% else %}{{ r[0] }}{% endif %}</span>{% endif -%}
+          {{ m.body }}<span class="time">{{ m.created_at|dt }}</span>
+        {#- -#}</div>
+      {% else %}
+        <p class="muted small" id="empty-note" style="text-align:center">Say hello! Messages are only visible to the two of you.</p>
+      {% endfor %}
+    </div>
+    <form class="chat-form" id="chat-form" method="post">
+      {{ csrf() }}
+      <input type="hidden" name="ref" id="ref" value="{{ pending_ref.key if pending_ref else '' }}">
+      <textarea name="body" id="body" placeholder="Write a message…" required maxlength="4000" aria-label="Message"></textarea>
+      <button class="btn" type="submit">Send</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(() => {
+  const cid = {{ c.id }};
+  const me = {{ g.user.id }};
+  const body = document.getElementById('chat-body');
+  const form = document.getElementById('chat-form');
+  const input = document.getElementById('body');
+  const refInput = document.getElementById('ref');
+  const csrf = document.querySelector('meta[name=csrf-token]').content;
+  const api = "{{ url_for('chat.api_messages', cid=c.id) }}";
+  let lastId = Math.max(0, ...[...body.querySelectorAll('.msg')].map(el => +el.dataset.id));
+
+  const scrollDown = () => { body.scrollTop = body.scrollHeight; };
+  scrollDown();
+
+  function fmt(ts) {
+    const d = new Date(ts.replace(' ', 'T'));
+    return isNaN(d) ? ts : d.toLocaleString([], {weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'});
+  }
+
+  function render(m, refs) {
+    if (body.querySelector(`.msg[data-id="${m.id}"]`)) return;
+    document.getElementById('empty-note')?.remove();
+    const el = document.createElement('div');
+    el.className = 'msg' + (m.sender_id === me ? ' mine' : '');
+    el.dataset.id = m.id;
+    const ref = m.ref_type && refs && refs[`${m.ref_type}:${m.ref_id}`];
+    if (ref) {
+      const span = document.createElement('span');
+      span.className = 'ref';
+      span.append('re: ');
+      const a = document.createElement('a');
+      a.href = ref.url; a.textContent = ref.title;
+      span.append(a);
+      el.append(span);
+    }
+    el.append(document.createTextNode(m.body));
+    const t = document.createElement('span');
+    t.className = 'time'; t.textContent = fmt(m.created_at);
+    el.append(t);
+    body.append(el);
+    lastId = Math.max(lastId, m.id);
+  }
+
+  async function poll() {
+    try {
+      const res = await fetch(`${api}?after=${lastId}`, {headers: {'Accept': 'application/json'}});
+      if (res.ok) {
+        const data = await res.json();
+        const nearBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 80;
+        data.messages.forEach(m => render(m, data.refs));
+        if (data.messages.length && nearBottom) scrollDown();
+      }
+    } catch (e) { /* offline: try again next tick */ }
+  }
+  setInterval(poll, 3000);
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    input.disabled = true;
+    try {
+      const res = await fetch(api, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRF-Token': csrf},
+        body: JSON.stringify({body: text, ref: refInput.value}),
+      });
+      if (res.ok) {
+        input.value = '';
+        refInput.value = '';
+        document.getElementById('ref-banner')?.remove();
+        await poll();
+        scrollDown();
+      }
+    } finally {
+      input.disabled = false;
+      input.focus();
+    }
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
+  });
+
+  document.getElementById('clear-ref')?.addEventListener('click', () => {
+    refInput.value = '';
+    document.getElementById('ref-banner').remove();
+  });
+})();
+</script>
+{% endblock %}

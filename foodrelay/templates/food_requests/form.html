@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf %}
+{% block title %}Request food{% endblock %}
+{% block content %}
+<div class="medium">
+  <div class="card">
+    <h1>Request food</h1>
+    <p class="muted">Tell suppliers what you need. They can pledge to help and message you to arrange it.</p>
+    <form method="post" class="stack">
+      {{ csrf() }}
+      <div><label for="title">Title</label>
+        <input id="title" name="title" type="text" required maxlength="120" placeholder="e.g. Breakfast items for weekend" value="{{ values.title }}"></div>
+      <div><label for="description">Description</label>
+        <textarea id="description" name="description" required placeholder="What kinds of food, who it's for, any dietary needs…">{{ values.description }}</textarea></div>
+      <div class="grid-2">
+        <div><label for="quantity">Quantity</label>
+          <input id="quantity" name="quantity" type="text" required placeholder="e.g. 60 meals" value="{{ values.quantity }}"></div>
+        <div><label for="needed_by">Needed by</label>
+          <input id="needed_by" name="needed_by" type="datetime-local" required value="{{ values.needed_by }}"></div>
+      </div>
+      <div class="grid-2">
+        <div><label for="location">Location</label>
+          <input id="location" name="location" type="text" required value="{{ values.location }}"></div>
+        <div><label for="city">City / area</label>
+          <input id="city" name="city" type="text" value="{{ values.city }}"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" type="submit">Post request</button>
+        <a class="btn secondary" href="{{ url_for('main.dashboard') }}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

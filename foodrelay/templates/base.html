@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}FoodRelay{% endblock %} · FoodRelay</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥖</text></svg>">
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="logo" href="{{ url_for('main.index') }}">🥖 Food<span>Relay</span></a>
+    <nav class="nav">
+      {% set ep = request.endpoint or '' %}
+      {% if g.user %}
+        <a href="{{ url_for('main.dashboard') }}" class="{{ 'active' if ep == 'main.dashboard' }}">Dashboard</a>
+        {% if g.user.role != 'admin' %}
+          <a href="{{ url_for('posts.offers') }}" class="{{ 'active' if ep.startswith('posts.') and 'offer' in ep }}">
+            {{ 'My offers' if g.user.role == 'supplier' else 'Food offers' }}</a>
+        {% endif %}
+        {% if g.user.role in ('supplier', 'distributor', 'volunteer') %}
+          <a href="{{ url_for('posts.food_requests') }}" class="{{ 'active' if 'food_request' in ep }}">Food requests</a>
+        {% endif %}
+        {% if g.user.role != 'consumer' %}
+          <a href="{{ url_for('posts.volunteer_requests') }}" class="{{ 'active' if 'volunteer' in ep }}">Volunteering</a>
+        {% endif %}
+        <a href="{{ url_for('chat.inbox') }}" class="{{ 'active' if ep.startswith('chat.') }}">Messages{% if unread %}<span class="badge-count">{{ unread }}</span>{% endif %}</a>
+        {% if g.user.role == 'admin' %}<a href="{{ url_for('admin.index') }}" class="{{ 'active' if ep.startswith('admin.') }}">Admin</a>{% endif %}
+        <a href="{{ url_for('main.profile') }}" class="{{ 'active' if ep == 'main.profile' }}">Profile</a>
+        <form method="post" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <button class="linklike" type="submit">Log out</button>
+        </form>
+      {% else %}
+        <a href="{{ url_for('main.index') }}#roles">How it works</a>
+        <a href="{{ url_for('auth.login') }}">Log in</a>
+        <a class="btn small" href="{{ url_for('auth.register') }}">Join FoodRelay</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul class="flashes">
+        {% for cat, msg in messages %}<li class="flash {{ cat }}">{{ msg }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <span>FoodRelay: good food belongs on plates, not in bins.</span>
+    <span>
+      Learn more:
+      {% for key, r in ROLES.items() %}<a href="{{ url_for('main.learn', role=key) }}">{{ r.label }}s</a>{{ ' · ' if not loop.last }}{% endfor %}
+    </span>
+  </div>
+</footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

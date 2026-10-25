@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% from "macros.html" import status_tag, post_button, message_button %}
+{% block title %}{{ r.title }}{% endblock %}
+{% block content %}
+{% set mine = r.distributor_id == g.user.id %}
+<div class="page-head">
+  <div>
+    <p class="small"><a href="{{ url_for('posts.food_requests') }}">← Food requests</a></p>
+    <h1>{{ r.title }}</h1>
+    <div class="tags" style="margin-top:8px">{{ status_tag(r.status) }}</div>
+  </div>
+</div>
+<div class="two-col">
+  <div class="card">
+    <p style="white-space:pre-wrap">{{ r.description }}</p>
+    <dl class="details">
+      <dt>Quantity</dt><dd>{{ r.quantity }}</dd>
+      <dt>Location</dt><dd>{{ r.location }}{% if r.city %}, {{ r.city }}{% endif %}</dd>
+      <dt>Needed by</dt><dd><b>{{ r.needed_by|dt }}</b></dd>
+      <dt>Requested by</dt><dd><a href="{{ url_for('main.user_profile', user_id=r.distributor_id) }}">{{ r.distributor_org or r.distributor_name }}</a> <span class="tag blue">✓ Verified distributor</span></dd>
+      {% if r.pledged_by %}<dt>Pledged by</dt><dd><a href="{{ url_for('main.user_profile', user_id=r.pledged_by) }}">{{ r.pledger_org or r.pledger_name }}</a></dd>{% endif %}
+    </dl>
+  </div>
+  <aside class="card">
+    {% if mine %}
+      <h3>Manage request</h3>
+      <div class="btn-row">
+        {% if r.status in ('open', 'pledged') %}
+          {% if r.pledged_by %}{{ message_button(r.pledged_by, 'food_request:%d' % r.id, 'Message supplier') }}{% endif %}
+          {{ post_button(url_for('posts.food_request_action', req_id=r.id, action='fulfil'), 'Mark fulfilled') }}
+          {% if r.status == 'pledged' %}{{ post_button(url_for('posts.food_request_action', req_id=r.id, action='unpledge'), 'Remove pledge', 'btn danger') }}{% endif %}
+          {{ post_button(url_for('posts.food_request_action', req_id=r.id, action='close'), 'Close request', 'btn danger', 'Close this request?') }}
+        {% else %}
+          <p class="small muted">This request is {{ r.status }}.</p>
+        {% endif %}
+      </div>
+    {% elif g.user.role == 'supplier' %}
+      <h3>Can you help?</h3>
+      {% if r.status == 'open' %}
+        <p class="small muted">Pledging tells {{ r.distributor_org or r.distributor_name }} you'll provide this food.</p>
+        <div class="btn-row">
+          {{ post_button(url_for('posts.food_request_action', req_id=r.id, action='pledge'), 'Pledge to help', 'btn accent') }}
+          {{ message_button(r.distributor_id, 'food_request:%d' % r.id, 'Message') }}
+        </div>
+      {% elif r.pledged_by == g.user.id and r.status == 'pledged' %}
+        <p class="small">You pledged to help with this request.</p>
+        <div class="btn-row">
+          {{ message_button(r.distributor_id, 'food_request:%d' % r.id, 'Message distributor') }}
+          {{ post_button(url_for('posts.food_request_action', req_id=r.id, action='unpledge'), 'Withdraw pledge', 'btn danger') }}
+        </div>
+      {% else %}
+        <p class="small muted">This request is {{ r.status }}.</p>
+        {{ message_button(r.distributor_id, 'food_request:%d' % r.id, 'Message') }}
+      {% endif %}
+    {% else %}
+      <h3>Get in touch</h3>
+      {{ message_button(r.distributor_id, 'food_request:%d' % r.id, 'Message distributor') }}
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

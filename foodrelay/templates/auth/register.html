@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf %}
+{% block title %}Join{% endblock %}
+{% block content %}
+<div class="medium">
+  <div class="card">
+    <h1>Join FoodRelay</h1>
+    <p class="muted">Pick how you'd like to take part. Not sure? Read the <a href="{{ url_for('main.index') }}#roles">role guides</a>.</p>
+    <form method="post" class="stack">
+      {{ csrf() }}
+      <fieldset>
+        <legend>I am a…</legend>
+        <div class="role-picker">
+          {% for key, r in ROLES.items() %}
+          <div>
+            <input type="radio" name="role" id="role-{{ key }}" value="{{ key }}" {{ 'checked' if role == key }} required>
+            <label for="role-{{ key }}"><span class="emoji">{{ r.icon }}</span> {{ r.label }}<small>{{ r.tagline }}</small></label>
+          </div>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <div class="grid-2">
+        <div><label for="name">Your name</label><input id="name" name="name" type="text" required value="{{ request.form.name }}"></div>
+        <div id="org-field">
+          <label for="org_name">Organization / business name <span class="hint">(suppliers &amp; distributors)</span></label>
+          <input id="org_name" name="org_name" type="text" value="{{ request.form.org_name }}">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div><label for="email">Email</label><input id="email" name="email" type="email" required value="{{ request.form.email }}"></div>
+        <div><label for="phone">Phone <span class="hint">(optional)</span></label><input id="phone" name="phone" type="tel" value="{{ request.form.phone }}"></div>
+      </div>
+      <div class="grid-2">
+        <div><label for="city">City / area</label><input id="city" name="city" type="text" value="{{ request.form.city }}"></div>
+        <div><label for="address">Address <span class="hint">(optional, used as default pickup spot)</span></label><input id="address" name="address" type="text" value="{{ request.form.address }}"></div>
+      </div>
+      <div class="grid-2">
+        <div><label for="password">Password <span class="hint">(8+ characters)</span></label><input id="password" name="password" type="password" minlength="8" required></div>
+        <div><label for="confirm">Confirm password</label><input id="confirm" name="confirm" type="password" minlength="8" required></div>
+      </div>
+      <p class="muted small" id="dist-note" hidden>Distributors are asked to upload certification (e.g. charity registration,
+        food-safety certificate) after signing up. You can browse right away, and you can claim food once you're verified.</p>
+      <button class="btn" type="submit">Create account</button>
+    </form>
+    <p class="muted small" style="margin-top:14px">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  const radios = document.querySelectorAll('input[name=role]');
+  function sync() {
+    const role = document.querySelector('input[name=role]:checked')?.value;
+    const needsOrg = role === 'supplier' || role === 'distributor';
+    document.getElementById('org_name').required = needsOrg;
+    document.getElementById('org-field').style.opacity = needsOrg || !role ? 1 : .55;
+    document.getElementById('dist-note').hidden = role !== 'distributor';
+  }
+  radios.forEach(r => r.addEventListener('change', sync));
+  sync();
+</script>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% from "macros.html" import offer_card, volunteer_card, status_tag %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Hi, {{ g.user.name }}</h1><p>🙋 Volunteer dashboard</p></div>
+  <div class="btn-row"><a class="btn" href="{{ url_for('posts.volunteer_requests') }}">Find volunteer shifts</a></div>
+</div>
+
+<section>
+  <div class="section-head"><h2>Your sign-ups</h2></div>
+  {% if my_signups %}
+    <div class="card table-wrap"><table class="list">
+      <tr><th>Shift</th><th>Organizer</th><th>When</th><th>Status</th></tr>
+      {% for s in my_signups %}
+      <tr>
+        <td><a href="{{ url_for('posts.volunteer_request', req_id=s.vid) }}">{{ s.title }}</a><div class="small muted">{{ s.location }}</div></td>
+        <td class="small">{{ s.org_name or s.name }}</td>
+        <td class="small">{{ s.start_time|dt }}</td>
+        <td>{{ status_tag(s.status) }}</td>
+      </tr>
+      {% endfor %}
+    </table></div>
+  {% else %}
+    <div class="empty">You haven't signed up for anything yet.</div>
+  {% endif %}
+</section>
+
+<section class="section">
+  <div class="section-head"><h2>Open volunteer requests</h2><a href="{{ url_for('posts.volunteer_requests') }}">See all</a></div>
+  {% if open_vol_requests %}
+    <div class="cards">{% for v in open_vol_requests %}{{ volunteer_card(v) }}{% endfor %}</div>
+  {% else %}
+    <div class="empty">No open requests right now.</div>
+  {% endif %}
+</section>
+
+<section class="section">
+  <div class="section-head"><h2>Food you could deliver</h2><a href="{{ url_for('posts.offers') }}">Browse offers</a></div>
+  {% if available_offers %}
+    <div class="cards">{% for o in available_offers %}{{ offer_card(o, now) }}{% endfor %}</div>
+  {% else %}
+    <div class="empty">No offers open to volunteers at the moment.</div>
+  {% endif %}
+</section>
+
+{% if my_claims %}
+<section class="section">
+  <div class="section-head"><h2>Your pickups</h2></div>
+  <div class="cards">{% for o in my_claims %}{{ offer_card(o, now) }}{% endfor %}</div>
+</section>
+{% endif %}
+{% endblock %}

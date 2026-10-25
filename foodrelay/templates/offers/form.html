@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf %}
+{% block title %}{{ 'Edit offer' if editing else 'Post food offer' }}{% endblock %}
+{% block content %}
+<div class="medium">
+  <div class="card">
+    <h1>{{ 'Edit offer' if editing else 'Post a food offer' }}</h1>
+    <p class="muted">Describe what you have and when it needs to be collected. All food on FoodRelay is free.</p>
+    <form method="post" class="stack">
+      {{ csrf() }}
+      <div><label for="title">Title</label>
+        <input id="title" name="title" type="text" required maxlength="120" placeholder="e.g. End-of-day bread &amp; pastries" value="{{ values.title }}"></div>
+      <div><label for="description">Description</label>
+        <textarea id="description" name="description" required placeholder="What's included, how it's packed, storage notes, allergens…">{{ values.description }}</textarea></div>
+      <div class="grid-3">
+        <div><label for="food_type">Food type</label>
+          <select id="food_type" name="food_type" required>
+            <option value="">Choose…</option>
+            {% for t in FOOD_TYPES %}<option {{ 'selected' if values.food_type == t }}>{{ t }}</option>{% endfor %}
+          </select></div>
+        <div><label for="quantity">Quantity</label>
+          <input id="quantity" name="quantity" type="text" required placeholder="e.g. 20 portions, 5 kg" value="{{ values.quantity }}"></div>
+        <div><label for="size">Size</label>
+          <select id="size" name="size">
+            <option value="small" {{ 'selected' if values.size == 'small' }}>Small (one household)</option>
+            <option value="medium" {{ 'selected' if values.size == 'medium' }}>Medium</option>
+            <option value="large" {{ 'selected' if values.size == 'large' }}>Large (organization)</option>
+          </select></div>
+      </div>
+      <div><label for="dietary_tags">Dietary notes <span class="hint">(optional, e.g. vegan, halal, contains nuts)</span></label>
+        <input id="dietary_tags" name="dietary_tags" type="text" value="{{ values.dietary_tags or '' }}"></div>
+      <div class="grid-2">
+        <div><label for="location">Pickup location</label>
+          <input id="location" name="location" type="text" required value="{{ values.location or '' }}"></div>
+        <div><label for="city">City / area</label>
+          <input id="city" name="city" type="text" value="{{ values.city or '' }}"></div>
+      </div>
+      <div class="grid-2">
+        <div><label for="pickup_start">Available from <span class="hint">(optional)</span></label>
+          <input id="pickup_start" name="pickup_start" type="datetime-local" value="{{ values.pickup_start or '' }}"></div>
+        <div><label for="pickup_deadline">Pickup deadline</label>
+          <input id="pickup_deadline" name="pickup_deadline" type="datetime-local" required value="{{ values.pickup_deadline or '' }}"></div>
+      </div>
+      <fieldset>
+        <legend>Who can see this offer?</legend>
+        <div class="checks">
+          <label><input type="checkbox" name="visible_distributors" value="1" {{ 'checked' if values.visible_distributors }}> Verified distributors</label>
+          <label><input type="checkbox" name="visible_volunteers" value="1" {{ 'checked' if values.visible_volunteers }}> Volunteers</label>
+          <label><input type="checkbox" id="vis-consumers" name="visible_consumers" value="1" {{ 'checked' if values.visible_consumers }}> Consumers</label>
+        </div>
+        <p class="hint" id="consumer-hint" style="margin:8px 0 0">Consumers can only see <b>small</b> offers.</p>
+      </fieldset>
+      <div class="btn-row">
+        <button class="btn" type="submit">{{ 'Save changes' if editing else 'Post offer' }}</button>
+        <a class="btn secondary" href="{{ url_for('posts.offer', offer_id=offer.id) if editing else url_for('main.dashboard') }}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  const size = document.getElementById('size'), cons = document.getElementById('vis-consumers');
+  function sync() {
+    const small = size.value === 'small';
+    cons.disabled = !small;
+    if (!small) cons.checked = false;
+  }
+  size.addEventListener('change', sync); sync();
+</script>
+{% endblock %}

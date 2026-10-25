@@ -1,0 +1,10 @@
+{% set vs = g.user.verification_status %}
+{% if vs == 'unverified' %}
+  <div class="notice warn"><b>Get verified to start claiming food.</b> Upload your certification and registration number on your
+    <a href="{{ url_for('main.profile') }}">profile</a>.</div>
+{% elif vs == 'pending' %}
+  <div class="notice warn"><b>Verification in review.</b> An administrator is checking your documents. You can browse in the meantime.</div>
+{% elif vs == 'rejected' %}
+  <div class="notice bad"><b>Verification was not approved.</b>{% if g.user.verification_note %} Note from reviewer: "{{ g.user.verification_note }}".{% endif %}
+    Update your documents on your <a href="{{ url_for('main.profile') }}">profile</a> and resubmit.</div>
+{% endif %}

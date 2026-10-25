@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "macros.html" import offer_card %}
+{% block title %}Food offers{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ 'Your food offers' if g.user.role == 'supplier' else 'Food offers' }}</h1>
+    <p>{% if g.user.role == 'consumer' %}Small offers shared directly with people nearby.
+       {% elif g.user.role == 'supplier' %}Everything you've posted, newest first.
+       {% else %}Surplus food from local suppliers, visible to {{ ROLES[g.user.role].label|lower }}s.{% endif %}</p>
+  </div>
+  {% if g.user.role == 'supplier' %}<a class="btn" href="{{ url_for('posts.new_offer') }}">+ Post food offer</a>{% endif %}
+</div>
+
+<form class="filters" method="get">
+  <input type="search" name="q" placeholder="Search (e.g. bread, vegan)" value="{{ request.args.q }}">
+  <select name="food_type">
+    <option value="">All food types</option>
+    {% for t in FOOD_TYPES %}<option {{ 'selected' if request.args.food_type == t }}>{{ t }}</option>{% endfor %}
+  </select>
+  <input type="text" name="city" placeholder="City" value="{{ request.args.city }}">
+  {% if g.user.role != 'supplier' %}
+  <select name="show">
+    <option value="available">Available now</option>
+    <option value="all" {{ 'selected' if request.args.show == 'all' }}>Include past</option>
+  </select>
+  {% endif %}
+  <button class="btn secondary" type="submit">Filter</button>
+</form>
+
+{% if offers %}
+  <div class="cards">{% for o in offers %}{{ offer_card(o, now) }}{% endfor %}</div>
+{% else %}
+  <div class="empty">No offers match. Try clearing the filters.</div>
+{% endif %}
+{% endblock %}

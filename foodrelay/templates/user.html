@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ person.org_name or person.name }}{% endblock %}
+{% block content %}
+<div class="medium">
+  <div class="card">
+    <div style="display:flex;gap:16px;align-items:center;margin-bottom:12px">
+      <span class="avatar" style="width:56px;height:56px;font-size:1.4rem">{{ (person.org_name or person.name)[:1]|upper }}</span>
+      <div>
+        <h1 style="margin:0">{{ person.org_name or person.name }}</h1>
+        <div class="tags" style="margin-top:6px">
+          <span class="tag">{{ ROLES[person.role].icon }} {{ ROLES[person.role].label }}</span>
+          {% if person.role == 'distributor' and person.verification_status == 'verified' %}<span class="tag blue">✓ Verified</span>{% endif %}
+        </div>
+      </div>
+    </div>
+    {% if person.bio %}<p style="white-space:pre-wrap">{{ person.bio }}</p>{% endif %}
+    <dl class="details">
+      {% if person.org_name %}<dt>Contact</dt><dd>{{ person.name }}</dd>{% endif %}
+      {% if person.city %}<dt>Area</dt><dd>{{ person.city }}</dd>{% endif %}
+      {% if person.role in ('supplier', 'distributor') and person.address %}<dt>Address</dt><dd>{{ person.address }}</dd>{% endif %}
+      <dt>Member since</dt><dd>{{ person.created_at[:10] }}</dd>
+    </dl>
+  </div>
+</div>
+{% endblock %}

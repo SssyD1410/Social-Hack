@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf, status_tag %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Admin</h1><p>Review distributor verification requests.</p></div></div>
+
+<div class="stats">
+  {% for key, r in ROLES.items() %}<div class="stat"><b>{{ counts.get(key, 0) }}</b>{{ r.label }}s</div>{% endfor %}
+</div>
+
+<div class="role-tabs" style="margin-top:20px">
+  {% for s in ('pending', 'verified', 'rejected', 'unverified') %}
+    <a class="btn small {{ '' if s == status else 'secondary' }}" href="{{ url_for('admin.index', status=s) }}">{{ s|capitalize }}</a>
+  {% endfor %}
+</div>
+
+{% for d in distributors %}
+<div class="card">
+  <div class="section-head">
+    <h3 style="margin:0">{{ d.org_name or d.name }}</h3>{{ status_tag(d.verification_status) }}
+  </div>
+  <dl class="details">
+    <dt>Contact</dt><dd>{{ d.name }} · {{ d.email }}{% if d.phone %} · {{ d.phone }}{% endif %}</dd>
+    <dt>Registration no.</dt><dd>{{ d.registration_number or '—' }}</dd>
+    <dt>Address</dt><dd>{{ d.address or '—' }}{% if d.city %}, {{ d.city }}{% endif %}</dd>
+    {% if d.bio %}<dt>About</dt><dd>{{ d.bio }}</dd>{% endif %}
+    <dt>Documents</dt>
+    <dd>
+      {% for doc in docs[d.id] %}<div><a href="{{ url_for('main.document', doc_id=doc.id) }}">{{ doc.original_name }}</a> <span class="small muted">({{ doc.doc_type }})</span></div>
+      {% else %}<span class="muted">None uploaded</span>{% endfor %}
+    </dd>
+    {% if d.verification_note %}<dt>Note</dt><dd>{{ d.verification_note }}</dd>{% endif %}
+  </dl>
+  <form method="post" class="stack" style="margin-top:14px">
+    {{ csrf() }}
+    <div><label for="note-{{ d.id }}">Note to applicant <span class="hint">(optional, shown if rejected)</span></label>
+      <input id="note-{{ d.id }}" type="text" name="note"></div>
+    <div class="btn-row">
+      {% if d.verification_status != 'verified' %}
+        <button class="btn" formaction="{{ url_for('admin.decide', user_id=d.id, decision='verify') }}">✓ Verify</button>
+      {% endif %}
+      {% if d.verification_status != 'rejected' %}
+        <button class="btn danger" formaction="{{ url_for('admin.decide', user_id=d.id, decision='reject') }}">{{ 'Revoke' if d.verification_status == 'verified' else 'Reject' }}</button>
+      {% endif %}
+    </div>
+  </form>
+</div>
+{% else %}
+  <div class="empty">No {{ status }} distributors.</div>
+{% endfor %}
+{% endblock %}
