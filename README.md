@@ -124,9 +124,3 @@ All demo accounts use the password `ecoserving-demo`.
 ```bash
 python -m unittest discover tests
 ```
-
-### Publishing
-
-Step-by-step instructions for PythonAnywhere are in [DEPLOY.md](DEPLOY.md). Production entry point: `wsgi.py`
-(`application`). A random secret key is created in `instance/secret_key` on first run (or set `ECOSERVING_SECRET_KEY`),
-and `flask --app ecoserving create-admin` creates an administrator. Never run `seed` on a live site.
