@@ -109,7 +109,30 @@ def init_app(app):
     app.register_blueprint(bp)
 
 
-def main(port=5001):
+def build_url(port=5001, beat=None, pace=None, speed=None, admin=None, autostart=False):
+    """The demo address with the chosen timing options (only the ones given are added)."""
+    options = {"beat": beat, "pace": pace, "speed": speed, "admin": admin, "autostart": 1 if autostart else None}
+    query_string = "&".join(f"{k}={v:g}" if isinstance(v, float) else f"{k}={v}"
+                            for k, v in options.items() if v is not None)
+    return f"http://127.0.0.1:{port}/demo" + (f"?{query_string}" if query_string else "")
+
+
+def main(argv=None):
+    import argparse
+    import threading
+    import webbrowser
+
+    ap = argparse.ArgumentParser(description="Run the EcoServing four-screen demo.")
+    ap.add_argument("--beat", type=float, metavar="SECONDS", help="pause after each caption (default 4)")
+    ap.add_argument("--pace", type=float, metavar="X", help="cursor and typing slowness (default 1.5; 1 = quicker)")
+    ap.add_argument("--speed", type=float, metavar="X", help="overall speed (default 1; 2 = twice as fast)")
+    ap.add_argument("--admin", type=float, metavar="X", help="extra speed of the admin window (default 2.2)")
+    ap.add_argument("--autostart", action="store_true", help="start playing as soon as the page opens")
+    ap.add_argument("--open", action="store_true", help="open the demo in your browser")
+    ap.add_argument("--port", type=int, default=5001)
+    args = ap.parse_args(argv)
+    port = args.port
+
     from . import create_app
     from .seed import seed
 
@@ -122,5 +145,8 @@ def main(port=5001):
                       "SECRET_KEY": "demo-only-not-secret"})
     with app.app_context():
         seed()
-    print(f"EcoServing demo: open http://127.0.0.1:{port}/demo  (Ctrl+C to stop)")
+    url = build_url(port, args.beat, args.pace, args.speed, args.admin, args.autostart)
+    print(f"EcoServing demo: open {url}  (Ctrl+C to stop)")
+    if args.open:
+        threading.Timer(1.0, webbrowser.open, args=(url,)).start()
     app.run(host="127.0.0.1", port=port, debug=False, threaded=True)

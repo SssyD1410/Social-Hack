@@ -42,9 +42,20 @@ shelter requests food and volunteers, claims the offer and chats, the volunteer 
 neighbor reserves a muffin box. At the end a scam post appears, the neighbor reports it, and an admin window opens
 in the middle of the screen to take the post down, suspend the account and resolve the report. Captions and a fake
 cursor explain each step, and every caption is followed by a pause (4 seconds) so a presenter can talk about it.
-It takes roughly six to seven minutes. Press **P** (or the Pause button) to freeze everything while you talk. Options
-on the address: `?beat=2` shorter pauses after captions (seconds), `?pace=1` quicker cursor and typing, `?speed=2`
-run everything faster, `?autostart=1` skip the start screen.
+It takes roughly six to seven minutes. Press **P** (or the Pause button) to freeze everything while you talk.
+
+Adjust the speed from the command line (the program prints the address to open, or add `--open` to launch it):
+
+```bash
+python run_demo.py --beat 2 --open          # shorter pauses after each caption (seconds, default 4)
+python run_demo.py --speed 2                # everything twice as fast
+python run_demo.py --pace 1                 # quicker cursor and typing (default 1.5)
+python run_demo.py --admin 3                # faster admin window (default 2.2)
+python run_demo.py --autostart --open       # skip the start screen
+```
+
+Options combine, and `python run_demo.py --help` lists them. The same settings work on the address as
+`?beat=2&speed=2&pace=1&admin=3&autostart=1`.
 
 The demo uses its own throwaway database (`instance/demo.sqlite`, reset on every run), is only started by
 `run_demo.py`, and is never part of the normal app or `wsgi.py`. Do not deploy it. Code: `ecoserving/demo.py`,

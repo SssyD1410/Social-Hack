@@ -62,7 +62,7 @@
       this.cursor = $('.cursor', el);
       this.captionEl = $('.pane-caption', el);
       this.scale = 1;
-      this.tempo = parseFloat(el.dataset.tempo) || 1;   // >1 makes this pane's cursor, typing and pauses quicker
+      this.tempo = (this.role === 'admin' && parseFloat(params.get('admin'))) || parseFloat(el.dataset.tempo) || 1;   // >1 makes this pane's cursor, typing and pauses quicker
       this.layout();
     }
 

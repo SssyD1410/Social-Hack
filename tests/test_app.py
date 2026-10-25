@@ -588,6 +588,13 @@ class EcoServingTest(unittest.TestCase):
         self.assertEqual(r.headers["Location"], "/demo/frame/admin/dashboard")
         self.assertEqual(c.get("/demo/frame/admin/admin/reports").status_code, 200)
 
+    def test_demo_command_line_options_become_url_options(self):
+        from ecoserving.demo import build_url
+        self.assertEqual(build_url(), "http://127.0.0.1:5001/demo")
+        self.assertEqual(build_url(5002, beat=6.0, pace=1.0, speed=2.0, admin=3.0, autostart=True),
+                         "http://127.0.0.1:5002/demo?beat=6&pace=1&speed=2&admin=3&autostart=1")
+        self.assertEqual(build_url(beat=2.5), "http://127.0.0.1:5001/demo?beat=2.5")
+
     def test_demo_reset_restores_fresh_data(self):
         c = self.demo_app().test_client()
         token = re.search(r'name="csrf-token" content="([^"]+)"', c.get("/demo").get_data(as_text=True)).group(1)
